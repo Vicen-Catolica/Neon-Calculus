@@ -13,7 +13,6 @@ config_version=5
 config/name="Novo Projeto de Jogo"
 run/main_scene="uid://ce51h7axk5lf6"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-config/icon="res://icon.svg"
 
 [display]
 

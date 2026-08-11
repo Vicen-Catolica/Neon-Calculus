@@ -1,8 +1,8 @@
 extends Control
 
-# Caminhos para as cenas - Atualize com os caminhos corretos do seu projeto
-const CENA_NIVEL_INICIAL = "res://cenas/niveis/submundo_neon.tscn"
-const CENA_OPCOES = "res://cenas/ui/menu_opcoes.tscn"
+# Caminhos para as cenas atualizados conforme a sua árvore de arquivos
+const CENA_NIVEL_INICIAL = "res://fase_1/fase_1.tscn"
+const CENA_OPCOES = "res://options/options.tscn"
 
 @onready var btn_iniciar = $MenuContainer/BtnIniciar
 @onready var btn_continuar = $MenuContainer/BtnContinuar
@@ -20,7 +20,7 @@ func _ready():
 	btn_iniciar.grab_focus()
 
 func _on_btn_iniciar_pressed():
-	# Carrega a primeira fase do jogo (Submundo de Neon)
+	# Carrega a primeira fase do jogo
 	get_tree().change_scene_to_file(CENA_NIVEL_INICIAL)
 
 func _on_btn_continuar_pressed():
