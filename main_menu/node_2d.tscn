@@ -36,7 +36,7 @@ offset_top = 226.0
 offset_right = 406.0
 offset_bottom = 484.0
 
-[node name="BtnIniciar" type="Button" parent="MainMenu/MenuContainer" unique_id=311100424]
+[node name="BtnStart" type="Button" parent="MainMenu/MenuContainer" unique_id=311100424]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
@@ -44,21 +44,21 @@ text = "INICIAR
 "
 flat = true
 
-[node name="BtnContinuar" type="Button" parent="MainMenu/MenuContainer" unique_id=916118591]
+[node name="BtnContinue" type="Button" parent="MainMenu/MenuContainer" unique_id=916118591]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
 text = "CONTINUAR"
 flat = true
 
-[node name="BtnOpcoes" type="Button" parent="MainMenu/MenuContainer" unique_id=1562137274]
+[node name="BtnOptions" type="Button" parent="MainMenu/MenuContainer" unique_id=1562137274]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
 text = "OPÇÕES"
 flat = true
 
-[node name="BtnSair" type="Button" parent="MainMenu/MenuContainer" unique_id=1523530398]
+[node name="BtnExit" type="Button" parent="MainMenu/MenuContainer" unique_id=1523530398]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
