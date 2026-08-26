@@ -1,26 +1,24 @@
 [gd_scene format=3 uid="uid://ce51h7axk5lf6"]
 
-[ext_resource type="Script" uid="uid://cg6fy8dvkqi2b" path="res://main_menu/mainMenu.gd" id="1_4vmg7"]
-[ext_resource type="Texture2D" uid="uid://dsi2fllhse0am" path="res://main_menu/Images/Gemini_Generated_Image_g9nirag9nirag9ni.png" id="2_ssdfv"]
-[ext_resource type="Texture2D" uid="uid://b1aa3piawd47o" path="res://main_menu/Images/download.png" id="3_78mqo"]
+[ext_resource type="Script" uid="uid://cg6fy8dvkqi2b" path="res://main_menu/main_menu.gd" id="1_4vmg7"]
+[ext_resource type="Texture2D" uid="uid://cp1nsyck2s47s" path="res://assets/images/main_menu_background.png" id="2_ssdfv"]
+[ext_resource type="Texture2D" uid="uid://b1aa3piawd47o" path="res://assets/images/main_menu_title.png" id="3_78mqo"]
 
-[node name="MainMenu" type="Node2D" unique_id=1502111152]
-
-[node name="MainMenu" type="Control" parent="." unique_id=1031112727]
+[node name="MainMenu" type="Control" unique_id=929546271]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("1_4vmg7")
 
-[node name="Background" type="TextureRect" parent="MainMenu" unique_id=1090042736]
+[node name="Background" type="TextureRect" parent="." unique_id=2052494017]
 layout_mode = 0
 offset_right = 1164.5833
 offset_bottom = 650.0
 texture = ExtResource("2_ssdfv")
 expand_mode = 3
 
-[node name="Logo" type="TextureRect" parent="MainMenu" unique_id=2142052522]
+[node name="Logo" type="TextureRect" parent="." unique_id=1427764881]
 layout_mode = 0
 offset_left = 26.0
 offset_top = 31.0
@@ -29,14 +27,14 @@ offset_bottom = 182.0
 texture = ExtResource("3_78mqo")
 expand_mode = 3
 
-[node name="MenuContainer" type="VBoxContainer" parent="MainMenu" unique_id=74746929]
+[node name="MenuContainer" type="VBoxContainer" parent="." unique_id=1542367054]
 layout_mode = 0
 offset_left = 54.0
 offset_top = 226.0
 offset_right = 406.0
 offset_bottom = 484.0
 
-[node name="BtnStart" type="Button" parent="MainMenu/MenuContainer" unique_id=311100424]
+[node name="BtnStart" type="Button" parent="MenuContainer" unique_id=1871786141]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
@@ -44,21 +42,21 @@ text = "INICIAR
 "
 flat = true
 
-[node name="BtnContinue" type="Button" parent="MainMenu/MenuContainer" unique_id=916118591]
+[node name="BtnContinue" type="Button" parent="MenuContainer" unique_id=1418993946]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
 text = "CONTINUAR"
 flat = true
 
-[node name="BtnOptions" type="Button" parent="MainMenu/MenuContainer" unique_id=1562137274]
+[node name="BtnOptions" type="Button" parent="MenuContainer" unique_id=1994612204]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
 text = "OPÇÕES"
 flat = true
 
-[node name="BtnExit" type="Button" parent="MainMenu/MenuContainer" unique_id=1523530398]
+[node name="BtnExit" type="Button" parent="MenuContainer" unique_id=779759373]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
