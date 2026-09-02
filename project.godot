@@ -19,6 +19,10 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 
+[dotnet]
+
+project/assembly_name="Novo Projeto de Jogo"
+
 [physics]
 
 3d/physics_engine="Jolt Physics"
