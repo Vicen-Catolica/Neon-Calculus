@@ -38,7 +38,7 @@ func _setup_buttons_gradient_text() -> void:
 				child.add_theme_stylebox_override(state, empty_style)
 			
 			child.add_theme_color_override("font_color", Color("#00fbfc"))
-			child.add_theme_color_override("font_hover_color", Color("#82ff53ff"))
+			child.add_theme_color_override("font_hover_color", Color("5ae300ff"))
 			child.add_theme_color_override("font_focus_color", Color("#82ff53ff"))
 
 func _on_start_pressed() -> void:
