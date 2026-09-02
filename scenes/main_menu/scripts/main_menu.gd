@@ -2,8 +2,8 @@ extends Control
 
 const NEON_FONT = preload("res://assets/fonts/Orbitron-Bold.ttf")
 
-@export_file("*.tscn") var start_scene: String = "res://fase_1/fase_1.tscn"
-@export_file("*.tscn") var option_scene: String = "res://options/options.tscn"
+@export_file("*.tscn") var start_scene: String = "res://scenes/fase_1/fase_1.tscn"
+@export_file("*.tscn") var option_scene: String = "res://scenes/options/options.tscn"
 
 @onready var menu_container: VBoxContainer = $MenuContainer
 @onready var btn_start: Button = $MenuContainer/BtnStart
@@ -37,9 +37,9 @@ func _setup_buttons_gradient_text() -> void:
 			for state in ["normal", "hover", "pressed", "focus", "disabled"]:
 				child.add_theme_stylebox_override(state, empty_style)
 			
-			child.add_theme_color_override("font_color", Color("#00fbfc"))
-			child.add_theme_color_override("font_hover_color", Color("5ae300ff"))
-			child.add_theme_color_override("font_focus_color", Color("#82ff53ff"))
+			child.add_theme_color_override("font_color", Color("#7ff59d"))
+			child.add_theme_color_override("font_hover_color", Color("#00f9fd"))
+			child.add_theme_color_override("font_focus_color", Color("#00f9fd"))
 
 func _on_start_pressed() -> void:
 	get_tree().change_scene_to_file(start_scene)
