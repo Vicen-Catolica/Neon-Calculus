@@ -1,21 +1,21 @@
 [gd_scene format=3 uid="uid://ce51h7axk5lf6"]
 
-[ext_resource type="Script" uid="uid://cg6fy8dvkqi2b" path="res://main_menu/scripts/main_menu.gd" id="1_3shxk"]
-[ext_resource type="Texture2D" uid="uid://cp1nsyck2s47s" path="res://assets/images/main_menu_background.png" id="2_bws42"]
-[ext_resource type="Texture2D" uid="uid://b1aa3piawd47o" path="res://assets/images/main_menu_title.png" id="3_3f7m4"]
+[ext_resource type="Script" path="res://main_menu/scripts/main_menu.gd" id="1_ob46e"]
+[ext_resource type="Texture2D" uid="uid://cp1nsyck2s47s" path="res://assets/images/main_menu_background.png" id="2_uqeha"]
+[ext_resource type="Texture2D" uid="uid://b1aa3piawd47o" path="res://assets/images/main_menu_title.png" id="3_wem23"]
 
 [node name="MainMenu" type="Control" unique_id=929546271]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
-script = ExtResource("1_3shxk")
+script = ExtResource("1_ob46e")
 
 [node name="Background" type="TextureRect" parent="." unique_id=2052494017]
 layout_mode = 0
 offset_right = 1164.5833
 offset_bottom = 650.0
-texture = ExtResource("2_bws42")
+texture = ExtResource("2_uqeha")
 expand_mode = 3
 
 [node name="Logo" type="TextureRect" parent="." unique_id=1427764881]
@@ -24,7 +24,7 @@ offset_left = 26.0
 offset_top = 31.0
 offset_right = 450.0
 offset_bottom = 182.0
-texture = ExtResource("3_3f7m4")
+texture = ExtResource("3_wem23")
 expand_mode = 3
 
 [node name="MenuContainer" type="VBoxContainer" parent="." unique_id=1542367054]
