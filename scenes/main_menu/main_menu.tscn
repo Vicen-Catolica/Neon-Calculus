@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://ce51h7axk5lf6"]
 
-[ext_resource type="Script" path="res://main_menu/scripts/main_menu.gd" id="1_ob46e"]
-[ext_resource type="Texture2D" uid="uid://cp1nsyck2s47s" path="res://assets/images/main_menu_background.png" id="2_uqeha"]
-[ext_resource type="Texture2D" uid="uid://b1aa3piawd47o" path="res://assets/images/main_menu_title.png" id="3_wem23"]
+[ext_resource type="Script" uid="uid://cg6fy8dvkqi2b" path="res://scenes/main_menu/scripts/main_menu.gd" id="1_ob46e"]
+[ext_resource type="Texture2D" uid="uid://cp1nsyck2s47s" path="res://assets/images/main_menu/main_menu_background.png" id="2_uqeha"]
+[ext_resource type="Texture2D" uid="uid://b1aa3piawd47o" path="res://assets/images/main_menu/main_menu_title.png" id="3_wem23"]
 
 [node name="MainMenu" type="Control" unique_id=929546271]
 layout_mode = 3
@@ -10,6 +10,8 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("1_ob46e")
+start_scene = "res://fase_1/fase_1.tscn"
+option_scene = "res://options/options.tscn"
 
 [node name="Background" type="TextureRect" parent="." unique_id=2052494017]
 layout_mode = 0
