@@ -2,7 +2,7 @@ extends Control
 
 const NEON_FONT = preload("res://assets/fonts/Orbitron-Bold.ttf")
 
-@export_file("*.tscn") var start_scene: String = "res://fase_1/fase_1.tscn"
+@export_file("*.tscn") var start_scene: String = "res://scenes/Stage1/stage1.tscn"
 @export_file("*.tscn") var option_scene: String = "res://options/options.tscn"
 
 @onready var menu_container: VBoxContainer = $MenuContainer
