@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://beycagnee1vc5"]
+
+[ext_resource type="PackedScene" uid="uid://tsvnbubb6bg4" path="res://Entities/player.tscn" id="1_ywn8h"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kgtat"]
+size = Vector2(1145, 103)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_abukt"]
+size = Vector2(468.5, 35)
+
+[node name="Fase1" type="Node2D" unique_id=2119244706]
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=202346321]
+oversampling_with_scale = 1
+position = Vector2(4, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=272873264]
+physics_interpolation_mode = 2
+texture_filter = 1
+position = Vector2(570, 596)
+shape = SubResource("RectangleShape2D_kgtat")
+one_way_collision_margin = 0.0
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="StaticBody2D" unique_id=216892385]
+position = Vector2(1435, 548)
+shape = SubResource("RectangleShape2D_abukt")
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="StaticBody2D" unique_id=715958608]
+position = Vector2(1923, 504)
+shape = SubResource("RectangleShape2D_abukt")
+
+[node name="Player" parent="." unique_id=922838097 instance=ExtResource("1_ywn8h")]
+position = Vector2(245, 370)
