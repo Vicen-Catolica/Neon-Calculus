@@ -1,12 +1,17 @@
 [gd_scene format=3 uid="uid://beycagnee1vc5"]
 
 [ext_resource type="PackedScene" uid="uid://tsvnbubb6bg4" path="res://Entities/player.tscn" id="1_ywn8h"]
+[ext_resource type="Script" uid="uid://cboxptu27oi8" path="res://scenes/hacking_ui/Terminal.gd" id="2_e1ier"]
+[ext_resource type="PackedScene" uid="uid://c5ubr3fk5bcyu" path="res://scenes/hacking_ui/HackingInterface.tscn" id="3_0dcvq"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kgtat"]
 size = Vector2(1145, 103)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_abukt"]
 size = Vector2(468.5, 35)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_kgtat"]
+radius = 71.17584
 
 [node name="Fase1" type="Node2D" unique_id=2119244706]
 
@@ -31,3 +36,14 @@ shape = SubResource("RectangleShape2D_abukt")
 
 [node name="Player" parent="." unique_id=922838097 instance=ExtResource("1_ywn8h")]
 position = Vector2(245, 370)
+
+[node name="Area2D" type="Area2D" parent="." unique_id=1188092537 node_paths=PackedStringArray("hacking_ui")]
+position = Vector2(245, 370)
+script = ExtResource("2_e1ier")
+hacking_ui = NodePath("../HackingInterface")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1596401494]
+position = Vector2(515, 103)
+shape = SubResource("CircleShape2D_kgtat")
+
+[node name="HackingInterface" parent="." unique_id=561738698 instance=ExtResource("3_0dcvq")]
