@@ -1,0 +1,416 @@
+[gd_scene format=3 uid="uid://c5ubr3fk5bcyu"]
+
+[ext_resource type="Script" uid="uid://bx3nywghmsixx" path="res://scenes/hacking_ui/hacking_interface.gd" id="1_edu43"]
+[ext_resource type="FontFile" uid="uid://b7b4e0l00k2m6" path="res://assets/fonts/Orbitron-Bold.ttf" id="2_n6573"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j4ohn"]
+bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.9411765, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_abukt"]
+bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.9411765, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ebqk3"]
+bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.9411765, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2mynh"]
+bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_n6573"]
+bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.9411765, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5dxew"]
+bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.9411765, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dkc27"]
+bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.9411765, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_opal3"]
+bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.9411765, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gpyry"]
+bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.9411765, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dmyid"]
+bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.9411765, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2kkfr"]
+bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.9411765, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8u17j"]
+bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.9411765, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ntibf"]
+bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.9411765, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e550j"]
+bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.9411765, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w0nfr"]
+bg_color = Color(0.039215688, 0.10980392, 0.078431375, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.22352941, 1, 0.078431375, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="HackingInterface" type="CanvasLayer" unique_id=561738698]
+process_mode = 3
+script = ExtResource("1_edu43")
+
+[node name="ControlPanel" type="Control" parent="." unique_id=582295086]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Background" type="ColorRect" parent="ControlPanel" unique_id=13135994]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="TopHeaderLabel" type="Label" parent="ControlPanel" unique_id=2142064972]
+layout_mode = 0
+offset_left = 320.0
+offset_top = 14.0
+offset_right = 832.0
+offset_bottom = 37.0
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+text = "TERMINAL DE DESCRIPTOGRAFIA - CONEXÃO ESTÁVEL"
+
+[node name="TimerContainer" type="PanelContainer" parent="ControlPanel" unique_id=1767317969]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -228.0
+offset_top = 19.0
+offset_right = -39.0
+offset_bottom = 83.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_j4ohn")
+
+[node name="TimerVBox" type="VBoxContainer" parent="ControlPanel/TimerContainer" unique_id=1058536257]
+layout_mode = 2
+
+[node name="TimerHeader" type="Label" parent="ControlPanel/TimerContainer/TimerVBox" unique_id=1974181074]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+text = "TEMPO RESTANTE"
+
+[node name="TimerLabel" type="Label" parent="ControlPanel/TimerContainer/TimerVBox" unique_id=1078288655]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+
+[node name="CenterContainer" type="VBoxContainer" parent="ControlPanel" unique_id=1891877807]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ChallengePanel" type="PanelContainer" parent="ControlPanel/CenterContainer" unique_id=1493780066]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_abukt")
+
+[node name="ChallengeVBox" type="VBoxContainer" parent="ControlPanel/CenterContainer/ChallengePanel" unique_id=737064985]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="ControlPanel/CenterContainer/ChallengePanel/ChallengeVBox" unique_id=789430516]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+text = "DESAFIO DE MATEMÁTICA:"
+
+[node name="SubtitleLabel" type="Label" parent="ControlPanel/CenterContainer/ChallengePanel/ChallengeVBox" unique_id=78723530]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+
+[node name="EquationLabel" type="Label" parent="ControlPanel/CenterContainer/ChallengePanel/ChallengeVBox" unique_id=646447631]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+
+[node name="InputBoxPanel" type="PanelContainer" parent="ControlPanel/CenterContainer/ChallengePanel/ChallengeVBox" unique_id=84124576]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_ebqk3")
+
+[node name="InputLine" type="LineEdit" parent="ControlPanel/CenterContainer/ChallengePanel/ChallengeVBox/InputBoxPanel" unique_id=1880021804]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_2mynh")
+
+[node name="NumpadGrid" type="GridContainer" parent="ControlPanel/CenterContainer" unique_id=621297553]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+columns = 3
+
+[node name="Btn1" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=362095474]
+custom_minimum_size = Vector2(30, 30)
+custom_maximum_size = Vector2(30, 30)
+layout_mode = 2
+offset_transform_enabled = true
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_n6573")
+text = "1"
+
+[node name="Btn2" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=1272199164]
+custom_minimum_size = Vector2(30, 30)
+custom_maximum_size = Vector2(30, 30)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_5dxew")
+text = "2"
+
+[node name="Btn3" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=384491129]
+custom_minimum_size = Vector2(30, 30)
+custom_maximum_size = Vector2(30, 30)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_dkc27")
+text = "3"
+
+[node name="Btn4" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=1234864875]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_opal3")
+text = "4"
+
+[node name="Btn5" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=1095558716]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_gpyry")
+text = "5"
+
+[node name="Btn6" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=1850040633]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_dmyid")
+text = "6"
+
+[node name="Btn7" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=1933613019]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_2kkfr")
+text = "7"
+
+[node name="Btn8" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=492334024]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_8u17j")
+text = "8"
+
+[node name="Btn9" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=1208094099]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_ntibf")
+text = "9"
+
+[node name="NumpadBottomHBox" type="HBoxContainer" parent="ControlPanel/CenterContainer" unique_id=1832384496]
+layout_mode = 2
+size_flags_vertical = 6
+offset_transform_enabled = true
+
+[node name="Spacer" type="Control" parent="ControlPanel/CenterContainer/NumpadBottomHBox" unique_id=1164666539]
+custom_minimum_size = Vector2(104, 0)
+layout_mode = 2
+
+[node name="Btn0" type="Button" parent="ControlPanel/CenterContainer/NumpadBottomHBox" unique_id=1423497503]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 30)
+custom_maximum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_e550j")
+text = " 0 "
+
+[node name="SubmitButton" type="Button" parent="ControlPanel/CenterContainer/NumpadBottomHBox" unique_id=541179191]
+unique_name_in_owner = true
+process_mode = 3
+layout_mode = 2
+theme_override_colors/font_color = Color(0.22352941, 1, 0.078431375, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_w0nfr")
+text = "Confirmar"
+
+[node name="FooterStatusLabel" type="Label" parent="ControlPanel" unique_id=605657037]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 610.0
+offset_right = 363.0
+offset_bottom = 633.0
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+text = "STATUS DO SISTEMA: AGUARDANDO ENTRADA"
+
+[node name="HackTimer" type="Timer" parent="ControlPanel" unique_id=1700534700]
+unique_name_in_owner = true
+
+[connection signal="pressed" from="ControlPanel/CenterContainer/NumpadBottomHBox/SubmitButton" to="." method="_on_submit_button_pressed"]
