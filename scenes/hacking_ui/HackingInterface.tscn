@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bx3nywghmsixx" path="res://scenes/hacking_ui/hacking_interface.gd" id="1_edu43"]
 [ext_resource type="FontFile" uid="uid://b7b4e0l00k2m6" path="res://assets/fonts/Orbitron-Bold.ttf" id="2_n6573"]
+[ext_resource type="Script" uid="uid://cjw7x4cjuh83g" path="res://scenes/hacking_ui/math_visualizer.gd" id="3_5dxew"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j4ohn"]
 bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
@@ -261,6 +262,7 @@ layout_mode = 2
 
 [node name="TitleLabel" type="Label" parent="ControlPanel/CenterContainer/ChallengePanel/ChallengeVBox" unique_id=789430516]
 layout_mode = 2
+size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
 theme_override_fonts/font = ExtResource("2_n6573")
 text = "DESAFIO DE MATEMÁTICA:"
@@ -275,6 +277,12 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
 theme_override_fonts/font = ExtResource("2_n6573")
+
+[node name="MathVisualizer" type="Control" parent="ControlPanel/CenterContainer/ChallengePanel/ChallengeVBox" unique_id=59140746]
+custom_minimum_size = Vector2(340, 160)
+layout_mode = 2
+size_flags_vertical = 4
+script = ExtResource("3_5dxew")
 
 [node name="InputBoxPanel" type="PanelContainer" parent="ControlPanel/CenterContainer/ChallengePanel/ChallengeVBox" unique_id=84124576]
 custom_minimum_size = Vector2(150, 0)

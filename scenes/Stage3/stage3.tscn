@@ -1,0 +1,68 @@
+[gd_scene format=3 uid="uid://b2jpkkbj0dwii"]
+
+[ext_resource type="Script" uid="uid://cboxptu27oi8" path="res://scenes/hacking_ui/Terminal.gd" id="1_spojn"]
+[ext_resource type="PackedScene" uid="uid://c5ubr3fk5bcyu" path="res://scenes/hacking_ui/HackingInterface.tscn" id="2_lxhdv"]
+[ext_resource type="Script" uid="uid://nyu3ykmsnxry" path="res://scenes/Stage1/NextStage.gd" id="3_lxhdv"]
+[ext_resource type="PackedScene" uid="uid://tsvnbubb6bg4" path="res://Entities/player.tscn" id="4_l3j21"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_l3j21"]
+size = Vector2(1166.5, 103)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3rmbq"]
+size = Vector2(20, 711)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_aenoo"]
+radius = 71.17584
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_aenoo"]
+size = Vector2(20, 87)
+
+[node name="Stage3" type="Node2D" unique_id=269608330]
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1461238357]
+oversampling_with_scale = 1
+position = Vector2(4, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=1017577257]
+physics_interpolation_mode = 2
+texture_filter = 1
+position = Vector2(559.25, 596)
+shape = SubResource("RectangleShape2D_l3j21")
+one_way_collision_margin = 0.0
+
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="StaticBody2D" unique_id=371395850]
+position = Vector2(-14, 338)
+shape = SubResource("RectangleShape2D_3rmbq")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=152718754 node_paths=PackedStringArray("hacking_ui")]
+position = Vector2(245, 370)
+script = ExtResource("1_spojn")
+hacking_ui = NodePath("../HackingInterface")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1463517919]
+position = Vector2(515, 103)
+shape = SubResource("CircleShape2D_aenoo")
+
+[node name="Area2D3" type="Area2D" parent="." unique_id=1782552559 node_paths=PackedStringArray("hacking_ui")]
+position = Vector2(490, 740)
+script = ExtResource("1_spojn")
+hacking_ui = NodePath("../HackingInterface")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D3" unique_id=88705081]
+position = Vector2(476, -280)
+shape = SubResource("CircleShape2D_aenoo")
+
+[node name="HackingInterface" parent="." unique_id=561738698 instance=ExtResource("2_lxhdv")]
+visible = false
+
+[node name="Area2D2" type="Area2D" parent="." unique_id=1101418281 groups=["Player"]]
+position = Vector2(178, 46)
+script = ExtResource("3_lxhdv")
+next_stage = "uid://cho7ctxgixek5"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D2" unique_id=1363084567]
+position = Vector2(958, 455)
+shape = SubResource("RectangleShape2D_aenoo")
+
+[node name="Player" parent="." unique_id=922838097 instance=ExtResource("4_l3j21")]
+position = Vector2(-32, 364)

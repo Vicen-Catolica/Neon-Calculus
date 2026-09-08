@@ -49,3 +49,6 @@ func _physics_process(delta):
 				anim.play("Idle")
 
 	move_and_slide()
+
+
+

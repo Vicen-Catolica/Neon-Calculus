@@ -8,7 +8,7 @@
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_kgtat"]
 radius = 38.0
-height = 144.0
+height = 132.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ua6mu"]
 atlas = ExtResource("2_kee72")
@@ -247,7 +247,6 @@ animations = [{
 script = ExtResource("1_gb1tc")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=114415261]
-visible = false
 position = Vector2(95, 103)
 shape = SubResource("CapsuleShape2D_kgtat")
 

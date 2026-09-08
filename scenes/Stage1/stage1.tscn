@@ -3,15 +3,19 @@
 [ext_resource type="PackedScene" uid="uid://tsvnbubb6bg4" path="res://Entities/player.tscn" id="1_ywn8h"]
 [ext_resource type="Script" uid="uid://cboxptu27oi8" path="res://scenes/hacking_ui/Terminal.gd" id="2_e1ier"]
 [ext_resource type="PackedScene" uid="uid://c5ubr3fk5bcyu" path="res://scenes/hacking_ui/HackingInterface.tscn" id="3_0dcvq"]
+[ext_resource type="Script" uid="uid://nyu3ykmsnxry" path="res://scenes/Stage1/NextStage.gd" id="3_a048t"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kgtat"]
-size = Vector2(1145, 103)
+size = Vector2(1166.5, 103)
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_abukt"]
-size = Vector2(468.5, 35)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_j4ohn"]
+size = Vector2(20, 711)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_kgtat"]
 radius = 71.17584
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_bputu"]
+size = Vector2(20, 87)
 
 [node name="Fase1" type="Node2D" unique_id=2119244706]
 
@@ -22,20 +26,16 @@ position = Vector2(4, 0)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=272873264]
 physics_interpolation_mode = 2
 texture_filter = 1
-position = Vector2(570, 596)
+position = Vector2(559.25, 596)
 shape = SubResource("RectangleShape2D_kgtat")
 one_way_collision_margin = 0.0
 
-[node name="CollisionShape2D2" type="CollisionShape2D" parent="StaticBody2D" unique_id=216892385]
-position = Vector2(1435, 548)
-shape = SubResource("RectangleShape2D_abukt")
-
-[node name="CollisionShape2D3" type="CollisionShape2D" parent="StaticBody2D" unique_id=715958608]
-position = Vector2(1923, 504)
-shape = SubResource("RectangleShape2D_abukt")
+[node name="CollisionShape2D4" type="CollisionShape2D" parent="StaticBody2D" unique_id=330430587]
+position = Vector2(-14, 338)
+shape = SubResource("RectangleShape2D_j4ohn")
 
 [node name="Player" parent="." unique_id=922838097 instance=ExtResource("1_ywn8h")]
-position = Vector2(245, 370)
+position = Vector2(-31, 363)
 
 [node name="Area2D" type="Area2D" parent="." unique_id=1188092537 node_paths=PackedStringArray("hacking_ui")]
 position = Vector2(245, 370)
@@ -46,4 +46,25 @@ hacking_ui = NodePath("../HackingInterface")
 position = Vector2(515, 103)
 shape = SubResource("CircleShape2D_kgtat")
 
+[node name="Area2D2" type="Area2D" parent="." unique_id=1956826486 groups=["Player"]]
+position = Vector2(178, 46)
+script = ExtResource("3_a048t")
+next_stage = "uid://2mj2i37yd1mi"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D2" unique_id=1238521549]
+position = Vector2(958, 455)
+shape = SubResource("RectangleShape2D_bputu")
+
+[node name="Area2D3" type="Area2D" parent="." unique_id=386384877 node_paths=PackedStringArray("hacking_ui")]
+position = Vector2(490, 740)
+script = ExtResource("2_e1ier")
+hacking_ui = NodePath("../HackingInterface")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D3" unique_id=222326161]
+position = Vector2(465, -267)
+shape = SubResource("CircleShape2D_kgtat")
+
 [node name="HackingInterface" parent="." unique_id=561738698 instance=ExtResource("3_0dcvq")]
+visible = false
+
+[connection signal="area_entered" from="Area2D2" to="Player" method="_on_area_2d_2_area_entered"]
