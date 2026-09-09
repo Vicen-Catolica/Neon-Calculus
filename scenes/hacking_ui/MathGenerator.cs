@@ -1,98 +1,87 @@
 using Godot;
+using Godot.Collections; // OBRIGATÓRIO para compatibilidade com GDScript
 using System;
 
-public partial class MathGenerator : Node
+public partial class MathGenerator : RefCounted
 {
     private Random _random = new Random();
 
-    public Godot.Collections.Dictionary GenerateValidEquation(int stage, int subTopic = 0)
+    public Dictionary GenerateValidEquation(int stage, int subTopic)
     {
-        string expression = "";
-        int solution = 0;
-        string topic = "";
-        var dict = new Godot.Collections.Dictionary();
+        var dict = new Dictionary();
 
         switch (stage)
         {
             case 1:
                 if (subTopic == 0)
                 {
-                    topic = "NÚMEROS INTEIROS (ADIÇÃO E SUBTRAÇÃO)";
+                    dict["Topic"] = "NÚMEROS INTEIROS (ADIÇÃO E SUBTRAÇÃO)";
                     int a = _random.Next(-9, 10);
                     if (a == 0) a = 3;
-                    solution = _random.Next(1, 12);
+                    int solution = _random.Next(1, 12);
                     int res = solution + a;
-                    expression = $"x + ({a}) = {res}";
-
+                    
+                    string termA = a >= 0 ? $"{a}" : $"({a})";
+                    dict["Expression"] = $"x + {termA} = {res}";
+                    dict["Solution"] = solution;
                     dict["ParamA"] = a;
                     dict["ParamRes"] = res;
                 }
                 else
                 {
-                    topic = "ÁLGEBRA SIMPLES (MULTIPLICAÇÃO)";
-                    int a = _random.Next(2, 5);
-                    solution = _random.Next(2, 10);
-                    int res = a * solution;
-                    expression = $"{a}x = {res}";
+                    dict["Topic"] = "ÁLGEBRA SIMPLES (MULTIPLICAÇÃO)";
+                    int count = _random.Next(2, 6);
+                    int solution = _random.Next(2, 10);
+                    int res = count * solution;
 
-                    dict["ParamA"] = a;
+                    dict["Expression"] = $"{count}x = {res}";
+                    dict["Solution"] = solution;
+                    dict["ParamA"] = count;
                     dict["ParamRes"] = res;
                 }
                 break;
 
             case 2:
-                if (subTopic == 0)
-                {
-                    topic = "EQUAÇÕES DO 1º GRAU (POSITIVOS)";
-                    int mult = _random.Next(2, 5);
-                    solution = _random.Next(2, 10);
-                    int bVal = _random.Next(2, 9);
-                    int totalC = (mult * solution) + bVal;
-                    expression = $"{mult}x + {bVal} = {totalC}";
-
-                    dict["ParamMult"] = mult;
-                    dict["ParamB"] = bVal;
-                    dict["ParamTotal"] = totalC;
-                }
-                else
-                {
-                    topic = "NÚMEROS RACIONAIS & INTEIROS NEGATIVOS";
-                    int mult = _random.Next(2, 5);
-                    solution = _random.Next(2, 10);
-                    int bVal = _random.Next(2, 9);
-                    int totalC = (mult * solution) - bVal;
-                    expression = $"{mult}x - {bVal} = {totalC}";
-
-                    dict["ParamMult"] = mult;
-                    dict["ParamB"] = -bVal;
-                    dict["ParamTotal"] = totalC;
-                }
+                dict["Topic"] = "EQUAÇÃO DO 1º GRAU";
+                int mult = _random.Next(2, 5);
+                int sol2 = _random.Next(2, 10);
+                int bVal = _random.Next(2, 9);
+                if (subTopic == 1) bVal = -bVal; // Trata equações com subtração
+                
+                int totalC = (mult * sol2) + bVal;
+                string signStr = bVal >= 0 ? "+" : "-";
+                dict["Expression"] = $"{mult}x {signStr} {Math.Abs(bVal)} = {totalC}";
+                dict["Solution"] = sol2;
+                dict["ParamMult"] = mult;
+                dict["ParamB"] = bVal;
+                dict["ParamTotal"] = totalC;
                 break;
 
             case 3:
                 if (subTopic == 0)
                 {
-                    topic = "RAZÃO E PROPORÇÃO (REGRA DE TRÊS)";
+                    dict["Topic"] = "REGRA DE TRÊS SIMPLES";
                     int baseVal = _random.Next(2, 6);
-                    int factor = _random.Next(2, 5);
-                    solution = _random.Next(2, 10);
-                    int rightNum = solution * factor;
-                    int rightDen = baseVal * factor;
-                    expression = $"x / {baseVal} = {rightNum} / {rightDen}";
+                    int den = _random.Next(2, 6);
+                    int sol3 = _random.Next(2, 10);
+                    int num = (sol3 * den) / baseVal;
 
+                    dict["Expression"] = $"x / {baseVal} = {num} / {den}";
+                    dict["Solution"] = sol3;
                     dict["ParamBase"] = baseVal;
-                    dict["ParamRightNum"] = rightNum;
-                    dict["ParamRightDen"] = rightDen;
+                    dict["ParamRightNum"] = num;
+                    dict["ParamRightDen"] = den;
                 }
                 else
                 {
-                    topic = "GEOMETRIA (ÁREA DE RETÂNGULO)";
-                    int altura = _random.Next(3, 8);
-                    solution = _random.Next(3, 10);
-                    int area = solution * altura;
-                    expression = $"Área = {area} | Altura = {altura} | Base x = ?";
+                    dict["Topic"] = "GEOMETRIA (ÁREA DO RETÂNGULO)";
+                    int alt = _random.Next(3, 8);
+                    int solArea = _random.Next(4, 12);
+                    int area = alt * solArea;
 
-                    dict["ParamAltura"] = altura;
+                    dict["Expression"] = $"Área = {area} | Altura = {alt}";
+                    dict["Solution"] = solArea;
+                    dict["ParamAltura"] = alt;
                     dict["ParamArea"] = area;
                 }
                 break;
@@ -100,34 +89,32 @@ public partial class MathGenerator : Node
             case 4:
                 if (subTopic == 0)
                 {
-                    topic = "ÁLGEBRA (PROPRIEDADE DISTRIBUTIVA)";
+                    dict["Topic"] = "PROPRIEDADE DISTRIBUTIVA";
                     int k = _random.Next(2, 5);
-                    solution = _random.Next(2, 8);
                     int offset = _random.Next(2, 6);
-                    int total = k * (solution + offset);
-                    expression = $"{k}(x + {offset}) = {total}";
+                    int solDist = _random.Next(2, 10);
+                    int totalDist = k * (solDist + offset);
 
+                    dict["Expression"] = $"{k}(x + {offset}) = {totalDist}";
+                    dict["Solution"] = solDist;
                     dict["ParamK"] = k;
                     dict["ParamOffset"] = offset;
-                    dict["ParamTotal"] = total;
+                    dict["ParamTotal"] = totalDist;
                 }
                 else
                 {
-                    topic = "GEOMETRIA (ÂNGULOS DO TRIÂNGULO)";
-                    int angA = _random.Next(35, 70);
-                    int angB = _random.Next(35, 70);
-                    solution = 180 - (angA + angB);
-                    expression = $"Triângulo: {angA}°, {angB}° e x°";
+                    dict["Topic"] = "ÂNGULOS DO TRIÂNGULO";
+                    int angA = _random.Next(30, 70);
+                    int angB = _random.Next(30, 70);
+                    int solTri = 180 - (angA + angB);
 
+                    dict["Expression"] = $"{angA}° + {angB}° + x° = 180°";
+                    dict["Solution"] = solTri;
                     dict["ParamAngA"] = angA;
                     dict["ParamAngB"] = angB;
                 }
                 break;
         }
-
-        dict["Expression"] = expression;
-        dict["Solution"] = solution;
-        dict["Topic"] = topic;
 
         return dict;
     }

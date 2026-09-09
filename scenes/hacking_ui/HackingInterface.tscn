@@ -1,8 +1,13 @@
 [gd_scene format=3 uid="uid://c5ubr3fk5bcyu"]
 
 [ext_resource type="Script" uid="uid://bx3nywghmsixx" path="res://scenes/hacking_ui/hacking_interface.gd" id="1_edu43"]
+[ext_resource type="Shader" uid="uid://3ljodtwsqimo" path="res://scenes/hacking_ui/HackingInterface.gdshader" id="2_dkc27"]
 [ext_resource type="FontFile" uid="uid://b7b4e0l00k2m6" path="res://assets/fonts/Orbitron-Bold.ttf" id="2_n6573"]
 [ext_resource type="Script" uid="uid://cjw7x4cjuh83g" path="res://scenes/hacking_ui/math_visualizer.gd" id="3_5dxew"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kgtat"]
+shader = ExtResource("2_dkc27")
+shader_parameter/scanline_count = 300.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j4ohn"]
 bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
@@ -11,6 +16,18 @@ border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0, 0.9411765, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_knbnx"]
+bg_color = Color(0.08, 0.064, 0.031999998, 0.78431374)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.6666667, 0, 1)
 corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
@@ -27,6 +44,19 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
+expand_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kgtat"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.015686275, 0.03529412, 0.078431375, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.22352941, 1, 0.078431375, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ebqk3"]
 bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
@@ -55,6 +85,21 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dkc27"]
+bg_color = Color(1, 0.84313726, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_d0nl5"]
+bg_color = Color(0, 0.9411765, 1, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.9411765, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5dxew"]
 bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
 border_width_left = 2
@@ -67,7 +112,7 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dkc27"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8qxs5"]
 bg_color = Color(0.047058824, 0.08235294, 0.1254902, 1)
 border_width_left = 2
 border_width_top = 2
@@ -163,6 +208,18 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_f80yf"]
+bg_color = Color(0, 0.9411765, 1, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0.9411765, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_w0nfr"]
 bg_color = Color(0.039215688, 0.10980392, 0.078431375, 1)
 border_width_left = 2
@@ -175,9 +232,392 @@ corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_16ggh"]
+bg_color = Color(1, 0.84313726, 0, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.84313726, 0, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a2w4u"]
+bg_color = Color(0.22352941, 1, 0.078431375, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.22352941, 1, 0.078431375, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_nf6lf"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+
 [node name="HackingInterface" type="CanvasLayer" unique_id=561738698]
 process_mode = 3
 script = ExtResource("1_edu43")
+
+[node name="Background" type="ColorRect" parent="." unique_id=864387124]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+
+[node name="CRTOverlay" type="ColorRect" parent="." unique_id=13135994]
+material = SubResource("ShaderMaterial_kgtat")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.047058824, 0.08235294, 0.1254902, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="MainMargin" type="MarginContainer" parent="." unique_id=164032803]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 20
+
+[node name="MainVBox" type="VBoxContainer" parent="MainMargin" unique_id=1978228727]
+layout_mode = 2
+
+[node name="HeaderHBox" type="Control" parent="MainMargin/MainVBox" unique_id=1234198186]
+layout_mode = 2
+size_flags_vertical = 2
+
+[node name="TopHeaderLabel" type="Label" parent="MainMargin/MainVBox/HeaderHBox" unique_id=2142064972]
+layout_mode = 0
+offset_left = 290.0
+offset_top = 14.0
+offset_right = 802.0
+offset_bottom = 35.0
+size_flags_horizontal = 6
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+text = "TERMINAL DE DESCRIPTOGRAFIA - CONEXÃO ESTÁVEL"
+
+[node name="TimerContainer" type="PanelContainer" parent="MainMargin/MainVBox/HeaderHBox" unique_id=1767317969]
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -176.0
+offset_top = 4.0
+offset_bottom = 54.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_j4ohn")
+
+[node name="TimerVBox" type="VBoxContainer" parent="MainMargin/MainVBox/HeaderHBox/TimerContainer" unique_id=1058536257]
+layout_mode = 2
+
+[node name="TimerHeader" type="Label" parent="MainMargin/MainVBox/HeaderHBox/TimerContainer/TimerVBox" unique_id=1974181074]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+text = "TEMPO RESTANTE"
+
+[node name="TimerLabel" type="Label" parent="MainMargin/MainVBox/HeaderHBox/TimerContainer/TimerVBox" unique_id=1078288655]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+
+[node name="ContentArea" type="Control" parent="MainMargin/MainVBox" unique_id=791570397]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="AIAssistantPanel" type="PanelContainer" parent="MainMargin/MainVBox/ContentArea" unique_id=2004572948]
+custom_minimum_size = Vector2(260, 0)
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_top = -319.0
+offset_right = 260.0
+offset_bottom = 62.0
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_knbnx")
+
+[node name="AIVBox" type="VBoxContainer" parent="MainMargin/MainVBox/ContentArea/AIAssistantPanel" unique_id=276128023]
+layout_mode = 2
+
+[node name="AIHeaderLabel" type="Label" parent="MainMargin/MainVBox/ContentArea/AIAssistantPanel/AIVBox" unique_id=1244282067]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.6666667, 0, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+text = "// A.I. CORE DIAGNOSTIC"
+
+[node name="AIHSeparator" type="HSeparator" parent="MainMargin/MainVBox/ContentArea/AIAssistantPanel/AIVBox" unique_id=535352667]
+modulate = Color(1, 0.6666667, 0, 1)
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="AIHintLabel" type="Label" parent="MainMargin/MainVBox/ContentArea/AIAssistantPanel/AIVBox" unique_id=795825320]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8117647, 0.4, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+
+[node name="CenterCalculatorContainer" type="CenterContainer" parent="MainMargin/MainVBox/ContentArea" unique_id=1094756724]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -312.0
+offset_bottom = 41.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ChallengePanel" type="PanelContainer" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer" unique_id=1493780066]
+custom_minimum_size = Vector2(380, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_abukt")
+
+[node name="ChallengeVBox" type="VBoxContainer" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel" unique_id=737064985]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox" unique_id=789430516]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+text = "DESAFIO DE MATEMÁTICA:"
+
+[node name="SubtitleLabel" type="Label" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox" unique_id=78723530]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_font_sizes/font_size = 13
+
+[node name="EquationPanel" type="PanelContainer" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox" unique_id=1263634585]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_kgtat")
+
+[node name="EquationLabel" type="Label" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/EquationPanel" unique_id=646447631]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.22352941, 1, 0.078431375, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_font_sizes/font_size = 23
+
+[node name="MathVisualizer" type="Control" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox" unique_id=59140746]
+custom_minimum_size = Vector2(120, 120)
+layout_mode = 2
+size_flags_vertical = 4
+script = ExtResource("3_5dxew")
+custom_font = ExtResource("2_n6573")
+
+[node name="InputBoxPanel" type="PanelContainer" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox" unique_id=84124576]
+custom_minimum_size = Vector2(150, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_ebqk3")
+
+[node name="InputLine" type="LineEdit" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/InputBoxPanel" unique_id=1880021804]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+focus_mode = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_colors/font_uneditable_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_2mynh")
+editable = false
+
+[node name="NumpadGrid" type="GridContainer" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox" unique_id=621297553]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+columns = 3
+
+[node name="Btn1" type="Button" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/NumpadGrid" unique_id=362095474]
+custom_minimum_size = Vector2(30, 36)
+custom_maximum_size = Vector2(30, 30)
+layout_mode = 2
+offset_transform_enabled = true
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_colors/font_hover_color = Color(0.019607844, 0.05490196, 0.09411765, 1)
+theme_override_colors/icon_focus_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_n6573")
+theme_override_styles/pressed_mirrored = SubResource("StyleBoxFlat_dkc27")
+theme_override_styles/hover = SubResource("StyleBoxFlat_d0nl5")
+text = "1"
+
+[node name="Btn2" type="Button" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/NumpadGrid" unique_id=1272199164]
+custom_minimum_size = Vector2(30, 36)
+custom_maximum_size = Vector2(30, 30)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_colors/font_hover_color = Color(0.019607844, 0.05490196, 0.09411765, 1)
+theme_override_colors/icon_focus_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_5dxew")
+theme_override_styles/pressed_mirrored = SubResource("StyleBoxFlat_dkc27")
+theme_override_styles/hover = SubResource("StyleBoxFlat_d0nl5")
+text = "2"
+
+[node name="Btn3" type="Button" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/NumpadGrid" unique_id=384491129]
+custom_minimum_size = Vector2(30, 36)
+custom_maximum_size = Vector2(30, 30)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_colors/font_hover_color = Color(0.019607844, 0.05490196, 0.09411765, 1)
+theme_override_colors/icon_focus_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_8qxs5")
+theme_override_styles/pressed_mirrored = SubResource("StyleBoxFlat_dkc27")
+theme_override_styles/hover = SubResource("StyleBoxFlat_d0nl5")
+text = "3"
+
+[node name="Btn4" type="Button" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/NumpadGrid" unique_id=1234864875]
+custom_minimum_size = Vector2(30, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_colors/font_hover_color = Color(0.019607844, 0.05490196, 0.09411765, 1)
+theme_override_colors/icon_focus_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_opal3")
+theme_override_styles/pressed_mirrored = SubResource("StyleBoxFlat_dkc27")
+theme_override_styles/hover = SubResource("StyleBoxFlat_d0nl5")
+text = "4"
+
+[node name="Btn5" type="Button" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/NumpadGrid" unique_id=1095558716]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_colors/font_hover_color = Color(0.019607844, 0.05490196, 0.09411765, 1)
+theme_override_colors/icon_focus_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_gpyry")
+theme_override_styles/pressed_mirrored = SubResource("StyleBoxFlat_dkc27")
+theme_override_styles/hover = SubResource("StyleBoxFlat_d0nl5")
+text = "5"
+
+[node name="Btn6" type="Button" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/NumpadGrid" unique_id=1850040633]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_colors/font_hover_color = Color(0.019607844, 0.05490196, 0.09411765, 1)
+theme_override_colors/icon_focus_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_dmyid")
+theme_override_styles/pressed_mirrored = SubResource("StyleBoxFlat_dkc27")
+theme_override_styles/hover = SubResource("StyleBoxFlat_d0nl5")
+text = "6"
+
+[node name="Btn7" type="Button" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/NumpadGrid" unique_id=1933613019]
+custom_minimum_size = Vector2(30, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_colors/font_hover_color = Color(0.019607844, 0.05490196, 0.09411765, 1)
+theme_override_colors/icon_focus_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_2kkfr")
+theme_override_styles/pressed_mirrored = SubResource("StyleBoxFlat_dkc27")
+theme_override_styles/hover = SubResource("StyleBoxFlat_d0nl5")
+text = "7"
+
+[node name="Btn8" type="Button" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/NumpadGrid" unique_id=492334024]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_colors/font_hover_color = Color(0.019607844, 0.05490196, 0.09411765, 1)
+theme_override_colors/icon_focus_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_8u17j")
+theme_override_styles/pressed_mirrored = SubResource("StyleBoxFlat_dkc27")
+theme_override_styles/hover = SubResource("StyleBoxFlat_d0nl5")
+text = "8"
+
+[node name="Btn9" type="Button" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/NumpadGrid" unique_id=1208094099]
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_colors/font_hover_color = Color(0.019607844, 0.05490196, 0.09411765, 1)
+theme_override_colors/icon_focus_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_ntibf")
+theme_override_styles/pressed_mirrored = SubResource("StyleBoxFlat_dkc27")
+theme_override_styles/hover = SubResource("StyleBoxFlat_d0nl5")
+text = "9"
+
+[node name="SpacerLeft" type="Control" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/NumpadGrid" unique_id=1164666539]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+
+[node name="Btn0" type="Button" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/NumpadGrid" unique_id=1423497503]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(30, 36)
+custom_maximum_size = Vector2(30, 30)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_colors/font_hover_color = Color(0.019607844, 0.05490196, 0.09411765, 1)
+theme_override_colors/icon_focus_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_e550j")
+theme_override_styles/pressed_mirrored = SubResource("StyleBoxFlat_dkc27")
+theme_override_styles/hover = SubResource("StyleBoxFlat_f80yf")
+text = " 0 "
+
+[node name="SpacerRight" type="Control" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/NumpadGrid" unique_id=1027937583]
+custom_minimum_size = Vector2(30, 0)
+layout_mode = 2
+
+[node name="SubmitButton" type="Button" parent="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox" unique_id=541179191]
+unique_name_in_owner = true
+process_mode = 3
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.22352941, 1, 0.078431375, 1)
+theme_override_colors/font_focus_color = Color(0.019607844, 0.05490196, 0.09411765, 1)
+theme_override_colors/font_hover_color = Color(0.019607844, 0.05490196, 0.09411765, 1)
+theme_override_colors/font_hover_pressed_color = Color(0.019607844, 0.05490196, 0.09411765, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_styles/normal = SubResource("StyleBoxFlat_w0nfr")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_16ggh")
+theme_override_styles/hover = SubResource("StyleBoxFlat_a2w4u")
+text = "Confirmar"
+
+[node name="FooterPanel" type="PanelContainer" parent="MainMargin/MainVBox" unique_id=663519095]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_nf6lf")
+
+[node name="FooterStatusLabel" type="Label" parent="MainMargin/MainVBox/FooterPanel" unique_id=1964337609]
+layout_mode = 2
+size_flags_horizontal = 2
+theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
+theme_override_fonts/font = ExtResource("2_n6573")
+text = "SYS_STATUS // AGUARDANDO ENTRADA_"
 
 [node name="ControlPanel" type="Control" parent="." unique_id=582295086]
 process_mode = 3
@@ -190,235 +630,7 @@ grow_vertical = 2
 mouse_filter = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="Background" type="ColorRect" parent="ControlPanel" unique_id=13135994]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.047058824, 0.08235294, 0.1254902, 1)
-metadata/_edit_use_anchors_ = true
-
-[node name="TopHeaderLabel" type="Label" parent="ControlPanel" unique_id=2142064972]
-layout_mode = 0
-offset_left = 320.0
-offset_top = 14.0
-offset_right = 832.0
-offset_bottom = 37.0
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-text = "TERMINAL DE DESCRIPTOGRAFIA - CONEXÃO ESTÁVEL"
-
-[node name="TimerContainer" type="PanelContainer" parent="ControlPanel" unique_id=1767317969]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -228.0
-offset_top = 19.0
-offset_right = -39.0
-offset_bottom = 83.0
-grow_horizontal = 0
-theme_override_styles/panel = SubResource("StyleBoxFlat_j4ohn")
-
-[node name="TimerVBox" type="VBoxContainer" parent="ControlPanel/TimerContainer" unique_id=1058536257]
-layout_mode = 2
-
-[node name="TimerHeader" type="Label" parent="ControlPanel/TimerContainer/TimerVBox" unique_id=1974181074]
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-text = "TEMPO RESTANTE"
-
-[node name="TimerLabel" type="Label" parent="ControlPanel/TimerContainer/TimerVBox" unique_id=1078288655]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-
-[node name="CenterContainer" type="VBoxContainer" parent="ControlPanel" unique_id=1891877807]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="ChallengePanel" type="PanelContainer" parent="ControlPanel/CenterContainer" unique_id=1493780066]
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_abukt")
-
-[node name="ChallengeVBox" type="VBoxContainer" parent="ControlPanel/CenterContainer/ChallengePanel" unique_id=737064985]
-custom_minimum_size = Vector2(0, 120)
-layout_mode = 2
-
-[node name="TitleLabel" type="Label" parent="ControlPanel/CenterContainer/ChallengePanel/ChallengeVBox" unique_id=789430516]
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-text = "DESAFIO DE MATEMÁTICA:"
-
-[node name="SubtitleLabel" type="Label" parent="ControlPanel/CenterContainer/ChallengePanel/ChallengeVBox" unique_id=78723530]
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-
-[node name="EquationLabel" type="Label" parent="ControlPanel/CenterContainer/ChallengePanel/ChallengeVBox" unique_id=646447631]
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-
-[node name="MathVisualizer" type="Control" parent="ControlPanel/CenterContainer/ChallengePanel/ChallengeVBox" unique_id=59140746]
-custom_minimum_size = Vector2(340, 160)
-layout_mode = 2
-size_flags_vertical = 4
-script = ExtResource("3_5dxew")
-
-[node name="InputBoxPanel" type="PanelContainer" parent="ControlPanel/CenterContainer/ChallengePanel/ChallengeVBox" unique_id=84124576]
-custom_minimum_size = Vector2(150, 0)
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-theme_override_styles/panel = SubResource("StyleBoxFlat_ebqk3")
-
-[node name="InputLine" type="LineEdit" parent="ControlPanel/CenterContainer/ChallengePanel/ChallengeVBox/InputBoxPanel" unique_id=1880021804]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-theme_override_styles/normal = SubResource("StyleBoxFlat_2mynh")
-
-[node name="NumpadGrid" type="GridContainer" parent="ControlPanel/CenterContainer" unique_id=621297553]
-unique_name_in_owner = true
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
-columns = 3
-
-[node name="Btn1" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=362095474]
-custom_minimum_size = Vector2(30, 30)
-custom_maximum_size = Vector2(30, 30)
-layout_mode = 2
-offset_transform_enabled = true
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-theme_override_styles/normal = SubResource("StyleBoxFlat_n6573")
-text = "1"
-
-[node name="Btn2" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=1272199164]
-custom_minimum_size = Vector2(30, 30)
-custom_maximum_size = Vector2(30, 30)
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-theme_override_styles/normal = SubResource("StyleBoxFlat_5dxew")
-text = "2"
-
-[node name="Btn3" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=384491129]
-custom_minimum_size = Vector2(30, 30)
-custom_maximum_size = Vector2(30, 30)
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-theme_override_styles/normal = SubResource("StyleBoxFlat_dkc27")
-text = "3"
-
-[node name="Btn4" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=1234864875]
-custom_minimum_size = Vector2(30, 30)
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-theme_override_styles/normal = SubResource("StyleBoxFlat_opal3")
-text = "4"
-
-[node name="Btn5" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=1095558716]
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-theme_override_styles/normal = SubResource("StyleBoxFlat_gpyry")
-text = "5"
-
-[node name="Btn6" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=1850040633]
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-theme_override_styles/normal = SubResource("StyleBoxFlat_dmyid")
-text = "6"
-
-[node name="Btn7" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=1933613019]
-custom_minimum_size = Vector2(30, 30)
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-theme_override_styles/normal = SubResource("StyleBoxFlat_2kkfr")
-text = "7"
-
-[node name="Btn8" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=492334024]
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-theme_override_styles/normal = SubResource("StyleBoxFlat_8u17j")
-text = "8"
-
-[node name="Btn9" type="Button" parent="ControlPanel/CenterContainer/NumpadGrid" unique_id=1208094099]
-layout_mode = 2
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-theme_override_styles/normal = SubResource("StyleBoxFlat_ntibf")
-text = "9"
-
-[node name="NumpadBottomHBox" type="HBoxContainer" parent="ControlPanel/CenterContainer" unique_id=1832384496]
-layout_mode = 2
-size_flags_vertical = 6
-offset_transform_enabled = true
-
-[node name="Spacer" type="Control" parent="ControlPanel/CenterContainer/NumpadBottomHBox" unique_id=1164666539]
-custom_minimum_size = Vector2(104, 0)
-layout_mode = 2
-
-[node name="Btn0" type="Button" parent="ControlPanel/CenterContainer/NumpadBottomHBox" unique_id=1423497503]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(30, 30)
-custom_maximum_size = Vector2(30, 30)
-layout_mode = 2
-size_flags_vertical = 4
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-theme_override_styles/normal = SubResource("StyleBoxFlat_e550j")
-text = " 0 "
-
-[node name="SubmitButton" type="Button" parent="ControlPanel/CenterContainer/NumpadBottomHBox" unique_id=541179191]
-unique_name_in_owner = true
-process_mode = 3
-layout_mode = 2
-theme_override_colors/font_color = Color(0.22352941, 1, 0.078431375, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-theme_override_styles/normal = SubResource("StyleBoxFlat_w0nfr")
-text = "Confirmar"
-
-[node name="FooterStatusLabel" type="Label" parent="ControlPanel" unique_id=605657037]
-layout_mode = 0
-offset_left = 6.0
-offset_top = 610.0
-offset_right = 363.0
-offset_bottom = 633.0
-theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
-text = "STATUS DO SISTEMA: AGUARDANDO ENTRADA"
-
 [node name="HackTimer" type="Timer" parent="ControlPanel" unique_id=1700534700]
 unique_name_in_owner = true
 
-[connection signal="pressed" from="ControlPanel/CenterContainer/NumpadBottomHBox/SubmitButton" to="." method="_on_submit_button_pressed"]
+[connection signal="pressed" from="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/SubmitButton" to="." method="_on_submit_button_pressed"]
