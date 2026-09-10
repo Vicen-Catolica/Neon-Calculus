@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://7fkoqmdrpsbl"]
+
+[ext_resource type="Script" uid="uid://0cbao3vba2yt" path="res://Entities/Enemy/enemy.gd" id="1_3l5gm"]
+[ext_resource type="Script" uid="uid://bd3021nc8bu0w" path="res://Entities/Enemy/finite_state_machine.gd" id="2_fcg00"]
+[ext_resource type="Script" uid="uid://bfbnqm02phbmd" path="res://Entities/Enemy/state_patrol.gd" id="3_y11p7"]
+[ext_resource type="Script" uid="uid://cbj7v4b8myt72" path="res://Entities/Enemy/state_suspect.gd" id="4_bycej"]
+[ext_resource type="Script" uid="uid://dhxfrb3cbi6s1" path="res://Entities/Enemy/state_search.gd" id="5_a077d"]
+[ext_resource type="Script" uid="uid://uf3a5ob7yc72" path="res://Entities/Enemy/state_alert.gd" id="6_u8o2d"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_j4ohn"]
+size = Vector2(160, 160)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_abukt"]
+
+[node name="Enemy" type="CharacterBody2D" unique_id=570389940]
+script = ExtResource("1_3l5gm")
+
+[node name="HearingArea" type="Area2D" parent="." unique_id=62214063]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HearingArea" unique_id=1148224389]
+shape = SubResource("RectangleShape2D_j4ohn")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=966043579]
+
+[node name="RayCast2D" type="RayCast2D" parent="." unique_id=1285694110]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=985395806]
+shape = SubResource("CapsuleShape2D_abukt")
+
+[node name="VisibleOnScreenEnabler2D" type="VisibleOnScreenEnabler2D" parent="." unique_id=613118882]
+
+[node name="FiniteStateMachine" type="Node" parent="." unique_id=2071868592 node_paths=PackedStringArray("initial_state")]
+script = ExtResource("2_fcg00")
+initial_state = NodePath("Patrol")
+
+[node name="Patrol" type="Node" parent="FiniteStateMachine" unique_id=1972830103]
+script = ExtResource("3_y11p7")
+
+[node name="Suspect" type="Node" parent="FiniteStateMachine" unique_id=1278669273]
+script = ExtResource("4_bycej")
+
+[node name="Search" type="Node" parent="FiniteStateMachine" unique_id=1569218015]
+script = ExtResource("5_a077d")
+
+[node name="Alert" type="Node" parent="FiniteStateMachine" unique_id=1880366560]
+script = ExtResource("6_u8o2d")
