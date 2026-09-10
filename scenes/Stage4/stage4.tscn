@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cboxptu27oi8" path="res://scenes/hacking_ui/Terminal.gd" id="1_aaxks"]
 [ext_resource type="PackedScene" uid="uid://c5ubr3fk5bcyu" path="res://scenes/hacking_ui/HackingInterface.tscn" id="2_1wpqg"]
-[ext_resource type="PackedScene" uid="uid://tsvnbubb6bg4" path="res://Entities/player.tscn" id="4_4u5j2"]
+[ext_resource type="PackedScene" uid="uid://tsvnbubb6bg4" path="res://Entities/Player/player.tscn" id="4_4u5j2"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4u5j2"]
 size = Vector2(1166.5, 103)

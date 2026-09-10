@@ -60,6 +60,9 @@ func _ready() -> void:
 
 func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 	get_tree().paused = true
+	# Oculta a barra de vida do HUD durante o minigame de hacking
+	get_tree().call_group("hud", "hide_hud")
+	
 	current_floor_level = floor_level
 	current_sub_topic = sub_topic
 	error_count = 0
@@ -93,7 +96,6 @@ func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 	if equation_label:
 		equation_label.text = str(eq_data.get("Expression", ""))
 	
-	# Efeito de pulso rápido na conta ao carregar
 		equation_label.pivot_offset = equation_label.size / 2.0
 		var tween = create_tween()
 		tween.tween_property(equation_label, "scale", Vector2(1.15, 1.15), 0.15)
@@ -131,10 +133,7 @@ func _calculate_dynamic_time_limit() -> float:
 		if (ang_a + ang_b) >= 100:
 			time_calculated += 5.2
 
-	# DOBRA O TEMPO CALCULADO TOTAL
 	time_calculated *= 2.0
-
-	# Ajusta os limites: mínimo de 30 segundos e máximo de 240 segundos (4 minutos)
 	return clamp(time_calculated, 30.0, 240.0)
 
 func _setup_equation_steps(stage: int, subtopic: int) -> void:
@@ -192,11 +191,9 @@ func _trigger_error() -> void:
 	current_input_text = ""
 	_update_input_display()
 	
-	# Penalidade de tempo
 	if hack_timer:
 		hack_timer.start(max(0.1, hack_timer.time_left - 3.0))
 		
-	# Ativa ou faz a I.A. piscar no 2º erro em diante
 	if error_count >= 2:
 		_activate_ai_assistant()
 
@@ -204,20 +201,16 @@ func _activate_ai_assistant() -> void:
 	if not ai_assistant_panel:
 		return
 		
-	# Se a I.A. AINDA NÃO estiver visível (1ª vez ativando)
 	if not ai_assistant_panel.visible:
 		var hint_text = _generate_step_by_step_hint()
 		if ai_hint_label:
 			ai_hint_label.text = hint_text
 			ai_assistant_panel.show()
-			
-			# Garante que a I.A. comece com a cor Laranja/Amarela base
 			ai_assistant_panel.modulate = Color("#ffaa00")
 			
 			var tween = create_tween()
 			tween.tween_property(ai_hint_label, "visible_ratio", 1.0, 1.2).from(0.0)
 	else:
-		# Se JÁ estiver visível: pisca o painel entre Vermelho e Laranja
 		_flash_ai_assistant()
 
 func _flash_ai_assistant() -> void:
@@ -225,15 +218,13 @@ func _flash_ai_assistant() -> void:
 		return
 		
 	var tween = create_tween()
-	var alert_red := Color("#ff0055")   # Vermelho de Erro
-	var base_amber := Color("#ffaa00")  # Laranja Alerta da IA
+	var alert_red := Color("#ff0055")
+	var base_amber := Color("#ffaa00")
 	
-	# Pulso rápido chamando a atenção
 	tween.tween_property(ai_assistant_panel, "modulate", alert_red, 0.08)
 	tween.tween_property(ai_assistant_panel, "modulate", base_amber, 0.08)
 	tween.tween_property(ai_assistant_panel, "modulate", alert_red, 0.08)
 	tween.tween_property(ai_assistant_panel, "modulate", base_amber, 0.08)
-	
 
 func _generate_step_by_step_hint() -> String:
 	var text = ">>> A.I. ASSISTANT PROTOCOL\n"
@@ -308,7 +299,6 @@ func _generate_step_by_step_hint() -> String:
 	return text
 
 func _process(delta: float) -> void:
-	# Atualiza o Temporizador e muda para vermelho no final
 	if hack_timer and hack_timer.time_left > 0 and timer_label:
 		var minutes: int = int(hack_timer.time_left / 60.0)
 		var seconds: int = int(hack_timer.time_left) % 60
@@ -319,7 +309,6 @@ func _process(delta: float) -> void:
 		else:
 			timer_label.add_theme_color_override("font_color", Color("#00f0ff"))
 
-	# Cursor do Rodapé Piscando (_)
 	_blink_timer += delta
 	var footer_label: Label = find_child("FooterStatusLabel", true, false)
 	if footer_label:
@@ -359,6 +348,9 @@ func _complete_hack(success: bool) -> void:
 		hack_timer.stop()
 	hide()
 	get_tree().paused = false
+	
+	# Restaura a visualização da barra de vida ao fechar a interface
+	get_tree().call_group("hud", "show_hud")
 	
 	if success:
 		emit_signal("hacking_succeeded")

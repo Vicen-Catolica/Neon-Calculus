@@ -1,12 +1,20 @@
 [gd_scene format=3 uid="uid://beycagnee1vc5"]
 
-[ext_resource type="PackedScene" uid="uid://tsvnbubb6bg4" path="res://Entities/player.tscn" id="1_ywn8h"]
+[ext_resource type="PackedScene" uid="uid://tsvnbubb6bg4" path="res://Entities/Player/player.tscn" id="1_ywn8h"]
 [ext_resource type="Script" uid="uid://cboxptu27oi8" path="res://scenes/hacking_ui/Terminal.gd" id="2_e1ier"]
 [ext_resource type="PackedScene" uid="uid://c5ubr3fk5bcyu" path="res://scenes/hacking_ui/HackingInterface.tscn" id="3_0dcvq"]
 [ext_resource type="Script" uid="uid://nyu3ykmsnxry" path="res://scenes/Stage1/NextStage.gd" id="3_a048t"]
+[ext_resource type="PackedScene" uid="uid://7fkoqmdrpsbl" path="res://Entities/Enemy/Enemy.tscn" id="5_b2f6c"]
+[ext_resource type="PackedScene" uid="uid://420lu1b3xoq7" path="res://scenes/Hud/HUD.tscn" id="6_5ltbi"]
+
+[sub_resource type="NavigationPolygon" id="NavigationPolygon_5ltbi"]
+vertices = PackedVector2Array(3518.1797, 556.9531, 3519.7969, 640.9922, -9, 638, -9, 541.03906)
+polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3)])
+outlines = Array[PackedVector2Array]([PackedVector2Array(-19, 531, 3528, 547, 3530, 651, -19, 648)])
+parsed_geometry_type = 1
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kgtat"]
-size = Vector2(1166.5, 103)
+size = Vector2(3551, 103)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_j4ohn"]
 size = Vector2(20, 711)
@@ -15,9 +23,12 @@ size = Vector2(20, 711)
 radius = 71.17584
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_bputu"]
-size = Vector2(20, 87)
+size = Vector2(42, 103.5)
 
 [node name="Fase1" type="Node2D" unique_id=2119244706]
+
+[node name="NavigationRegion2D" type="NavigationRegion2D" parent="." unique_id=1493914283]
+navigation_polygon = SubResource("NavigationPolygon_5ltbi")
 
 [node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=202346321]
 oversampling_with_scale = 1
@@ -26,9 +37,10 @@ position = Vector2(4, 0)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=272873264]
 physics_interpolation_mode = 2
 texture_filter = 1
-position = Vector2(559.25, 596)
+position = Vector2(1751.5, 596)
 shape = SubResource("RectangleShape2D_kgtat")
 one_way_collision_margin = 0.0
+debug_color = Color(0.85992444, 0.33487594, 0.37507713, 0.41960785)
 
 [node name="CollisionShape2D4" type="CollisionShape2D" parent="StaticBody2D" unique_id=330430587]
 position = Vector2(-14, 338)
@@ -52,7 +64,7 @@ script = ExtResource("3_a048t")
 next_stage = "uid://2mj2i37yd1mi"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D2" unique_id=1238521549]
-position = Vector2(958, 455)
+position = Vector2(3333, 442)
 shape = SubResource("RectangleShape2D_bputu")
 
 [node name="Area2D3" type="Area2D" parent="." unique_id=386384877 node_paths=PackedStringArray("hacking_ui")]
@@ -66,5 +78,17 @@ shape = SubResource("CircleShape2D_kgtat")
 
 [node name="HackingInterface" parent="." unique_id=561738698 instance=ExtResource("3_0dcvq")]
 visible = false
+
+[node name="Waypoint1" type="Marker2D" parent="." unique_id=202552185]
+position = Vector2(1224, 537)
+
+[node name="Waypoint2" type="Marker2D" parent="." unique_id=2126136294]
+position = Vector2(1694, 535)
+
+[node name="Enemy" parent="." unique_id=570389940 node_paths=PackedStringArray("waypoints") instance=ExtResource("5_b2f6c")]
+position = Vector2(1434, 524)
+waypoints = [NodePath("../Waypoint1"), NodePath("../Waypoint2")]
+
+[node name="Hud" parent="." unique_id=1461386447 instance=ExtResource("6_5ltbi")]
 
 [connection signal="area_entered" from="Area2D2" to="Player" method="_on_area_2d_2_area_entered"]

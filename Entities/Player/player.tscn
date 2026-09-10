@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://tsvnbubb6bg4"]
 
-[ext_resource type="Script" uid="uid://gmx6h3vant8" path="res://scenes/Stage1/player.gd" id="1_gb1tc"]
+[ext_resource type="Script" uid="uid://gmx6h3vant8" path="res://Entities/Player/player.gd" id="1_gb1tc"]
 [ext_resource type="Texture2D" uid="uid://cpptyneyc3sbk" path="res://assets/Sprites/male_hero-fall.png" id="2_kee72"]
 [ext_resource type="Texture2D" uid="uid://1t145jtw2ndf" path="res://assets/Sprites/male_hero-idle.png" id="3_prmdv"]
 [ext_resource type="Texture2D" uid="uid://ct6vc61up6g3o" path="res://assets/Sprites/male_hero-jump.png" id="4_s1j76"]
@@ -26,43 +26,43 @@ region = Rect2(256, 0, 128, 128)
 atlas = ExtResource("2_kee72")
 region = Rect2(384, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_klb6e"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_kee72"]
 atlas = ExtResource("3_prmdv")
 region = Rect2(0, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_eyssl"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_prmdv"]
 atlas = ExtResource("3_prmdv")
 region = Rect2(128, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_pg4qw"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_s1j76"]
 atlas = ExtResource("3_prmdv")
 region = Rect2(256, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_25cb4"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_6jj0l"]
 atlas = ExtResource("3_prmdv")
 region = Rect2(384, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_uck12"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_klb6e"]
 atlas = ExtResource("3_prmdv")
 region = Rect2(512, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_mat3c"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_eyssl"]
 atlas = ExtResource("3_prmdv")
 region = Rect2(640, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_ffc7a"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_pg4qw"]
 atlas = ExtResource("3_prmdv")
 region = Rect2(768, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_irn06"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_25cb4"]
 atlas = ExtResource("3_prmdv")
 region = Rect2(896, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_v3fwn"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_uck12"]
 atlas = ExtResource("3_prmdv")
 region = Rect2(1024, 0, 128, 128)
 
-[sub_resource type="AtlasTexture" id="AtlasTexture_f8jwp"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_mat3c"]
 atlas = ExtResource("3_prmdv")
 region = Rect2(1152, 0, 128, 128)
 
@@ -151,6 +151,18 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
+"texture": SubResource("AtlasTexture_kee72")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_prmdv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s1j76")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6jj0l")
+}, {
+"duration": 1.0,
 "texture": SubResource("AtlasTexture_klb6e")
 }, {
 "duration": 1.0,
@@ -167,18 +179,6 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_mat3c")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_ffc7a")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_irn06")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_v3fwn")
-}, {
-"duration": 1.0,
-"texture": SubResource("AtlasTexture_f8jwp")
 }],
 "loop": 1,
 "name": &"Idle",
@@ -247,15 +247,16 @@ animations = [{
 script = ExtResource("1_gb1tc")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=114415261]
+visible = false
 position = Vector2(95, 103)
 shape = SubResource("CapsuleShape2D_kgtat")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1016923184]
 texture_filter = 1
-position = Vector2(97, 115)
-scale = Vector2(4, 3.528)
+position = Vector2(97, 134)
+scale = Vector2(2.5004883, 2.1096804)
 sprite_frames = SubResource("SpriteFrames_kgtat")
-animation = &"Jump"
+animation = &"Idle"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1996964895]
 position = Vector2(92, 108)

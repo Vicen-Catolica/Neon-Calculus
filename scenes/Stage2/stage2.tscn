@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cboxptu27oi8" path="res://scenes/hacking_ui/Terminal.gd" id="1_7nusj"]
 [ext_resource type="PackedScene" uid="uid://c5ubr3fk5bcyu" path="res://scenes/hacking_ui/HackingInterface.tscn" id="2_21qqe"]
-[ext_resource type="PackedScene" uid="uid://tsvnbubb6bg4" path="res://Entities/player.tscn" id="3_21qqe"]
+[ext_resource type="PackedScene" uid="uid://tsvnbubb6bg4" path="res://Entities/Player/player.tscn" id="3_21qqe"]
 [ext_resource type="Script" uid="uid://nyu3ykmsnxry" path="res://scenes/Stage1/NextStage.gd" id="4_k1cv1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_k1cv1"]

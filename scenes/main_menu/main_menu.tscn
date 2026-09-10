@@ -1,64 +1,278 @@
 [gd_scene format=3 uid="uid://ce51h7axk5lf6"]
 
 [ext_resource type="Script" uid="uid://cg6fy8dvkqi2b" path="res://scenes/main_menu/scripts/main_menu.gd" id="1_3shxk"]
-[ext_resource type="Texture2D" uid="uid://cp1nsyck2s47s" path="res://assets/images/main_menu_background.png" id="2_bws42"]
-[ext_resource type="Texture2D" uid="uid://b1aa3piawd47o" path="res://assets/images/main_menu_title.png" id="3_3f7m4"]
+[ext_resource type="Texture2D" uid="uid://bpd1ycw612dp" path="res://assets/images/Background.jpg" id="2_ob46e"]
+[ext_resource type="Texture2D" uid="uid://d2qm5nrtfibfn" path="res://assets/images/Logo.png" id="3_uqeha"]
+[ext_resource type="Shader" uid="uid://cgb32xa6hxb7j" path="res://scenes/main_menu/main_menu.gdshader" id="3_wem23"]
+[ext_resource type="FontFile" uid="uid://b7b4e0l00k2m6" path="res://assets/fonts/Orbitron-Bold.ttf" id="4_uqeha"]
+[ext_resource type="Shader" uid="uid://bkq2kdlppopi7" path="res://scenes/main_menu/button_glitch.gdshader" id="5_3ovsr"]
+
+[sub_resource type="Curve" id="Curve_thkx5"]
+_limits = [0.0, 0.3, 0.0, 1.0]
+_data = [Vector2(0.010752685, 0), 0.0, 0.0, 0, 0, Vector2(0.49820784, 0.3), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_4xg86"]
+curve = SubResource("Curve_thkx5")
+
+[sub_resource type="Gradient" id="Gradient_ob46e"]
+offsets = PackedFloat32Array(0, 0.99019605, 0.996732, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.75490195, 0.75490195, 0.75490195, 1, 0.5007765, 0.5007765, 0.5007765, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_5seab"]
+gradient = SubResource("Gradient_ob46e")
+
+[sub_resource type="Gradient" id="Gradient_uqeha"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_3ovsr"]
+gradient = SubResource("Gradient_uqeha")
+
+[sub_resource type="Curve" id="Curve_ob46e"]
+_limits = [0.0, 3.0, 0.0, 1.0]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Curve" id="Curve_uqeha"]
+_limits = [0.0, 30.0, 0.0, 1.0]
+_data = [Vector2(0, 15.328466), 0.0, 0.0, 0, 0, Vector2(0.10394266, 26.27737), 0.0, 0.0, 0, 0, Vector2(0.23655917, 30), 0.0, 0.0, 0, 0, Vector2(1, 30), 0.0, 0.0, 0, 0]
+point_count = 4
+
+[sub_resource type="Curve" id="Curve_wem23"]
+_limits = [0.0, 3.0, 0.0, 1.0]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 1), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveXYZTexture" id="CurveXYZTexture_ob46e"]
+curve_x = SubResource("Curve_ob46e")
+curve_y = SubResource("Curve_uqeha")
+curve_z = SubResource("Curve_wem23")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_abukt"]
+particle_flag_align_y = true
+particle_flag_disable_z = true
+emission_shape_offset = Vector3(0, -200, 0)
+emission_shape = 3
+emission_box_extents = Vector3(350, 1, 1)
+direction = Vector3(-20, 1, 0)
+spread = 0.0
+initial_velocity_min = 100.0
+initial_velocity_max = 100.0
+gravity = Vector3(0, 3000, 0)
+scale_max = 2.5
+scale_over_velocity_curve = SubResource("CurveXYZTexture_ob46e")
+color = Color(0.8609068, 0.79259616, 1, 0.5019608)
+color_ramp = SubResource("GradientTexture1D_3ovsr")
+color_initial_ramp = SubResource("GradientTexture1D_5seab")
+alpha_curve = SubResource("CurveTexture_4xg86")
+
+[sub_resource type="Gradient" id="Gradient_wem23"]
+offsets = PackedFloat32Array(0, 0.24, 0.45, 0.56, 1)
+colors = PackedColorArray(0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0.99215686, 0, 0, 0, 1, 0, 0, 0, 0)
+metadata/_snap_enabled = true
+metadata/_snap_count = 100
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_kgtat"]
+gradient = SubResource("Gradient_wem23")
+fill_to = Vector2(0.5238908, 0)
+
+[sub_resource type="Gradient" id="Gradient_3ovsr"]
+offsets = PackedFloat32Array(0, 0.065, 0.12833333, 0.20833333, 1)
+colors = PackedColorArray(0, 0.20783325, 0.43, 1, 0, 0.20783325, 0.43, 0.74509805, 0, 0.20783325, 0.43, 0.54901963, 0, 0.20783325, 0.43, 0.43137255, 0, 0.20783325, 0.43, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_abukt"]
+gradient = SubResource("Gradient_3ovsr")
+fill_to = Vector2(0.32593855, 0)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kgtat"]
+shader = ExtResource("3_wem23")
+shader_parameter/glitch_intensity = 0.0
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_wem23"]
+shader = ExtResource("5_3ovsr")
+shader_parameter/glitch_intensity = 0.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ob46e"]
+content_margin_left = 24.0
+content_margin_top = 10.0
+content_margin_right = 24.0
+content_margin_bottom = 10.0
+bg_color = Color(0.037399996, 0.07612, 0.11, 0.7058824)
+border_width_left = 4
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0, 0.9843137, 0.9882353, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+expand_margin_left = 20.0
+expand_margin_top = 8.0
+expand_margin_right = 20.0
+expand_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3ovsr"]
+bg_color = Color(0.05882353, 0.14901961, 0.09411765, 0.78431374)
+border_width_left = 8
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3529412, 0.8901961, 0, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uqeha"]
+content_margin_left = 24.0
+content_margin_top = 10.0
+content_margin_right = 24.0
+content_margin_bottom = 10.0
+bg_color = Color(0.0585, 0.15, 0.093574986, 0.78431374)
+border_width_left = 8
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3529412, 0.8901961, 0, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+expand_margin_left = 20.0
+expand_margin_top = 8.0
+expand_margin_right = 20.0
+expand_margin_bottom = 8.0
 
 [node name="MainMenu" type="Control" unique_id=929546271]
 layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_3shxk")
 
 [node name="Background" type="TextureRect" parent="." unique_id=2052494017]
-layout_mode = 0
-offset_right = 1164.5833
-offset_bottom = 650.0
-texture = ExtResource("2_bws42")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_ob46e")
 expand_mode = 3
 
-[node name="Logo" type="TextureRect" parent="." unique_id=1427764881]
+[node name="GPUParticles2D" type="GPUParticles2D" parent="." unique_id=249039588]
+position = Vector2(1069, 1019)
+scale = Vector2(6, 6)
+amount = 1000
+visibility_rect = Rect2(-350, -200, 700, 400)
+process_material = SubResource("ParticleProcessMaterial_abukt")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=364353928]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_kgtat")
+metadata/_edit_use_anchors_ = true
+
+[node name="TextureRect2" type="TextureRect" parent="." unique_id=1972805164]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("GradientTexture2D_abukt")
+
+[node name="Logo" type="TextureRect" parent="." unique_id=546274657]
+material = SubResource("ShaderMaterial_kgtat")
 layout_mode = 0
-offset_left = 26.0
-offset_top = 31.0
-offset_right = 450.0
-offset_bottom = 182.0
-texture = ExtResource("3_3f7m4")
-expand_mode = 3
+offset_left = 13.000001
+offset_top = -19.0
+offset_right = 1037.0
+offset_bottom = 553.0
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("3_uqeha")
 
 [node name="MenuContainer" type="VBoxContainer" parent="." unique_id=1542367054]
-layout_mode = 0
-offset_left = 54.0
-offset_top = 226.0
-offset_right = 406.0
-offset_bottom = 484.0
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.045833334
+anchor_top = 0.32962963
+anchor_right = 0.24583334
+anchor_bottom = 0.6703704
+offset_left = 79.0
+offset_top = 97.0
+offset_right = 414.0
+offset_bottom = 239.99994
+grow_vertical = 2
+theme_override_constants/separation = 40
 
 [node name="BtnStart" type="Button" parent="MenuContainer" unique_id=1871786141]
+material = SubResource("ShaderMaterial_wem23")
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
-text = "INICIAR
-"
-flat = true
+theme_override_colors/font_color = Color(0, 0.9843137, 0.9882353, 1)
+theme_override_colors/font_pressed_color = Color(0.3529412, 0.8901961, 0, 1)
+theme_override_colors/font_hover_color = Color(0.3529412, 0.8901961, 0, 1)
+theme_override_fonts/font = ExtResource("4_uqeha")
+theme_override_font_sizes/font_size = 50
+theme_override_styles/normal = SubResource("StyleBoxFlat_ob46e")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_3ovsr")
+theme_override_styles/hover = SubResource("StyleBoxFlat_uqeha")
+text = "INICIAR"
+alignment = 0
 
 [node name="BtnContinue" type="Button" parent="MenuContainer" unique_id=1418993946]
+material = SubResource("ShaderMaterial_wem23")
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
+theme_override_colors/font_color = Color(0, 0.9843137, 0.9882353, 1)
+theme_override_colors/font_pressed_color = Color(0.3529412, 0.8901961, 0, 1)
+theme_override_colors/font_hover_color = Color(0.3529412, 0.8901961, 0, 1)
+theme_override_fonts/font = ExtResource("4_uqeha")
+theme_override_font_sizes/font_size = 50
+theme_override_styles/normal = SubResource("StyleBoxFlat_ob46e")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_3ovsr")
+theme_override_styles/hover = SubResource("StyleBoxFlat_uqeha")
 text = "CONTINUAR"
-flat = true
+alignment = 0
 
 [node name="BtnOptions" type="Button" parent="MenuContainer" unique_id=1994612204]
+material = SubResource("ShaderMaterial_wem23")
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
+theme_override_colors/font_color = Color(0, 0.9843137, 0.9882353, 1)
+theme_override_colors/font_pressed_color = Color(0.3529412, 0.8901961, 0, 1)
+theme_override_colors/font_hover_color = Color(0.3529412, 0.8901961, 0, 1)
+theme_override_fonts/font = ExtResource("4_uqeha")
+theme_override_font_sizes/font_size = 50
+theme_override_styles/normal = SubResource("StyleBoxFlat_ob46e")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_3ovsr")
+theme_override_styles/hover = SubResource("StyleBoxFlat_uqeha")
 text = "OPÇÕES"
-flat = true
+alignment = 0
 
 [node name="BtnExit" type="Button" parent="MenuContainer" unique_id=779759373]
+material = SubResource("ShaderMaterial_wem23")
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 4
+theme_override_colors/font_color = Color(0, 0.9843137, 0.9882353, 1)
+theme_override_colors/font_pressed_color = Color(0.3529412, 0.8901961, 0, 1)
+theme_override_colors/font_hover_color = Color(0.3529412, 0.8901961, 0, 1)
+theme_override_fonts/font = ExtResource("4_uqeha")
+theme_override_font_sizes/font_size = 50
+theme_override_styles/normal = SubResource("StyleBoxFlat_ob46e")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_3ovsr")
+theme_override_styles/hover = SubResource("StyleBoxFlat_uqeha")
 text = "SAIR"
-flat = true
+alignment = 0
