@@ -11,7 +11,6 @@ var tween: Tween
 var original_margin_pos: Vector2
 
 func _ready() -> void:
-	# Registra no grupo global para ocultar/exibir sob demanda
 	add_to_group("hud")
 
 	if margin_container:
@@ -20,10 +19,11 @@ func _ready() -> void:
 	_setup_cyberpunk_styles()
 	
 	await get_tree().process_frame
-	var player = get_tree().get_first_node_in_group("player") as Player
+	var player = get_tree().get_first_node_in_group("Player") as Player
 	if player:
-		player.defense_changed.connect(_on_defense_changed)
-		_on_defense_changed(player.current_defense, player.max_defense, false)
+		if not player.defense_changed.is_connected(_on_defense_changed):
+			player.defense_changed.connect(_on_defense_changed)
+		update_defense_bar(player.current_defense, player.max_defense, false)
 
 func hide_hud() -> void:
 	visible = false
@@ -76,7 +76,10 @@ func _setup_cyberpunk_styles() -> void:
 	label_values.add_theme_color_override("font_color", Color("#8a93b0"))
 	label_values.add_theme_font_size_override("font_size", 10)
 
-func _on_defense_changed(current: float, max_val: float, animate: bool = true) -> void:
+func _on_defense_changed(current: float, max_val: float) -> void:
+	update_defense_bar(current, max_val, true)
+
+func update_defense_bar(current: float, max_val: float, animate: bool = true) -> void:
 	defense_bar.max_value = max_val
 	var ratio = current / max_val if max_val > 0 else 0.0
 	var target_color = _get_status_color(ratio)

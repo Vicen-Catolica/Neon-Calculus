@@ -4,6 +4,7 @@
 [ext_resource type="Shader" uid="uid://3ljodtwsqimo" path="res://scenes/hacking_ui/HackingInterface.gdshader" id="2_dkc27"]
 [ext_resource type="FontFile" uid="uid://b7b4e0l00k2m6" path="res://assets/fonts/Orbitron-Bold.ttf" id="2_n6573"]
 [ext_resource type="Script" uid="uid://cjw7x4cjuh83g" path="res://scenes/hacking_ui/math_visualizer.gd" id="3_5dxew"]
+[ext_resource type="AudioStream" uid="uid://bwr0kwuu5742n" path="res://assets/Music/Overclocked_Resolve.mp3" id="5_opal3"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_kgtat"]
 shader = ExtResource("2_dkc27")
@@ -691,5 +692,8 @@ mouse_filter = 2
 
 [node name="HackTimer" type="Timer" parent="ControlPanel" unique_id=1700534700]
 unique_name_in_owner = true
+
+[node name="BGMPlayer" type="AudioStreamPlayer" parent="." unique_id=1299447350]
+stream = ExtResource("5_opal3")
 
 [connection signal="pressed" from="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/SubmitButton" to="." method="_on_submit_button_pressed"]

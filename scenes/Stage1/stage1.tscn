@@ -47,7 +47,7 @@ position = Vector2(-14, 338)
 shape = SubResource("RectangleShape2D_j4ohn")
 
 [node name="Player" parent="." unique_id=922838097 instance=ExtResource("1_ywn8h")]
-position = Vector2(-31, 363)
+position = Vector2(56, 386)
 
 [node name="Area2D" type="Area2D" parent="." unique_id=1188092537 node_paths=PackedStringArray("hacking_ui")]
 position = Vector2(245, 370)

@@ -8,7 +8,7 @@
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_kgtat"]
 radius = 38.0
-height = 132.0
+height = 160.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ua6mu"]
 atlas = ExtResource("2_kee72")
@@ -244,23 +244,25 @@ animations = [{
 }]
 
 [node name="Player" type="CharacterBody2D" unique_id=922838097 groups=["Player"]]
+position = Vector2(173, 300.955)
 script = ExtResource("1_gb1tc")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=114415261]
-visible = false
-position = Vector2(95, 103)
+position = Vector2(-1.96875, -7.935425)
+scale = Vector2(0.5, 0.5)
 shape = SubResource("CapsuleShape2D_kgtat")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1016923184]
 texture_filter = 1
-position = Vector2(97, 134)
+position = Vector2(0.03125, 1.0645752)
 scale = Vector2(2.5004883, 2.1096804)
 sprite_frames = SubResource("SpriteFrames_kgtat")
 animation = &"Idle"
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1996964895]
-position = Vector2(92, 108)
+position = Vector2(-4.96875, -24.935425)
 limit_left = 0
 limit_top = -9999999
+limit_bottom = 10000001
 limit_smoothed = true
 position_smoothing_speed = 30.0

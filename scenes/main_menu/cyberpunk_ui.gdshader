@@ -1,19 +1,24 @@
 shader_type canvas_item;
 
-uniform float scanline_count : hint_range(10.0, 300.0) = 150.0;
-uniform float scanline_intensity : hint_range(0.0, 0.5) = 0.12;
-uniform float pulse_speed : hint_range(0.1, 5.0) = 2.0;
+uniform float glitch_intensity : hint_range(0.0, 1.0) = 0.0;
 
 void fragment() {
-    vec4 col = texture(TEXTURE, UV);
-    
-    // Efeito de linhas de varredura (Scanlines)
-    float scanline = sin(UV.y * scanline_count * 3.14159) * 0.5 + 0.5;
-    col.rgb -= scanline * scanline_intensity * col.a;
-    
-    // Pulso de brilho suave
-    float pulse = sin(TIME * pulse_speed) * 0.08 + 0.92;
-    col.rgb *= pulse;
-    
-    COLOR = col;
+	vec2 uv = UV;
+	
+	// Deslocamento horizontal aleatório por faixas
+	if (glitch_intensity > 0.0) {
+		float line_noise = sin(uv.y * 50.0 + TIME * 30.0);
+		if (line_noise > 0.5) {
+			uv.x += (fract(sin(TIME) * 43758.5453) - 0.5) * 0.05 * glitch_intensity;
+		}
+	}
+	
+	// Separação dos canais RGB (Aberração Cromática)
+	float shift = 0.02 * glitch_intensity;
+	float r = texture(TEXTURE, vec2(uv.x + shift, uv.y)).r;
+	float g = texture(TEXTURE, uv).g;
+	float b = texture(TEXTURE, vec2(uv.x - shift, uv.y)).b;
+	float a = texture(TEXTURE, uv).a;
+	
+	COLOR = vec4(r, g, b, a);
 }

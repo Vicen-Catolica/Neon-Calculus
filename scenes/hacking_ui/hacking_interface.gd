@@ -19,6 +19,9 @@ signal hacking_failed
 @onready var btn_0: Button = find_child("Btn0", true, false)
 @onready var submit_button: Button = find_child("SubmitButton", true, false)
 
+# Player de Áudio para a Trilha Sonora do Hacking
+@onready var bgm_player: AudioStreamPlayer = $BGMPlayer
+
 var math_generator = load("res://scenes/hacking_ui/MathGenerator.cs").new()
 
 var max_steps: int = 2
@@ -70,6 +73,10 @@ func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 	if ai_assistant_panel:
 		ai_assistant_panel.hide()
 		ai_assistant_panel.modulate = Color(1, 1, 1, 1)
+	
+	# Inicia a trilha sonora do minigame de hacking caso exista o player e o stream configurado
+	if bgm_player and bgm_player.stream and not bgm_player.playing:
+		bgm_player.play()
 	
 	eq_data = math_generator.GenerateValidEquation(floor_level, sub_topic)
 	final_target_solution = int(eq_data["Solution"])
@@ -238,14 +245,14 @@ func _generate_step_by_step_hint() -> String:
 				var op = " - " + str(a) if a >= 0 else " - (" + str(a) + ")"
 				text += "[!] ANÁLISE DE RETA REAL:\n"
 				text += " > Isolando a variável X:\n"
-				text += "   X = " + str(res) + op + "\n"
+				text += "    X = " + str(res) + op + "\n"
 				text += " > Calcule o valor final."
 			else:
 				var count = int(eq_data.get("ParamA", 1))
 				var res = int(eq_data.get("ParamRes", 0))
 				text += "[!] BLOCOS ÁLGEBRICOS:\n"
 				text += " > Divida a soma total:\n"
-				text += "   X = " + str(res) + " / " + str(count)
+				text += "    X = " + str(res) + " / " + str(count)
 		2:
 			var mult = int(eq_data.get("ParamMult", 1))
 			var b_val = int(eq_data.get("ParamB", 0))
@@ -274,7 +281,7 @@ func _generate_step_by_step_hint() -> String:
 				text += "[!] GEOMETRIA PLANAR:\n"
 				text += " > Fórmula: Base · Altura = Área\n"
 				text += " > Isolando Base (X):\n"
-				text += "   X = " + str(area) + " / " + str(alt)
+				text += "    X = " + str(area) + " / " + str(alt)
 		4:
 			if current_sub_topic == 0:
 				var k = int(eq_data.get("ParamK", 1))
@@ -336,7 +343,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _update_input_display() -> void:
 	if input_line:
 		if current_input_text == "":
-			input_line.text = "X = [   ]"
+			input_line.text = "X = [    ]"
 		else:
 			input_line.text = "X = [ " + current_input_text + " ]"
 
@@ -346,6 +353,11 @@ func _on_hack_timer_timeout() -> void:
 func _complete_hack(success: bool) -> void:
 	if hack_timer:
 		hack_timer.stop()
+		
+	# Para a música de hacking ao concluir (sucesso ou falha)
+	if bgm_player and bgm_player.playing:
+		bgm_player.stop()
+		
 	hide()
 	get_tree().paused = false
 	
@@ -355,4 +367,4 @@ func _complete_hack(success: bool) -> void:
 	if success:
 		emit_signal("hacking_succeeded")
 	else:
-		emit_signal("hacking_failed")
+		emit_signal("hacking_failed")	

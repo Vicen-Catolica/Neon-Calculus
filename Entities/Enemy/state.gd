@@ -1,11 +1,8 @@
-class_name State
+class_name EnemyState
 extends Node
 
-@warning_ignore("unused_signal")
-signal transitioned(state, new_state_name: String)
-
-var actor: CharacterBody2D
-var fsm
+var enemy: CharacterBody2D
+var state_machine: Node
 
 func enter() -> void:
 	pass
