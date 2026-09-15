@@ -14,10 +14,12 @@ func physics_update(delta: float) -> void:
 		state_machine.transition_to("Search")
 		return
 
-	var has_los = enemy.is_player_in_los()
+	# Checa se o player está visível OU dentro da área de audição
+	var is_detected = enemy.is_player_in_los() or enemy.is_player_in_hearing_area
+
 	var dist_to_player = enemy.global_position.distance_to(target_player.global_position)
 
-	if has_los:
+	if is_detected:
 		lose_sight_timer = 0.0
 		enemy.last_known_player_pos = target_player.global_position
 
@@ -25,7 +27,8 @@ func physics_update(delta: float) -> void:
 		if abs(dist_x) > 5.0:
 			enemy.update_facing(sign(dist_x))
 
-		if dist_to_player <= enemy.attack_range:
+		# Só dispara o taser se tiver linha de visão real
+		if dist_to_player <= enemy.attack_range and enemy.is_player_in_los():
 			enemy.velocity.x = move_toward(enemy.velocity.x, 0, enemy.chase_speed)
 			enemy.try_fire_taser()
 		else:
@@ -34,6 +37,7 @@ func physics_update(delta: float) -> void:
 	else:
 		lose_sight_timer += delta
 		
+		# Move até a última posição conhecida do player
 		var dist_to_last_pos = enemy.last_known_player_pos.x - enemy.global_position.x
 		if abs(dist_to_last_pos) > 10.0:
 			var dir_x = sign(dist_to_last_pos)
@@ -42,6 +46,7 @@ func physics_update(delta: float) -> void:
 		else:
 			enemy.velocity.x = move_toward(enemy.velocity.x, 0, enemy.chase_speed)
 
+		# Passados os 3 segundos sem visão nem audição, vai para o estado de busca
 		if lose_sight_timer >= lose_interest_time:
 			state_machine.transition_to("Search")
 

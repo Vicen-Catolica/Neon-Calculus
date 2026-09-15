@@ -65,4 +65,4 @@ position = Vector2(958, 455)
 shape = SubResource("RectangleShape2D_aenoo")
 
 [node name="Player" parent="." unique_id=922838097 instance=ExtResource("4_l3j21")]
-position = Vector2(-32, 364)
+position = Vector2(72, 505)

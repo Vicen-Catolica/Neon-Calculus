@@ -61,6 +61,14 @@ func _ready() -> void:
 	if input_line and input_line is LineEdit:
 		input_line.text_submitted.connect(func(_text): _on_submit_pressed())
 
+	_update_accessibility_equation_size()
+	if SettingsManager.has_signal("accessibility_settings_changed"):
+		SettingsManager.accessibility_settings_changed.connect(_update_accessibility_equation_size)
+
+func _update_accessibility_equation_size() -> void:
+	if equation_label:
+		equation_label.add_theme_font_size_override("font_size", SettingsManager.get_equation_font_size())
+
 func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 	get_tree().paused = true
 	# Oculta a barra de vida do HUD durante o minigame de hacking

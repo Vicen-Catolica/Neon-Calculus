@@ -66,4 +66,4 @@ shape = SubResource("CircleShape2D_btywe")
 visible = false
 
 [node name="Player" parent="." unique_id=922838097 instance=ExtResource("4_4u5j2")]
-position = Vector2(-29, 371)
+position = Vector2(69, 503)

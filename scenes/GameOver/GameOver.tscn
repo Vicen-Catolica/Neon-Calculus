@@ -73,8 +73,7 @@ text = "Carregar Checkpoint"
 [node name="ButtonMenu" type="Button" parent="CenterContainer/VBoxContainer" unique_id=858891993]
 process_mode = 3
 layout_mode = 2
-text = "Menu Principal
-"
+text = "Menu Principal"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1373324339]
 stream = ExtResource("3_ppu1c")

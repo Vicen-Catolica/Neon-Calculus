@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://7fkoqmdrpsbl"]
 
-[ext_resource type="Script" uid="uid://0cbao3vba2yt" path="res://Entities/Enemy/Enemy.gd" id="1_3l5gm"]
+[ext_resource type="Script" uid="uid://l6vouayfgflt" path="res://Entities/Enemy/enemy.gd" id="1_3l5gm"]
 [ext_resource type="Script" uid="uid://b1kjryndremfi" path="res://Entities/Enemy/StateMachine.gd" id="2_3l5gm"]
 [ext_resource type="Script" uid="uid://cei8ckjm6pemv" path="res://Entities/Enemy/StatePatrol.gd" id="3_fcg00"]
 [ext_resource type="Script" uid="uid://b2csqrwn3tqhl" path="res://Entities/Enemy/StateSuspicious.gd" id="4_y11p7"]

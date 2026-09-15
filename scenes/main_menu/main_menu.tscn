@@ -69,8 +69,8 @@ color_initial_ramp = SubResource("GradientTexture1D_5seab")
 alpha_curve = SubResource("CurveTexture_4xg86")
 
 [sub_resource type="Gradient" id="Gradient_wem23"]
-offsets = PackedFloat32Array(0, 0.24, 0.45, 0.56, 1)
-colors = PackedColorArray(0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0.99215686, 0, 0, 0, 1, 0, 0, 0, 0)
+offsets = PackedFloat32Array(0, 0.28, 0.46, 0.56, 1)
+colors = PackedColorArray(0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0.98, 0, 0, 0, 0.9, 0, 0, 0, 0)
 metadata/_snap_enabled = true
 metadata/_snap_count = 100
 
@@ -79,12 +79,12 @@ gradient = SubResource("Gradient_wem23")
 fill_to = Vector2(0.5238908, 0)
 
 [sub_resource type="Gradient" id="Gradient_3ovsr"]
-offsets = PackedFloat32Array(0, 0.065, 0.12833333, 0.20833333, 1)
-colors = PackedColorArray(0, 0.20783325, 0.43, 1, 0, 0.20783325, 0.43, 0.74509805, 0, 0.20783325, 0.43, 0.54901963, 0, 0.20783325, 0.43, 0.43137255, 0, 0.20783325, 0.43, 0)
+offsets = PackedFloat32Array(0, 0.08, 0.16, 0.26, 1)
+colors = PackedColorArray(0, 0.20783325, 0.43, 0.8, 0, 0.20783325, 0.43, 0.6, 0, 0.20783325, 0.43, 0.35, 0, 0.20783325, 0.43, 0.15, 0, 0.20783325, 0.43, 0)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_abukt"]
 gradient = SubResource("Gradient_3ovsr")
-fill_to = Vector2(0.32593855, 0)
+fill_to = Vector2(0.35, 0)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_kgtat"]
 shader = ExtResource("3_3ovsr")
@@ -115,6 +115,10 @@ expand_margin_right = 20.0
 expand_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3ovsr"]
+content_margin_left = 24.0
+content_margin_top = 10.0
+content_margin_right = 24.0
+content_margin_bottom = 10.0
 bg_color = Color(0.05882353, 0.14901961, 0.09411765, 0.78431374)
 border_width_left = 8
 border_width_top = 2
@@ -125,6 +129,10 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
+expand_margin_left = 20.0
+expand_margin_top = 8.0
+expand_margin_right = 20.0
+expand_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uqeha"]
 content_margin_left = 24.0
@@ -194,11 +202,11 @@ texture = SubResource("GradientTexture2D_abukt")
 [node name="Logo" type="TextureRect" parent="." unique_id=546274657]
 material = SubResource("ShaderMaterial_kgtat")
 layout_mode = 0
-offset_left = 13.000001
-offset_top = -19.0
-offset_right = 1037.0
-offset_bottom = 553.0
-scale = Vector2(0.8, 0.8)
+offset_left = 60.0
+offset_top = 35.0
+offset_right = 1084.0
+offset_bottom = 607.0
+scale = Vector2(0.55, 0.55)
 texture = ExtResource("3_uqeha")
 
 [node name="MenuContainer" type="VBoxContainer" parent="." unique_id=1542367054]
@@ -282,6 +290,7 @@ alignment = 0
 [node name="BGM" type="AudioStreamPlayer" parent="." unique_id=1344495840]
 stream = ExtResource("7_5seab")
 autoplay = true
+bus = &"BGM"
 
 [node name="ClickSFX" type="AudioStreamPlayer" parent="." unique_id=195621025]
 stream = ExtResource("8_4xg86")

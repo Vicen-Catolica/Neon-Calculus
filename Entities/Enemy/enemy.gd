@@ -41,7 +41,6 @@ var is_firing_taser: bool = false
 var taser_target_ref: Node2D = null
 
 func _ready() -> void:
-	# Instancia ou recupera o nó RayCast2D
 	if has_node("RayCast2D"):
 		ray_cast = $RayCast2D
 	else:
@@ -52,7 +51,6 @@ func _ready() -> void:
 
 	ray_cast.position = Vector2(0, -20)
 
-	# Instancia ou recupera o nó Line2D para o efeito do Taser
 	if has_node("TaserLine"):
 		taser_line = $TaserLine
 	elif has_node("Line2D"):
@@ -80,7 +78,6 @@ func _ready() -> void:
 
 	visible_enabler.enable_mode = VisibleOnScreenEnabler2D.ENABLE_MODE_INHERIT
 	
-	# Configura o timer do ataque para permitir loops repetidos
 	if attack_timer:
 		attack_timer.one_shot = true
 		if not attack_timer.timeout.is_connected(_on_attack_timer_timeout):
@@ -206,7 +203,14 @@ func is_player_in_los() -> bool:
 	if not target_player:
 		return false
 		
+	var ray_origin = global_position + Vector2(0, -20)
 	var player_center = target_player.global_position + Vector2(0, -20)
+	var dist_to_player = ray_origin.distance_to(player_center)
+
+	# Se ultrapassar a distância máxima de visão, perde o contato visual imediatamente
+	if dist_to_player > vision_range:
+		return false
+
 	return has_line_of_sight_to(target_player, player_center)
 
 # --- AUDIÇÃO, ATAQUE E EFEITO DO TASER ---
@@ -318,3 +322,7 @@ func _draw() -> void:
 
 	draw_line(origin, end_point, line_color, 2.0)
 	draw_circle(end_point, 4.0, line_color)
+
+
+func is_player_in_hearing_range() -> bool:
+	return is_player_in_hearing_area

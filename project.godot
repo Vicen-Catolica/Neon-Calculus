@@ -14,16 +14,31 @@ config/name="Novo Projeto de Jogo"
 run/main_scene="uid://ce51h7axk5lf6"
 config/features=PackedStringArray("4.7", "C#", "GL Compatibility")
 
+[audio]
+
+buses/default_bus_layout="uid://dyxtp740c3gs4"
+
+[autoload]
+
+SettingsManager="*uid://bj80syu8ugvhp"
+_mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
+
 [display]
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
-window/size/mode=3
+window/size/mode="exclusive_fullscreen"
+window/size/initial_position_type=2
 window/stretch/mode="canvas_items"
+window/per_pixel_transparency/allowed=true
 
 [dotnet]
 
 project/assembly_name="Novo Projeto de Jogo"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot_ai/plugin.cfg")
 
 [global_group]
 

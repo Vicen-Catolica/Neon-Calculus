@@ -65,4 +65,4 @@ shape = SubResource("RectangleShape2D_hohxx")
 visible = false
 
 [node name="Player" parent="." unique_id=922838097 instance=ExtResource("3_21qqe")]
-position = Vector2(-33, 370)
+position = Vector2(71, 505)
