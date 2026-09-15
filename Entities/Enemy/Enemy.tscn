@@ -1,0 +1,75 @@
+[gd_scene format=3 uid="uid://7fkoqmdrpsbl"]
+
+[ext_resource type="Script" uid="uid://l6vouayfgflt" path="res://Entities/Enemy/enemy.gd" id="1_3l5gm"]
+[ext_resource type="Script" uid="uid://b1kjryndremfi" path="res://Entities/Enemy/StateMachine.gd" id="2_3l5gm"]
+[ext_resource type="Script" uid="uid://cei8ckjm6pemv" path="res://Entities/Enemy/StatePatrol.gd" id="3_fcg00"]
+[ext_resource type="Script" uid="uid://b2csqrwn3tqhl" path="res://Entities/Enemy/StateSuspicious.gd" id="4_y11p7"]
+[ext_resource type="Script" uid="uid://btkyfuv2px4ja" path="res://Entities/Enemy/StateSearch.gd" id="5_bycej"]
+[ext_resource type="Script" uid="uid://b7eqlmbwp3k2d" path="res://Entities/Enemy/StateMaxAlert.gd" id="6_a077d"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_u8o2d"]
+radius = 300.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_kgtat"]
+radius = 15.0
+height = 44.0
+
+[node name="Enemy" type="CharacterBody2D" unique_id=570389940]
+script = ExtResource("1_3l5gm")
+
+[node name="Sensors" type="Node2D" parent="." unique_id=941893662]
+
+[node name="HearingArea" type="Area2D" parent="Sensors" unique_id=663024509]
+visible = false
+
+[node name="HearingCollision" type="CollisionShape2D" parent="Sensors/HearingArea" unique_id=2110177588]
+position = Vector2(1, 0)
+shape = SubResource("CircleShape2D_u8o2d")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1923954961]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1187923660]
+shape = SubResource("CapsuleShape2D_kgtat")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=29633788]
+
+[node name="VisibleOnScreenEnabler2D" type="VisibleOnScreenEnabler2D" parent="." unique_id=1298091270]
+position = Vector2(-284, 255)
+rect = Rect2(269, -277, 30, 44)
+
+[node name="AttackTimer" type="Timer" parent="." unique_id=616725901]
+
+[node name="StateMachine" type="Node" parent="." unique_id=1757105370 node_paths=PackedStringArray("initial_state")]
+script = ExtResource("2_3l5gm")
+initial_state = NodePath("Patrol")
+
+[node name="Patrol" type="Node" parent="StateMachine" unique_id=1625281084]
+script = ExtResource("3_fcg00")
+
+[node name="Suspicious" type="Node" parent="StateMachine" unique_id=275082092]
+script = ExtResource("4_y11p7")
+
+[node name="Search" type="Node" parent="StateMachine" unique_id=656336607]
+script = ExtResource("5_bycej")
+
+[node name="MaxAlert" type="Node" parent="StateMachine" unique_id=389305560]
+script = ExtResource("6_a077d")
+
+[node name="StateIndicator" type="Label" parent="." unique_id=829964249]
+custom_minimum_size = Vector2(40, 30)
+offset_left = -20.0
+offset_top = -65.0
+offset_right = 20.0
+offset_bottom = -35.0
+pivot_offset = Vector2(20, 15)
+offset_transform_position = Vector2(-20, -65)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TaserLine" type="Line2D" parent="." unique_id=937844630]
+visible = false
+width = 3.0
+default_color = Color(0, 0.9411765, 1, 1)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
