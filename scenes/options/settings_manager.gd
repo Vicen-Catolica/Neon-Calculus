@@ -18,7 +18,6 @@ const DEFAULT_CONTROLS: Dictionary = {
 	"ui_left": KEY_A,
 	"ui_right": KEY_D,
 	"ui_accept": KEY_SPACE,
-	"ui_up": KEY_W,
 	"ui_down": KEY_S,
 	"Interact": KEY_E
 }
@@ -27,7 +26,6 @@ const ACTION_DISPLAY_NAMES: Dictionary = {
 	"ui_left": "Mover para a Esquerda",
 	"ui_right": "Mover para a Direita",
 	"ui_accept": "Pular",
-	"ui_up": "Mover para Cima",
 	"ui_down": "Mover para Baixo",
 	"Interact": "Interagir"
 }
@@ -101,6 +99,15 @@ func apply_settings() -> void:
 	apply_controls_settings()
 
 func apply_controls_settings() -> void:
+	if config.has_section_key("Controls", "ui_up"):
+		config.erase_section_key("Controls", "ui_up")
+		config.save(SAVE_PATH)
+
+	if InputMap.has_action("ui_up"):
+		for event in InputMap.action_get_events("ui_up"):
+			if event is InputEventKey:
+				InputMap.action_erase_event("ui_up", event)
+
 	for action in DEFAULT_CONTROLS.keys():
 		var keycode: int = config.get_value("Controls", action, DEFAULT_CONTROLS[action])
 		_bind_action_key(action, keycode)
