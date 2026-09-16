@@ -99,15 +99,6 @@ func apply_settings() -> void:
 	apply_controls_settings()
 
 func apply_controls_settings() -> void:
-	if config.has_section_key("Controls", "ui_up"):
-		config.erase_section_key("Controls", "ui_up")
-		config.save(SAVE_PATH)
-
-	if InputMap.has_action("ui_up"):
-		for event in InputMap.action_get_events("ui_up"):
-			if event is InputEventKey:
-				InputMap.action_erase_event("ui_up", event)
-
 	for action in DEFAULT_CONTROLS.keys():
 		var keycode: int = config.get_value("Controls", action, DEFAULT_CONTROLS[action])
 		_bind_action_key(action, keycode)
