@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1t145jtw2ndf"
-path="res://.godot/imported/male_hero-idle.png-07f00d72c38e9a55ebbad828e060e3b4.ctex"
+uid="uid://bi0v7o4ovwlob"
+path="res://.godot/imported/frame 4.png-f80668abf0bbf477bf1cc17bb3b836c5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Sprites/male_hero-idle.png"
-dest_files=["res://.godot/imported/male_hero-idle.png-07f00d72c38e9a55ebbad828e060e3b4.ctex"]
+source_file="res://assets/Sprites/PlayerRun/frame 4.png"
+dest_files=["res://.godot/imported/frame 4.png-f80668abf0bbf477bf1cc17bb3b836c5.ctex"]
 
 [params]
 

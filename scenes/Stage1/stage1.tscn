@@ -6,6 +6,7 @@
 [ext_resource type="Script" uid="uid://nyu3ykmsnxry" path="res://scenes/Stage1/NextStage.gd" id="3_a048t"]
 [ext_resource type="PackedScene" uid="uid://7fkoqmdrpsbl" path="res://Entities/Enemy/Enemy.tscn" id="5_b2f6c"]
 [ext_resource type="PackedScene" uid="uid://420lu1b3xoq7" path="res://scenes/Hud/HUD.tscn" id="6_5ltbi"]
+[ext_resource type="PackedScene" uid="uid://df7k2qax4m1a0" path="res://Entities/SecurityCamera/SecurityCamera.tscn" id="7_qhg4d"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_5ltbi"]
 vertices = PackedVector2Array(3518.1797, 556.9531, 3519.7969, 640.9922, -9, 638, -9, 541.03906)
@@ -90,5 +91,8 @@ position = Vector2(1434, 524)
 waypoints = [NodePath("../Waypoint1"), NodePath("../Waypoint2")]
 
 [node name="Hud" parent="." unique_id=1461386447 instance=ExtResource("6_5ltbi")]
+
+[node name="SecurityCamera" parent="." unique_id=314159265 instance=ExtResource("7_qhg4d")]
+position = Vector2(900, 540)
 
 [connection signal="area_entered" from="Area2D2" to="Player" method="_on_area_2d_2_area_entered"]

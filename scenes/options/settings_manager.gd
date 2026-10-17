@@ -218,7 +218,6 @@ func apply_video_settings() -> void:
 
 		1: # Tela Cheia Exclusiva
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN)
-			DisplayServer.window_set_size(target_res)
 
 		2: # Janela sem Bordas (tela cheia sem bordas)
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)

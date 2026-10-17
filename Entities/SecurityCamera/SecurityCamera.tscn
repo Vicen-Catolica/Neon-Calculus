@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://df7k2p9x4m1a0"]
+
+[ext_resource type="Script" path="res://Entities/SecurityCamera/security_camera.gd" id="1_cam01"]
+[ext_resource type="FontFile" uid="uid://b7b4e0l00k2m6" path="res://assets/fonts/Orbitron-Bold.ttf" id="2_font"]
+[ext_resource type="AudioStream" uid="uid://cgv2v8rl2wqr7" path="res://assets/Music/Button-sound.mp3" id="3_sfx"]
+
+[node name="SecurityCamera" type="Node2D" unique_id=314159265]
+script = ExtResource("1_cam01")
+
+[node name="VisibleOnScreenEnabler2D" type="VisibleOnScreenEnabler2D" parent="." unique_id=314159266]
+rect = Rect2(-100, -100, 600, 600)
+
+[node name="AlertTimer" type="Timer" parent="." unique_id=314159267]
+one_shot = true
+
+[node name="HackTimer" type="Timer" parent="." unique_id=314159268]
+one_shot = true
+
+[node name="StateLabel" type="Label" parent="." unique_id=314159269]
+offset_left = -30.0
+offset_top = -32.0
+offset_right = 30.0
+offset_bottom = -14.0
+theme_override_fonts/font = ExtResource("2_font")
+theme_override_font_sizes/font_size = 11
+text = "SCAN"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="AudioAlert" type="AudioStreamPlayer2D" parent="." unique_id=314159270]
+stream = ExtResource("3_sfx")
+volume_db = 2.0
+pitch_scale = 1.6

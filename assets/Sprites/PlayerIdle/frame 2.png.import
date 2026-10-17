@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bstl6qgmigjla"
-path="res://.godot/imported/male_hero-run.png-257f91a14592cd15d853248d86b6a2ee.ctex"
+uid="uid://dp6sk2ict1oqc"
+path="res://.godot/imported/frame 2.png-24f2f83fc5611d6b329ff831389c90d2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/Sprites/male_hero-run.png"
-dest_files=["res://.godot/imported/male_hero-run.png-257f91a14592cd15d853248d86b6a2ee.ctex"]
+source_file="res://assets/Sprites/PlayerIdle/frame 2.png"
+dest_files=["res://.godot/imported/frame 2.png-24f2f83fc5611d6b329ff831389c90d2.ctex"]
 
 [params]
 

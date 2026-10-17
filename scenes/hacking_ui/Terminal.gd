@@ -6,6 +6,11 @@ extends Area2D
 
 @export_enum("Automático", "Forçar Tema 1", "Forçar Tema 2") var topic_mode: int = 0
 
+@export_category("Dispositivos Conectados (Axioma)")
+@export var target_camera: Node2D
+@export var target_cameras: Array[Node2D] = []
+@export var camera_disable_duration: float = 25.0
+
 var player_in_range: bool = false
 var sub_topic: int = 0
 
@@ -60,6 +65,11 @@ func _start_terminal_hack() -> void:
 func _on_success() -> void:
 	is_unlocked = true
 	print("Terminal hackeado!")
+	if is_instance_valid(target_camera) and target_camera.has_method("hack_disable"):
+		target_camera.hack_disable(camera_disable_duration)
+	for cam in target_cameras:
+		if is_instance_valid(cam) and cam.has_method("hack_disable"):
+			cam.hack_disable(camera_disable_duration)
 
 func _on_failure() -> void:
 	print("Falha no hack!")

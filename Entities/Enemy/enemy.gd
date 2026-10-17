@@ -41,6 +41,7 @@ var is_firing_taser: bool = false
 var taser_target_ref: Node2D = null
 
 func _ready() -> void:
+	add_to_group("Enemies")
 	if has_node("RayCast2D"):
 		ray_cast = $RayCast2D
 	else:
@@ -326,3 +327,9 @@ func _draw() -> void:
 
 func is_player_in_hearing_range() -> bool:
 	return is_player_in_hearing_area
+
+func on_external_alert(alert_pos: Vector2) -> void:
+	last_known_player_pos = alert_pos
+	if state_machine and state_machine.current_state:
+		if state_machine.current_state.name != "MaxAlert":
+			state_machine.transition_to("Search")

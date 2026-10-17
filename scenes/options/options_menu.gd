@@ -27,6 +27,7 @@ var rebinding_action: String = ""
 var rebinding_button: Button = null
 var action_buttons: Dictionary = {}
 var _font: Font
+var resolution_hint: Label = null
 
 
 func _ready() -> void:
@@ -244,6 +245,12 @@ func _style_option_button(btn: OptionButton) -> void:
 	hover.border_width_left = 5
 	btn.add_theme_stylebox_override("hover", hover)
 
+	var disabled := normal.duplicate()
+	disabled.bg_color = Color(DARK_BG.r, DARK_BG.g, DARK_BG.b, 0.45)
+	disabled.border_color = Color(NEON_CYAN.r, NEON_CYAN.g, NEON_CYAN.b, 0.2)
+	btn.add_theme_stylebox_override("disabled", disabled)
+	btn.add_theme_color_override("font_disabled_color", Color(NEON_CYAN.r, NEON_CYAN.g, NEON_CYAN.b, 0.35))
+
 	var popup: PopupMenu = btn.get_popup()
 	if popup:
 		popup.add_theme_font_override("font", _font)
@@ -444,10 +451,27 @@ func _setup_ui_options() -> void:
 	display_option.add_item("Janela", 0)
 	display_option.add_item("Tela Cheia", 1)
 	display_option.add_item("Janela sem Bordas", 2)
+	if not display_option.item_selected.is_connected(_on_display_mode_changed):
+		display_option.item_selected.connect(_on_display_mode_changed)
 
 	resolution_option.clear()
-	for res in SettingsManager.RESOLUTIONS:
-		resolution_option.add_item("%dx%d" % [res.x, res.y])
+	for i in range(SettingsManager.RESOLUTIONS.size()):
+		var res: Vector2i = SettingsManager.RESOLUTIONS[i]
+		if i == 0:
+			resolution_option.add_item("%dx%d (Nativa)" % [res.x, res.y], i)
+		else:
+			resolution_option.add_item("%dx%d" % [res.x, res.y], i)
+
+	if not resolution_hint and resolution_option:
+		var res_row = resolution_option.get_parent()
+		var video_vbox = res_row.get_parent()
+		resolution_hint = Label.new()
+		resolution_hint.name = "ResolutionHint"
+		if _font:
+			resolution_hint.add_theme_font_override("font", _font)
+		resolution_hint.add_theme_font_size_override("font_size", 13)
+		video_vbox.add_child(resolution_hint)
+		video_vbox.move_child(resolution_hint, res_row.get_index() + 1)
 
 	colorblind_option.clear()
 	colorblind_option.add_item("Desativado", 0)
@@ -460,6 +484,26 @@ func _setup_ui_options() -> void:
 	equation_size_option.add_item("Normal (100%)", 0)
 	equation_size_option.add_item("Grande (125%)", 1)
 	equation_size_option.add_item("Extra Grande (150%)", 2)
+
+
+func _on_display_mode_changed(idx: int) -> void:
+	_update_resolution_field_state(idx)
+
+
+func _update_resolution_field_state(mode_idx: int) -> void:
+	if not resolution_option:
+		return
+	if mode_idx == 0: # Janela
+		resolution_option.disabled = false
+		if resolution_hint:
+			resolution_hint.text = "// Redimensionamento de janela ativo."
+			resolution_hint.modulate = Color(NEON_CYAN, 0.75)
+	else: # Tela Cheia / Janela sem Bordas
+		resolution_option.disabled = true
+		resolution_option.select(0)
+		if resolution_hint:
+			resolution_hint.text = "// Resolução nativa ativa em Tela Cheia (use Modo Janela para redimensionar)."
+			resolution_hint.modulate = Color(NEON_GREEN, 0.75)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -550,6 +594,7 @@ func _load_current_values() -> void:
 	var current_mode: int = SettingsManager.config.get_value("Video", "display_mode", 1)
 	display_option.select(current_mode)
 	resolution_option.select(SettingsManager.config.get_value("Video", "resolution_idx", 0))
+	_update_resolution_field_state(current_mode)
 	vsync_check.button_pressed = SettingsManager.config.get_value("Video", "vsync", true)
 
 	colorblind_option.select(SettingsManager.config.get_value("Accessibility", "colorblind_mode", 0))
@@ -579,8 +624,9 @@ func _on_save_button_pressed() -> void:
 	if equation_size_option.get_popup().visible:
 		equation_size_option.get_popup().hide()
 
+	var res_idx: int = resolution_option.selected if display_option.selected == 0 else 0
 	SettingsManager.save_audio_settings(master_slider.value, bgm_slider.value, sfx_slider.value)
-	SettingsManager.save_video_settings(display_option.selected, resolution_option.selected, vsync_check.button_pressed)
+	SettingsManager.save_video_settings(display_option.selected, res_idx, vsync_check.button_pressed)
 	SettingsManager.save_accessibility_settings(colorblind_option.selected, equation_size_option.selected)
 	SettingsManager.save_controls_settings(pending_controls)
 	print("Configurações salvas e aplicadas!")
@@ -594,6 +640,7 @@ func _on_reset_button_pressed() -> void:
 		voice_slider.value = 0.8
 	display_option.select(1)
 	resolution_option.select(0)
+	_update_resolution_field_state(1)
 	vsync_check.button_pressed = true
 	colorblind_option.select(0)
 	equation_size_option.select(0)
