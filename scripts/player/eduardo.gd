@@ -36,6 +36,7 @@ var _coyote: float = 0.0
 var _jump_buffer: float = 0.0
 var _ladders: Array[Area2D] = []
 var _hacking: bool = false
+var _air_speed: float = 110.0
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 @onready var fx: AnimatedSprite2D = $HackFx
@@ -99,9 +100,8 @@ func _process_ground_air(delta: float, dir: float) -> void:
 	if Input.is_action_just_released("jump") and velocity.y < 0.0:
 		velocity.y *= 0.5
 
-	var target := 0.0
-	if dir != 0.0:
-		target = dir * _current_speed()
+	var speed := _current_speed()
+	var target := dir * speed
 	var rate := acceleration if dir != 0.0 else friction
 	velocity.x = move_toward(velocity.x, target, rate * delta)
 
@@ -122,11 +122,17 @@ func _process_climb(dir: float) -> void:
 
 
 func _current_speed() -> float:
+	# No ar mantém a velocidade horizontal máxima de quando saiu do chão
+	# (pular correndo conserva a corrida).
+	if not is_on_floor():
+		return _air_speed
 	if _crouching:
-		return crouch_speed
-	if Input.is_action_pressed("run") and is_on_floor():
-		return run_speed
-	return walk_speed
+		_air_speed = crouch_speed
+	elif Input.is_action_pressed("run"):
+		_air_speed = run_speed
+	else:
+		_air_speed = walk_speed
+	return _air_speed
 
 
 # --- Agachar -----------------------------------------------------------
