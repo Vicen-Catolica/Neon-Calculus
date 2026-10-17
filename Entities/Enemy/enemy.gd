@@ -137,7 +137,7 @@ func check_sensors() -> void:
 		return
 
 	var ray_origin = global_position + Vector2(0, -20)
-	var player_center = target_player.global_position + Vector2(0, -20)
+	var player_center = _aim_point(target_player)
 	var to_player = player_center - ray_origin
 	var dist_to_player = to_player.length()
 
@@ -204,7 +204,7 @@ func is_player_in_los() -> bool:
 		return false
 		
 	var ray_origin = global_position + Vector2(0, -20)
-	var player_center = target_player.global_position + Vector2(0, -20)
+	var player_center = _aim_point(target_player)
 	var dist_to_player = ray_origin.distance_to(player_center)
 
 	# Se ultrapassar a distância máxima de visão, perde o contato visual imediatamente
@@ -326,3 +326,9 @@ func _draw() -> void:
 
 func is_player_in_hearing_range() -> bool:
 	return is_player_in_hearing_area
+
+
+func _aim_point(target: Node2D) -> Vector2:
+	if target.has_method("get_aim_point"):
+		return target.get_aim_point()
+	return target.global_position + Vector2(0, -20)
