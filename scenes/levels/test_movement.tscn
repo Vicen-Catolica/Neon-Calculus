@@ -1,0 +1,61 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player/eduardo.tscn" id="1_edu"]
+[ext_resource type="PackedScene" path="res://scenes/objects/ladder.tscn" id="2_lad"]
+
+[sub_resource type="RectangleShape2D" id="floor"]
+size = Vector2(2400, 32)
+
+[sub_resource type="RectangleShape2D" id="ceiling"]
+size = Vector2(200, 40)
+
+[sub_resource type="RectangleShape2D" id="platform"]
+size = Vector2(300, 24)
+
+[node name="TestMovement" type="Node2D"]
+
+[node name="Floor" type="StaticBody2D" parent="."]
+position = Vector2(1000, 16)
+
+[node name="Shape" type="CollisionShape2D" parent="Floor"]
+shape = SubResource("floor")
+
+[node name="Visual" type="ColorRect" parent="Floor"]
+offset_left = -1200.0
+offset_top = -16.0
+offset_right = 1200.0
+offset_bottom = 16.0
+color = Color(0.15, 0.2, 0.3, 1)
+
+[node name="LowCeiling" type="StaticBody2D" parent="."]
+position = Vector2(500, -120)
+
+[node name="Shape" type="CollisionShape2D" parent="LowCeiling"]
+shape = SubResource("ceiling")
+
+[node name="Visual" type="ColorRect" parent="LowCeiling"]
+offset_left = -100.0
+offset_top = -20.0
+offset_right = 100.0
+offset_bottom = 20.0
+color = Color(0.5, 0.15, 0.3, 1)
+
+[node name="UpperPlatform" type="StaticBody2D" parent="."]
+position = Vector2(1000, -200)
+
+[node name="Shape" type="CollisionShape2D" parent="UpperPlatform"]
+shape = SubResource("platform")
+
+[node name="Visual" type="ColorRect" parent="UpperPlatform"]
+offset_left = -150.0
+offset_top = -12.0
+offset_right = 150.0
+offset_bottom = 12.0
+color = Color(0.15, 0.2, 0.3, 1)
+
+[node name="Ladder" parent="." instance=ExtResource("2_lad")]
+position = Vector2(1000, 0)
+scale = Vector2(1, 1.8)
+
+[node name="Eduardo" parent="." instance=ExtResource("1_edu")]
+position = Vector2(100, 0)

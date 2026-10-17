@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://beycagnee1vc5"]
 
-[ext_resource type="PackedScene" uid="uid://tsvnbubb6bg4" path="res://Entities/Player/player.tscn" id="1_ywn8h"]
+[ext_resource type="PackedScene" path="res://scenes/player/eduardo.tscn" id="1_ywn8h"]
 [ext_resource type="Script" uid="uid://cboxptu27oi8" path="res://scenes/hacking_ui/Terminal.gd" id="2_e1ier"]
 [ext_resource type="PackedScene" uid="uid://c5ubr3fk5bcyu" path="res://scenes/hacking_ui/HackingInterface.tscn" id="3_0dcvq"]
 [ext_resource type="Script" uid="uid://nyu3ykmsnxry" path="res://scenes/Stage1/NextStage.gd" id="3_a048t"]
