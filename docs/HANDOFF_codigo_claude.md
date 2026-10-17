@@ -23,7 +23,10 @@ Este documento resume tudo o que foi decidido e produzido antes de começarmos o
   - **GDScript**: UI, transições de cena, chamadas de animação.
 - Física: `CharacterBody2D` para jogador e guardas; `RayCast2D` e `Area2D` para visão e audição.
 - IA: FSM com padrão **State** (Patrulha → Suspeita → Busca → Alerta Máximo); `NavigationRegion2D`/`NavigationAgent2D`; recalcular rota só ao mudar de estado.
-- Pausa do hack: `process_mode` — mundo em `PROCESS_MODE_DISABLED` (ou desacelerado), `HackingInterface` em `PROCESS_MODE_ALWAYS`.
+- Pausa do hack (**decisão atualizada**): o mundo fica **desacelerado** via `Engine.time_scale` (visão hacker ~25%, equação ~5%), não pausado. A `HackingInterface` e o cronômetro do hack usam **tempo real** (ignoram `time_scale`, ex.: `Time.get_ticks_msec()` ou dividir delta por `Engine.time_scale`). A pausa total de acessibilidade usa `get_tree().paused = true` com a `HackingInterface` em `PROCESS_MODE_ALWAYS` (já ligada no `GameManager` via `pause_on_hacking`).
+- Resolução (**decisão**): manter 1920×1080 com stretch `canvas_items` (menu/HUD intactos). A `Camera2D` de gameplay usa zoom (2,2) ≈ enquadramento 960×540; snap 2D e filtro Nearest ligados. Se tremer em resoluções não múltiplas de 1080p, migrar o mundo para um SubViewport 960×540 depois.
+- Inputs (**decisão**): o Eduardo novo usa só as ações novas (`move_left`, `move_right`, `run`, `crouch`, `jump`, `climb_*`, `hack_*`, `interact_world`), nunca `ui_*`. `Interact` é mantida. O player antigo e o `Terminal.gd` serão removidos no fim da etapa 3.
+- Addon `godot_ai`: autoload e plugin removidos do `project.godot` (projeto precisa abrir sem erros para a CI headless).
 - Comunicação: **Signals** (padrão Observer). `GameManager` como autoload/singleton.
 - Testes: **GUT** (GDScript) e **NUnit** (C#), com foco no gerador de equações (sempre solução inteira e plausível).
 - Git + GitHub, GitFlow, CI com GitHub Actions (build headless).

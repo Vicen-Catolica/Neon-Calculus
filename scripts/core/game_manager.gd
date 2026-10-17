@@ -31,6 +31,8 @@ func set_state(new_state: State) -> void:
 	var was_vision := state == State.HACK_VISION
 	state = new_state
 	Engine.time_scale = _time_scale_for(new_state)
+	# Pausa total (acessibilidade): HackingInterface roda em PROCESS_MODE_ALWAYS.
+	get_tree().paused = new_state == State.HACKING and pause_on_hacking
 	state_changed.emit(new_state)
 	var is_vision := new_state == State.HACK_VISION
 	if was_vision != is_vision:
@@ -54,6 +56,6 @@ func _time_scale_for(s: State) -> float:
 		State.HACK_VISION:
 			return WORLD_SPEED_HACK_VISION
 		State.HACKING:
-			return 0.0 if pause_on_hacking else WORLD_SPEED_HACKING
+			return WORLD_SPEED_HACKING
 		_:
 			return WORLD_SPEED_NORMAL
