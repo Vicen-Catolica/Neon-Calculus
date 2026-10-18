@@ -26,12 +26,27 @@ var current_floor: int = 1
 var lore_read: Array[String] = []
 ## Variância somada por cada alarme disparado.
 const ALARM_VARIANCE: float = 20.0
+## Segundos sem hack/alarme até a variância começar a cair.
+const VARIANCE_DECAY_DELAY: float = 8.0
+## Pontos de variância perdidos por segundo depois do atraso.
+const VARIANCE_DECAY_RATE: float = 2.5
+var _calm_time: float = 0.0
 ## Acessibilidade: pausa total durante a equação em vez de câmera lenta.
 var pause_on_hacking: bool = false
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+
+## Variância baixa sozinha quando o jogador passa um tempo sem hackear nem ser visto.
+func _process(delta: float) -> void:
+	if state != State.PLAYING or get_tree().paused:
+		return
+	_calm_time += delta
+	if _calm_time >= VARIANCE_DECAY_DELAY and variance > 0.0:
+		variance = maxf(variance - VARIANCE_DECAY_RATE * delta, 0.0)
+		variance_changed.emit(variance, variance_limit)
 
 
 func set_state(new_state: State) -> void:
@@ -49,6 +64,8 @@ func set_state(new_state: State) -> void:
 
 
 func add_variance(amount: float) -> void:
+	if amount > 0.0:
+		_calm_time = 0.0
 	variance = clampf(variance + amount, 0.0, variance_limit)
 	variance_changed.emit(variance, variance_limit)
 	if variance >= variance_limit:
@@ -57,6 +74,7 @@ func add_variance(amount: float) -> void:
 
 func reset_variance() -> void:
 	variance = 0.0
+	_calm_time = 0.0
 	variance_changed.emit(variance, variance_limit)
 
 

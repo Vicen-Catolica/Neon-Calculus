@@ -2,5 +2,5 @@
 
 [ext_resource type="Script" path="res://scripts/ui/lore_reader.gd" id="1_kv3m1"]
 
-[node name="LoreReader" type="CanvasLayer" unique_id=44353681]
+[node name="LoreReader" type="CanvasLayer" unique_id=727701901]
 script = ExtResource("1_kv3m1")

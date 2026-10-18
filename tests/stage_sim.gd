@@ -130,5 +130,40 @@ func _ready() -> void:
 	Input.action_release("move_right")
 	check("porta hackeada abre e deixa passar", door.is_open and p.global_position.x > door.global_position.x + 20.0, "x=%.0f" % p.global_position.x)
 
+	# Leitor de lore centralizado na tela.
+	term.open(); await step(2)
+	var panel_rect: Rect2 = reader._panel.get_global_rect()
+	var vp := get_viewport().get_visible_rect()
+	check("painel de lore centralizado", vp.encloses(panel_rect) and absf(panel_rect.get_center().x - vp.get_center().x) < 4.0, str(panel_rect))
+	reader._close(); await step(2)
+
+	# Guarda: jogador atravessa e a detecção não é instantânea.
+	var g3 := lvl.get_node("Guards/Guard3") as Enemy
+	freeze_guards(false)
+	g3.global_position = Vector2(4300, -48)
+	g3.state_machine.transition_to("Distracted")  # parado e cego enquanto o Eduardo passa
+	tp(4200, -48); await step(5)
+	Input.action_press("move_right"); await step(150); Input.action_release("move_right"); await step(5)
+	check("jogador atravessa o guarda", p.global_position.x > g3.global_position.x + 20.0, "p=%.0f g=%.0f" % [p.global_position.x, g3.global_position.x])
+	g3.waypoints = []
+	g3.state_machine.transition_to("Patrol")
+	g3.update_facing(1.0)
+	g3.awareness = 0.0
+	tp(g3.global_position.x + 250.0, -48); await step(12)
+	check("barra de detecção enche aos poucos", g3.awareness > 0.0 and g3._current_state_name() != "maxalert", "%.2f %s" % [g3.awareness, g3._current_state_name()])
+	await step(120)
+	check("barra cheia vira alerta máximo", g3._current_state_name() == "maxalert", g3._current_state_name())
+	freeze_guards(true)
+
+	# Variância cai sozinha depois de um tempo sem hack.
+	tp(200, 16); await step(240)  # longe de câmeras/guardas, varredura terminada
+	GameManager.reset_variance()
+	GameManager.add_variance(30.0)
+	var v0 := GameManager.variance
+	await step(int(GameManager.VARIANCE_DECAY_DELAY * 60.0) - 60)
+	check("variância segura antes do atraso", GameManager.variance == v0, "%.1f" % GameManager.variance)
+	await step(240)
+	check("variância cai depois do atraso", GameManager.variance < v0, "%.1f -> %.1f" % [v0, GameManager.variance])
+
 	print("\n%s — %d falha(s)" % ["TUDO OK" if fails == 0 else "HÁ FALHAS", fails])
 	get_tree().quit()
