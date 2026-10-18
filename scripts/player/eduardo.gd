@@ -37,6 +37,11 @@ var _jump_buffer: float = 0.0
 var _ladders: Array[Area2D] = []
 var _hacking: bool = false
 var _air_speed: float = 110.0
+var _landing: bool = false
+var _climb_cooldown: float = 0.0
+var _hidden: bool = false
+var _hide_spots: Array[Area2D] = []
+var _lights: Array[Node] = []
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 @onready var fx: AnimatedSprite2D = $HackFx
@@ -66,6 +71,13 @@ func _physics_process(delta: float) -> void:
 		return
 
 	var dir := Input.get_axis("move_left", "move_right")
+
+	if _hidden:
+		_process_hidden(delta, dir)
+		return
+	if Input.is_action_just_pressed("interact_world") and _try_hide():
+		return
+
 	if dir != 0.0:
 		facing = 1 if dir > 0.0 else -1
 
@@ -105,7 +117,8 @@ func _process_ground_air(delta: float, dir: float) -> void:
 	var rate := acceleration if dir != 0.0 else friction
 	velocity.x = move_toward(velocity.x, target, rate * delta)
 
-	if _ladder_available() and (Input.is_action_pressed("climb_up") or (Input.is_action_pressed("climb_down") and not is_on_floor())):
+	_climb_cooldown = maxf(_climb_cooldown - delta, 0.0)
+	if _climb_cooldown <= 0.0 and _ladder_available() and (Input.is_action_pressed("climb_up") or (Input.is_action_pressed("climb_down") and not is_on_floor())):
 		_enter_climb()
 
 
@@ -115,8 +128,13 @@ func _process_climb(dir: float) -> void:
 	var leave := Input.is_action_just_pressed("jump") or not _ladder_available()
 	if leave:
 		_set_state(State.FALL)
+		# Não reagarra a escada logo em seguida (senão, ao chegar no topo
+		# segurando "subir", ele cai de volta nela antes de pisar na plataforma).
+		_climb_cooldown = 0.35
 		if Input.is_action_just_pressed("jump"):
 			velocity.y = jump_velocity * 0.7
+		elif v < 0.0:
+			velocity.y = -160.0  # impulso para passar da borda da plataforma
 	elif is_on_floor() and v > 0.0:
 		_set_state(State.IDLE)
 
@@ -158,10 +176,101 @@ func _apply_crouch_shape(crouched: bool) -> void:
 func _can_stand() -> bool:
 	var params := PhysicsShapeQueryParameters2D.new()
 	params.shape = stand_shape.shape
-	params.transform = global_transform * stand_shape.transform
+	# 3 px acima: o contato da base com o chão não conta como obstáculo.
+	params.transform = global_transform.translated(Vector2(0, -3)) * stand_shape.transform
 	params.collision_mask = collision_mask
 	params.exclude = [get_rid()]
 	return get_world_2d().direct_space_state.intersect_shape(params, 1).is_empty()
+
+
+# --- Esconderijos e luz ------------------------------------------------
+
+## Chamado pelas Areas2D de esconderijo (grupo "hide_spot").
+func register_hide_spot(area: Area2D) -> void:
+	if not _hide_spots.has(area):
+		_hide_spots.append(area)
+
+
+func unregister_hide_spot(area: Area2D) -> void:
+	_hide_spots.erase(area)
+
+
+## Chamado pela LightZone de um letreiro neon aceso.
+func enter_light(source: Node) -> void:
+	if not _lights.has(source):
+		_lights.append(source)
+
+
+func exit_light(source: Node) -> void:
+	_lights.erase(source)
+
+
+func is_in_light() -> bool:
+	return not _lights.is_empty()
+
+
+func is_hidden() -> bool:
+	return _hidden
+
+
+## Guardas e câmeras só enxergam o jogador se ele não estiver escondido no escuro.
+func is_detectable() -> bool:
+	return not (_hidden and _lights.is_empty())
+
+
+## Agachado ou escondido: passos silenciosos.
+func is_silent() -> bool:
+	return _hidden or _crouching
+
+
+func can_hide() -> bool:
+	return not _hide_spots.is_empty() and is_on_floor() and _lights.is_empty() and state != State.CLIMB
+
+
+## Texto de ajuda para a HUD.
+func get_interaction_hint() -> String:
+	if _hidden:
+		return "[F] SAIR DO ESCONDERIJO"
+	if not _hide_spots.is_empty():
+		if not _lights.is_empty():
+			return "LUZ DEMAIS PARA SE ESCONDER — APAGUE O NEON"
+		return "[F] ESCONDER"
+	return ""
+
+
+func _try_hide() -> bool:
+	if not can_hide():
+		return false
+	var spot := _hide_spots[0]
+	_hidden = true
+	_crouching = true
+	_apply_crouch_shape(true)
+	velocity = Vector2.ZERO
+	global_position.x = spot.global_position.x
+	z_index = -1
+	sprite.modulate = Color(0.35, 0.38, 0.5)
+	if sprite.animation != &"crouch_idle":
+		sprite.play(&"crouching")
+	_set_state(State.CROUCH)
+	return true
+
+
+func _unhide() -> void:
+	_hidden = false
+	z_index = 0
+	sprite.modulate = Color.WHITE
+
+
+func _process_hidden(delta: float, dir: float) -> void:
+	if not is_on_floor():
+		velocity.y += _gravity * delta
+	velocity.x = 0.0
+	move_and_slide()
+	if Input.is_action_just_pressed("interact_world") or dir != 0.0 or Input.is_action_just_pressed("jump"):
+		_unhide()
+		return
+	if not (sprite.animation == &"crouching" and sprite.is_playing()):
+		_play(&"crouch_idle")
 
 
 # --- Escadas -----------------------------------------------------------
@@ -210,22 +319,54 @@ func _update_state(dir: float) -> void:
 func _set_state(s: State) -> void:
 	if s == state:
 		return
+	var was_air := state == State.JUMP or state == State.FALL
 	state = s
+	if was_air and s == State.IDLE and is_on_floor():
+		_landing = true
+		sprite.play(&"land")
+	if s == State.CLIMB:
+		sprite.play(&"ladder_enter")
 	state_changed.emit(s)
 
 
+func _update_climb_visuals() -> void:
+	# Primeiro toca a entrada (vira de costas); depois o ciclo de subida.
+	if sprite.animation == &"ladder_enter" and sprite.is_playing():
+		return
+	if sprite.animation != &"ladder_climb":
+		sprite.animation = &"ladder_climb"
+	if velocity.y < -1.0:
+		if not sprite.is_playing() or sprite.get_playing_speed() < 0.0:
+			sprite.play(&"ladder_climb")
+	elif velocity.y > 1.0:
+		if not sprite.is_playing() or sprite.get_playing_speed() > 0.0:
+			sprite.play_backwards(&"ladder_climb")
+	else:
+		# Parado na escada: segura a pose neutra.
+		sprite.pause()
+		sprite.frame = 2
+
+
 func _update_visuals(delta: float) -> void:
-	sprite.flip_h = facing < 0
+	# Na escada ele fica de costas: sem espelhar.
+	var mirror := facing < 0 and state != State.CLIMB
+	sprite.flip_h = mirror
 	# Centro do corpo no quadro fica ~2 px à direita do centro; espelha ao virar.
-	sprite.position.x = -2.0 * facing
+	sprite.position.x = 2.0 if mirror else -2.0
 	fx.flip_h = sprite.flip_h
 	fx.position.x = sprite.position.x
 	camera.position.x = lerpf(camera.position.x, look_ahead * facing, 4.0 * delta)
 
+	# Aterrissagem: toca "land" uma vez; andar/correr cortam a animação.
+	if _landing and (state != State.IDLE or not (sprite.animation == &"land" and sprite.is_playing())):
+		_landing = false
+
 	match state:
 		State.IDLE:
-			# Não corta a transição de levantar (crouching ao contrário).
-			if not (sprite.animation == &"crouching" and sprite.is_playing()):
+			# Não corta a transição de levantar (crouching ao contrário) nem a aterrissagem.
+			if _landing:
+				pass
+			elif not (sprite.animation == &"crouching" and sprite.is_playing()):
 				_play(&"idle")
 		State.WALK:
 			_play(&"walk")
@@ -238,15 +379,13 @@ func _update_visuals(delta: float) -> void:
 		State.CROUCH_WALK:
 			_play(&"crouch_walk")
 		State.JUMP:
-			_hold_frame(&"run", 2)  # placeholder até existir a arte de pulo
+			# Toca uma vez e segura o último quadro (ápice).
+			if sprite.animation != &"jump":
+				sprite.play(&"jump")
 		State.FALL:
-			_hold_frame(&"run", 5)  # placeholder até existir a arte de queda
+			_play(&"fall")
 		State.CLIMB:
-			# Placeholder: anima "walk" ao subir/descer, congela parado.
-			if absf(velocity.y) > 1.0:
-				_play(&"walk")
-			else:
-				sprite.pause()
+			_update_climb_visuals()
 
 
 func _play(anim: StringName) -> void:
@@ -274,6 +413,9 @@ func _on_game_state_changed(new_state: GameManager.State) -> void:
 	if hacking_now == _hacking:
 		return
 	_hacking = hacking_now
+	if _hidden:
+		# Hackeando escondido: continua agachado atrás do objeto.
+		return
 	if hacking_now:
 		_crouching = false
 		_apply_crouch_shape(false)

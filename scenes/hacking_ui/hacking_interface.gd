@@ -38,6 +38,7 @@ var _blink_timer: float = 0.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	add_to_group("hacking_ui")
 	hide()
 	
 	if ai_assistant_panel:

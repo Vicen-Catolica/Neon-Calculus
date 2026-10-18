@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://scripts/player/eduardo.gd" id="1_edu"]
 [ext_resource type="SpriteFrames" path="res://scenes/player/eduardo_frames.tres" id="2_frames"]
 [ext_resource type="PackedScene" path="res://scenes/player/game_camera.tscn" id="3_cam"]
+[ext_resource type="Script" path="res://scripts/hacking/hack_vision.gd" id="4_hv"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_stand"]
 radius = 14.0
@@ -37,3 +38,6 @@ animation = &"hack_fx"
 
 [node name="GameCamera" parent="." instance=ExtResource("3_cam")]
 position = Vector2(0, -60)
+
+[node name="HackVision" type="Node" parent="."]
+script = ExtResource("4_hv")

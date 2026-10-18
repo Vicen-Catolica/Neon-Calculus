@@ -1,6 +1,6 @@
 extends Control
 
-@export_file("*.tscn") var start_scene: String = "res://scenes/Stage1/stage1.tscn"
+@export_file("*.tscn") var start_scene: String = "res://scenes/levels/slums/slums_stage1.tscn"
 @export_file("*.tscn") var option_scene: String = "res://scenes/options/OptionsMenu.tscn"
 
 # ── Cores Cyberpunk ──

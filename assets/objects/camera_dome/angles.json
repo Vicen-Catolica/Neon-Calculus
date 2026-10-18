@@ -1,0 +1,98 @@
+{
+  "frame_size": [
+    48,
+    48
+  ],
+  "ceiling_edge": "top (y=0)",
+  "columns": [
+    {
+      "index": 0,
+      "aim_deg": 165,
+      "lens_point": [
+        16.8,
+        17.6
+      ]
+    },
+    {
+      "index": 1,
+      "aim_deg": 150,
+      "lens_point": [
+        17.5,
+        19.4
+      ]
+    },
+    {
+      "index": 2,
+      "aim_deg": 135,
+      "lens_point": [
+        18.7,
+        20.8
+      ]
+    },
+    {
+      "index": 3,
+      "aim_deg": 120,
+      "lens_point": [
+        20.2,
+        22.0
+      ]
+    },
+    {
+      "index": 4,
+      "aim_deg": 105,
+      "lens_point": [
+        22.1,
+        22.7
+      ]
+    },
+    {
+      "index": 5,
+      "aim_deg": 90,
+      "lens_point": [
+        24.0,
+        22.9
+      ]
+    },
+    {
+      "index": 6,
+      "aim_deg": 75,
+      "lens_point": [
+        25.9,
+        22.7
+      ]
+    },
+    {
+      "index": 7,
+      "aim_deg": 60,
+      "lens_point": [
+        27.8,
+        22.0
+      ]
+    },
+    {
+      "index": 8,
+      "aim_deg": 45,
+      "lens_point": [
+        29.3,
+        20.8
+      ]
+    },
+    {
+      "index": 9,
+      "aim_deg": 30,
+      "lens_point": [
+        30.5,
+        19.4
+      ]
+    },
+    {
+      "index": 10,
+      "aim_deg": 15,
+      "lens_point": [
+        31.2,
+        17.6
+      ]
+    }
+  ],
+  "note": "aim_deg: Godot convention, 0 = right, 90 = straight down, 180 = left"
+}
