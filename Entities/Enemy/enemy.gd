@@ -18,9 +18,17 @@ signal alarm_triggered(last_position: Vector2)
 
 @export_category("Sensores")
 @export_flags_2d_physics var vision_mask: int = 3 # Camada 1 (Mundo) + Camada 2 (Player)
+## Altura dos olhos em relação à origem do nó (guardas com sprite de 128 px usam ~-100).
+@export var eye_offset: Vector2 = Vector2(0, -20)
+## Andar normal (não agachado) só é ouvido dentro deste raio; correr usa a HearingArea inteira.
+@export var walk_hearing_radius: float = 140.0
+## Raio em que o guarda responde a um alarme de câmera/varredura.
+@export var alarm_response_radius: float = 900.0
 
 @export_category("Debug Visual")
 @export var show_debug_vision: bool = true
+## Desenha o cone de visão (laranja em patrulha, vermelho em alerta).
+@export var show_vision_cone: bool = false
 
 @onready var state_machine: StateMachine = $StateMachine
 @onready var nav_agent: NavigationAgent2D = $NavigationAgent2D
@@ -49,7 +57,7 @@ func _ready() -> void:
 		add_child(ray_cast)
 		ray_cast.enabled = false
 
-	ray_cast.position = Vector2(0, -20)
+	ray_cast.position = eye_offset
 
 	if has_node("TaserLine"):
 		taser_line = $TaserLine
@@ -91,15 +99,24 @@ func _ready() -> void:
 		state_indicator.add_theme_font_override("font", custom_font)
 		state_indicator.add_theme_font_size_override("font_size", 22)
 		
+	add_to_group("guards")
+	GameManager.alarm_raised.connect(_on_alarm_raised)
+	var hackable := get_node_or_null("Hackable") as Hackable
+	if hackable:
+		hackable.kind = Hackable.Kind.CYBORG if enemy_type == EnemyType.CYBORG else Hackable.Kind.GUARD
+		hackable.ignore_body = self
+		hackable.hacked.connect(_on_hacked)
+
 	state_machine.init(self)
 
 func _process(_delta: float) -> void:
-	if show_debug_vision:
+	if show_debug_vision or show_vision_cone:
 		queue_redraw()
+	_update_animation()
 
 	if is_firing_taser and is_instance_valid(taser_target_ref):
-		var start_pos = global_position + Vector2(0, -20)
-		var end_pos = taser_target_ref.global_position + Vector2(0, -20)
+		var start_pos = global_position + eye_offset + Vector2(0, 30)
+		var end_pos = _aim_point(taser_target_ref)
 		generate_lightning_beam(start_pos, end_pos)
 
 func _physics_process(delta: float) -> void:
@@ -135,8 +152,14 @@ func check_sensors() -> void:
 	var target_player = get_player()
 	if not target_player:
 		return
+	# Distraído (implante tocando) ou desacordado: não vê nem ouve.
+	if _current_state_name() in ["distracted", "stunned"]:
+		return
+	# Escondido: invisível e silencioso.
+	if target_player.has_method("is_detectable") and not target_player.is_detectable():
+		return
 
-	var ray_origin = global_position + Vector2(0, -20)
+	var ray_origin = global_position + eye_offset
 	var player_center = _aim_point(target_player)
 	var to_player = player_center - ray_origin
 	var dist_to_player = to_player.length()
@@ -164,16 +187,21 @@ func check_sensors() -> void:
 			current_state_name = state_machine.current_state.name
 
 		var is_moving = abs(target_player.velocity.x) > 10.0 or abs(target_player.velocity.y) > 10.0
-		
+
 		var is_running_flag = false
 		if target_player.has_method("is_running"):
 			is_running_flag = target_player.is_running()
 		elif "is_running" in target_player:
 			is_running_flag = target_player.is_running
 
+		# Agachado não faz barulho; andando só é ouvido de perto.
+		var is_silent: bool = target_player.has_method("is_silent") and target_player.is_silent()
+		if is_silent or (not is_running_flag and dist_to_player > walk_hearing_radius):
+			is_moving = false
+
 		if is_moving:
 			if is_running_flag:
-				if current_state_name in ["Patrol", "Suspicious"]:
+				if current_state_name in ["Patrol", "Suspicious", "Investigate"]:
 					last_known_player_pos = target_player.global_position
 					state_machine.transition_to("Search")
 			else:
@@ -203,7 +231,9 @@ func is_player_in_los() -> bool:
 	if not target_player:
 		return false
 		
-	var ray_origin = global_position + Vector2(0, -20)
+	if target_player.has_method("is_detectable") and not target_player.is_detectable():
+		return false
+	var ray_origin = global_position + eye_offset
 	var player_center = _aim_point(target_player)
 	var dist_to_player = ray_origin.distance_to(player_center)
 
@@ -298,10 +328,22 @@ func update_state_indicator(state_name: String) -> void:
 			state_indicator.visible = true
 			state_indicator.text = "!"
 			state_indicator.add_theme_color_override("font_color", Color("#ff0055"))
+		"investigate":
+			state_indicator.visible = true
+			state_indicator.text = "?"
+			state_indicator.add_theme_color_override("font_color", Color("#ffaa00"))
+		"distracted":
+			state_indicator.visible = true
+			state_indicator.text = "~"
+			state_indicator.add_theme_color_override("font_color", Color("#33f2ff"))
+		_:
+			state_indicator.visible = false
 
 # --- DEBUG VISUAL DE DEPURAÇÃO DO RAYCAST ---
 
 func _draw() -> void:
+	if show_vision_cone:
+		_draw_vision_cone()
 	if not show_debug_vision or not is_instance_valid(ray_cast):
 		return
 
@@ -332,3 +374,106 @@ func _aim_point(target: Node2D) -> Vector2:
 	if target.has_method("get_aim_point"):
 		return target.get_aim_point()
 	return target.global_position + Vector2(0, -20)
+
+
+func _current_state_name() -> String:
+	if state_machine and state_machine.current_state:
+		return String(state_machine.current_state.name).to_lower()
+	return ""
+
+
+# --- Reações a hack e alarme ---------------------------------------------
+
+## Hack no agente: o implante "toca" e ele fica distraído (cego e surdo) por alguns segundos.
+func _on_hacked() -> void:
+	if enemy_type == EnemyType.CYBORG:
+		# Unidades lógicas: o hack reinicia a rota (volta ao primeiro waypoint).
+		var patrol: Node = state_machine.states.get("patrol")
+		if patrol:
+			patrol.current_waypoint_idx = 0
+		state_machine.transition_to("Patrol")
+		return
+	state_machine.transition_to("Distracted")
+
+
+## Chamado por distrações (quiosque, etc.): vai até o ponto e olha em volta.
+func investigate(world_point: Vector2) -> void:
+	if enemy_type == EnemyType.CYBORG:
+		return
+	if _current_state_name() in ["maxalert", "stunned"]:
+		return
+	target_noise_pos = world_point
+	if state_machine.current_state and state_machine.current_state.name == "Investigate":
+		state_machine.current_state.enter()  # reinicia com o novo ponto
+	else:
+		state_machine.transition_to("Investigate")
+
+
+func _on_alarm_raised(world_position: Vector2) -> void:
+	if _current_state_name() in ["stunned"]:
+		return
+	if global_position.distance_to(world_position) > alarm_response_radius:
+		return
+	last_known_player_pos = world_position
+	state_machine.transition_to("MaxAlert")
+
+
+# --- Animação --------------------------------------------------------------
+
+func _update_animation() -> void:
+	var spr := get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
+	if spr == null or spr.sprite_frames == null or spr.sprite_frames.get_animation_names().is_empty():
+		return
+	var moving := absf(velocity.x) > 8.0
+	var anim: StringName = &"idle"
+	match _current_state_name():
+		"patrol":
+			anim = &"patrol" if moving else &"idle"
+		"suspicious", "distracted":
+			anim = &"suspicious"
+		"investigate", "search":
+			anim = &"patrol" if moving else &"suspicious"
+		"maxalert":
+			if is_firing_taser or (attack_timer and not attack_timer.is_stopped()):
+				anim = &"shoot"
+			else:
+				anim = &"chase" if moving else &"alert"
+		"stunned":
+			anim = &"stunned"
+	if spr.sprite_frames.has_animation(anim) and spr.animation != anim:
+		spr.play(anim)
+
+
+# --- Cone de visão ---------------------------------------------------------
+
+func _draw_vision_cone() -> void:
+	var st := _current_state_name()
+	if st in ["distracted", "stunned"]:
+		return
+	var origin := eye_offset
+	var g_origin := global_position + eye_offset
+	var facing := get_facing_direction()
+	var base_angle := facing.angle()
+	var half := deg_to_rad(vision_angle_deg * 0.5)
+	var pts := PackedVector2Array([origin])
+	var space := get_world_2d().direct_space_state
+	var steps := 12
+	for i in steps + 1:
+		var a := base_angle - half + 2.0 * half * float(i) / float(steps)
+		var end := g_origin + Vector2.from_angle(a) * vision_range
+		var q := PhysicsRayQueryParameters2D.create(g_origin, end, 1)
+		var ex: Array[RID] = [get_rid()]
+		var p := get_player()
+		if p is CollisionObject2D:
+			ex.append((p as CollisionObject2D).get_rid())
+		q.exclude = ex
+		var hit := space.intersect_ray(q)
+		if not hit.is_empty():
+			end = hit["position"]
+		pts.append(end - global_position)
+	var col := Color(1.0, 0.55, 0.15, 0.10)
+	if st == "maxalert":
+		col = Color(1.0, 0.1, 0.12, 0.22)
+	elif st in ["suspicious", "search", "investigate"]:
+		col = Color(1.0, 0.75, 0.1, 0.16)
+	draw_colored_polygon(pts, col)

@@ -6,6 +6,9 @@ signal state_changed(new_state: State)
 signal hack_vision_changed(active: bool)
 signal variance_changed(value: float, limit: float)
 signal sweep_triggered
+## Câmera/varredura detectou o jogador: guardas próximos vão até a posição.
+signal alarm_raised(world_position: Vector2)
+signal lore_unlocked(entry_id: String)
 
 enum State { PLAYING, HACK_VISION, HACKING, PAUSED, GAME_OVER }
 
@@ -17,6 +20,12 @@ const WORLD_SPEED_HACKING: float = 0.05
 var state: State = State.PLAYING
 var variance: float = 0.0
 var variance_limit: float = 100.0
+## Andar atual da torre (1 = favelas). Define a dificuldade base das equações.
+var current_floor: int = 1
+## Logs de lore já lidos (ids do JSON), persistem entre fases.
+var lore_read: Array[String] = []
+## Variância somada por cada alarme disparado.
+const ALARM_VARIANCE: float = 20.0
 ## Acessibilidade: pausa total durante a equação em vez de câmera lenta.
 var pause_on_hacking: bool = false
 
@@ -49,6 +58,26 @@ func add_variance(amount: float) -> void:
 func reset_variance() -> void:
 	variance = 0.0
 	variance_changed.emit(variance, variance_limit)
+
+
+## Chamado ao entrar numa fase nova (ou recomeçar após game over).
+func start_level(floor_number: int) -> void:
+	current_floor = floor_number
+	set_state(State.PLAYING)
+	Engine.time_scale = WORLD_SPEED_NORMAL
+	reset_variance()
+
+
+func raise_alarm(world_position: Vector2) -> void:
+	alarm_raised.emit(world_position)
+	add_variance(ALARM_VARIANCE)
+
+
+func mark_lore_read(entry_id: String) -> void:
+	if entry_id in lore_read:
+		return
+	lore_read.append(entry_id)
+	lore_unlocked.emit(entry_id)
 
 
 func _time_scale_for(s: State) -> float:

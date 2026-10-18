@@ -1,0 +1,134 @@
+extends Node
+## Simulação da Fase 1 (favelas): exercita as mecânicas por código/input e
+## imprime OK/FALHOU por item. Uso:
+##   godot --headless --path . res://tests/stage_sim.tscn
+
+var lvl: Node
+var p: Eduardo
+var fails := 0
+
+
+func step(n: int) -> void:
+	for i in n:
+		await get_tree().physics_frame
+
+
+func tp(x: float, y: float) -> void:
+	p.global_position = Vector2(x, y)
+	p.velocity = Vector2.ZERO
+
+
+func check(label: String, cond: bool, extra: String = "") -> void:
+	print(("OK      " if cond else "FALHOU  ") + label + ("  " + extra if extra != "" else ""))
+	if not cond:
+		fails += 1
+
+
+func freeze_guards(on: bool) -> void:
+	for g in get_tree().get_nodes_in_group("guards"):
+		g.process_mode = Node.PROCESS_MODE_DISABLED if on else Node.PROCESS_MODE_INHERIT
+
+
+func _ready() -> void:
+	lvl = load("res://scenes/levels/slums/slums_stage1.tscn").instantiate()
+	add_child(lvl)
+	p = lvl.get_node("Eduardo")
+	p.defense_changed.connect(func(c, m): print("   [dano] defesa=", c, "/", m, " em x=", snappedf(p.global_position.x, 1), " y=", snappedf(p.global_position.y, 1)))
+	await step(30)
+	check("spawn no chão da rua (y≈16)", absf(p.global_position.y - 16.0) < 3.0, "y=%.1f" % p.global_position.y)
+	check("variância zerada ao entrar", GameManager.variance == 0.0)
+	freeze_guards(true)
+
+	# Esconderijo tutorial (sacos de lixo em x=430).
+	tp(430, 16); await step(10)
+	Input.action_press("interact_world"); await step(2); Input.action_release("interact_world"); await step(10)
+	check("esconder nos sacos de lixo", p.is_hidden() and not p.is_detectable())
+	Input.action_press("interact_world"); await step(2); Input.action_release("interact_world"); await step(10)
+	check("sair do esconderijo", not p.is_hidden())
+
+	# Caixotes sob a luz do RAMEN: não dá para esconder até apagar o neon.
+	tp(1000, 16); await step(10)
+	check("luz do RAMEN expõe o jogador", p.is_in_light())
+	Input.action_press("interact_world"); await step(2); Input.action_release("interact_world"); await step(5)
+	check("não esconde sob a luz", not p.is_hidden())
+	var ramen := lvl.get_node("NeonSigns/NeonRamenFlicker2f") as NeonSign
+	var hv := p.get_node("HackVision") as HackVision
+	hv.debug_hack(ramen.get_node("Hackable"), true); await step(5)
+	check("hack apaga o RAMEN", not ramen.powered)
+	check("variância subiu com o hack", GameManager.variance > 0.0, "%.0f" % GameManager.variance)
+	await step(5)
+	Input.action_press("interact_world"); await step(2); Input.action_release("interact_world"); await step(10)
+	check("esconde nos caixotes depois de apagar a luz", p.is_hidden())
+	Input.action_press("interact_world"); await step(2); Input.action_release("interact_world"); await step(5)
+
+	# Escada até a passarela.
+	tp(1488, 16); await step(10)
+	Input.action_press("climb_up"); await step(260); Input.action_release("climb_up"); await step(40)
+	check("escada leva à passarela (y≈-144)", absf(p.global_position.y + 144.0) < 6.0, "y=%.1f state=%s" % [p.global_position.y, p.State.keys()[p.state]])
+
+	# Degraus para o quarteirão elevado (2 x 32 px).
+	tp(1960, 16); await step(5)
+	Input.action_press("move_right"); await step(2)
+	for k in 2:
+		Input.action_press("jump"); await step(20); Input.action_release("jump"); await step(30)
+	await step(30)
+	Input.action_release("move_right"); await step(10)
+	check("sobe os degraus até o quarteirão (y≈-48)", absf(p.global_position.y + 48.0) < 3.0, "x=%.0f y=%.1f" % [p.global_position.x, p.global_position.y])
+
+	# Quiosque atrai o guarda 2.
+	freeze_guards(false)
+	var g2 := lvl.get_node("Guards/Guard2")
+	var kiosk := lvl.get_node("AxiomaKiosk")
+	tp(1700, 16); await step(5)
+	hv.debug_hack(kiosk.get_node("Hackable"), true); await step(5)
+	check("quiosque manda o guarda investigar", g2._current_state_name() == "investigate", g2._current_state_name())
+	freeze_guards(true)
+
+	# Câmera de parede desliga com hack.
+	var wall := lvl.get_node("Cameras/WallCamera") as SecurityCamera
+	hv.debug_hack(wall.get_node("Hackable"), true); await step(60)
+	check("câmera hackeada desliga", wall.mode == SecurityCamera.Mode.DISABLED, str(wall.mode))
+
+	# Câmera vê o jogador e dispara alarme (dome no beco coberto).
+	var dome := lvl.get_node("Cameras/DomeCamera") as SecurityCamera
+	var alarms := [0]
+	var cb := func(_pos): alarms[0] += 1
+	GameManager.alarm_raised.connect(cb)
+	tp(4300, -48); await step(5)
+	dome.aim_deg = 90.0
+	await step(120)
+	check("dome detecta e dispara alarme", alarms[0] > 0, "alarmes=%d modo=%s" % [alarms[0], dome.mode])
+	GameManager.alarm_raised.disconnect(cb)
+
+	# Túnel baixo: em pé bloqueia, agachado passa.
+	tp(3300, -48); await step(10)
+	Input.action_press("move_right"); await step(150)
+	var x_stand := p.global_position.x
+	check("túnel bloqueia em pé", x_stand < 3400.0, "x=%.0f" % x_stand)
+	Input.action_press("crouch"); await step(20)
+	await step(480)
+	check("túnel passa agachado", p.global_position.x > 3800.0, "x=%.0f" % p.global_position.x)
+	Input.action_release("crouch"); Input.action_release("move_right"); await step(30)
+
+	# Terminal de lore.
+	var term := lvl.get_node("DataTerminals/Terminal_slums_03_variance")
+	tp(3880, -48); await step(10)
+	check("terminal detecta o jogador perto", term.is_player_near())
+	term.open(); await step(2)
+	var reader := get_tree().get_first_node_in_group("lore_reader")
+	check("leitor de lore abre e pausa", reader.is_open() and get_tree().paused)
+	reader._close(); await step(2)
+	check("lore marcada como lida", "slums_03_variance" in GameManager.lore_read)
+
+	# Porta: bloqueia até o hack, depois libera.
+	var door := lvl.get_node("SecurityDoor") as SecurityDoor
+	tp(4600, -48); await step(5)
+	Input.action_press("move_right"); await step(120)
+	check("porta trancada bloqueia", p.global_position.x < door.global_position.x, "x=%.0f" % p.global_position.x)
+	hv.debug_hack(door.get_node("Hackable"), true); await step(60)
+	await step(120)
+	Input.action_release("move_right")
+	check("porta hackeada abre e deixa passar", door.is_open and p.global_position.x > door.global_position.x + 20.0, "x=%.0f" % p.global_position.x)
+
+	print("\n%s — %d falha(s)" % ["TUDO OK" if fails == 0 else "HÁ FALHAS", fails])
+	get_tree().quit()

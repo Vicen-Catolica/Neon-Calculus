@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=54 format=3]
+[gd_resource type="SpriteFrames" load_steps=76 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/characters/eduardo/idle/frame_1.png" id="1"]
 [ext_resource type="Texture2D" path="res://assets/characters/eduardo/idle/frame_2.png" id="2"]
@@ -52,25 +52,53 @@
 [ext_resource type="Texture2D" path="res://assets/characters/eduardo/hack_fx/frame_2.png" id="50"]
 [ext_resource type="Texture2D" path="res://assets/characters/eduardo/hack_fx/frame_3.png" id="51"]
 [ext_resource type="Texture2D" path="res://assets/characters/eduardo/hack_fx/frame_4.png" id="52"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/jump/frame_1.png" id="53"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/jump/frame_2.png" id="54"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/jump/frame_3.png" id="55"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/jump/frame_4.png" id="56"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/jump/frame_5.png" id="57"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/fall/frame_1.png" id="58"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/fall/frame_2.png" id="59"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/fall/frame_3.png" id="60"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/fall/frame_4.png" id="61"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/land/frame_1.png" id="62"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/land/frame_2.png" id="63"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/land/frame_3.png" id="64"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/land/frame_4.png" id="65"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/ladder_enter/frame_1.png" id="66"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/ladder_enter/frame_2.png" id="67"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/ladder_enter/frame_3.png" id="68"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/ladder_enter/frame_4.png" id="69"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/ladder_climb/frame_1.png" id="70"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/ladder_climb/frame_2.png" id="71"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/ladder_climb/frame_3.png" id="72"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/ladder_climb/frame_4.png" id="73"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/ladder_climb/frame_5.png" id="74"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/ladder_climb/frame_6.png" id="75"]
 
 [resource]
 animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("1")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("2")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("3")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("4")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("5")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("6")
 }],
@@ -81,25 +109,32 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("7")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("8")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("9")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("10")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("11")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("12")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("13")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("14")
 }],
@@ -110,25 +145,32 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("15")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("16")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("17")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("18")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("19")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("20")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("21")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("22")
 }],
@@ -139,19 +181,24 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("23")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("24")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("25")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("26")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("27")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("28")
 }],
@@ -162,13 +209,16 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("29")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("30")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("31")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("32")
 }],
@@ -179,25 +229,32 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("33")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("34")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("35")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("36")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("37")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("38")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("39")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("40")
 }],
@@ -208,13 +265,16 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("41")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("42")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("43")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("44")
 }],
@@ -225,13 +285,16 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("45")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("46")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("47")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("48")
 }],
@@ -242,17 +305,132 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("49")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("50")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("51")
-}, {
+},
+{
 "duration": 1.0,
 "texture": ExtResource("52")
 }],
 "loop": true,
 "name": &"hack_fx",
 "speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("53")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("54")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("55")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("56")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("57")
+}],
+"loop": false,
+"name": &"jump",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("58")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("59")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("60")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("61")
+}],
+"loop": true,
+"name": &"fall",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("62")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("63")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("64")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("65")
+}],
+"loop": false,
+"name": &"land",
+"speed": 16.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("66")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("67")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("68")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("69")
+}],
+"loop": false,
+"name": &"ladder_enter",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("70")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("71")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("72")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("73")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("74")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("75")
+}],
+"loop": true,
+"name": &"ladder_climb",
+"speed": 9.0
 }]

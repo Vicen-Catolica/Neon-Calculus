@@ -1,0 +1,54 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/objects/axioma_kiosk.gd" id="1_rg1lc"]
+[ext_resource type="Texture2D" path="res://assets/terminals/equation_hacking/frame_1.png" id="2_s2nwj"]
+[ext_resource type="Texture2D" path="res://assets/terminals/equation_hacking/frame_2.png" id="3_87v3v"]
+[ext_resource type="Texture2D" path="res://assets/terminals/equation_hacking/frame_3.png" id="4_n5jxn"]
+[ext_resource type="Texture2D" path="res://assets/terminals/equation_hacking/frame_4.png" id="5_a80q7"]
+[ext_resource type="Texture2D" path="res://assets/terminals/equation_locked/frame_1.png" id="6_drq3c"]
+[ext_resource type="Texture2D" path="res://assets/terminals/equation_locked/frame_2.png" id="7_rfbyo"]
+[ext_resource type="Script" path="res://scripts/hacking/hackable.gd" id="8_3i4d7"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ivw61"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_s2nwj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_87v3v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_n5jxn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_a80q7")
+}],
+"loop": 1,
+"name": &"hacking",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("6_drq3c")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_rfbyo")
+}],
+"loop": 1,
+"name": &"locked",
+"speed": 2.0
+}]
+
+[node name="AxiomaKiosk" type="Node2D" unique_id=369391808]
+script = ExtResource("1_rg1lc")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=704974764]
+position = Vector2(0, -48)
+sprite_frames = SubResource("SpriteFrames_ivw61")
+animation = &"locked"
+
+[node name="Hackable" type="Node2D" parent="." unique_id=43465901]
+position = Vector2(4, -66)
+script = ExtResource("8_3i4d7")
+display_name = "QUIOSQUE AXIOMA"

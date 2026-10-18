@@ -1,0 +1,105 @@
+{
+  "frame_size": [
+    80,
+    80
+  ],
+  "pivot": [
+    27,
+    51
+  ],
+  "angles_deg": [
+    -15.0,
+    -7.5,
+    0.0,
+    7.5,
+    15.0,
+    22.5,
+    30.0,
+    37.5,
+    45.0
+  ],
+  "columns": [
+    {
+      "index": 0,
+      "angle_offset_deg": -15.0,
+      "aim_deg": 11.2,
+      "lens_point": [
+        43.8,
+        38.0
+      ]
+    },
+    {
+      "index": 1,
+      "angle_offset_deg": -7.5,
+      "aim_deg": 18.7,
+      "lens_point": [
+        45.4,
+        40.6
+      ]
+    },
+    {
+      "index": 2,
+      "angle_offset_deg": 0.0,
+      "aim_deg": 26.2,
+      "lens_point": [
+        46.4,
+        43.1
+      ]
+    },
+    {
+      "index": 3,
+      "angle_offset_deg": 7.5,
+      "aim_deg": 33.7,
+      "lens_point": [
+        47.1,
+        45.6
+      ]
+    },
+    {
+      "index": 4,
+      "angle_offset_deg": 15.0,
+      "aim_deg": 41.2,
+      "lens_point": [
+        47.6,
+        48.8
+      ]
+    },
+    {
+      "index": 5,
+      "angle_offset_deg": 22.5,
+      "aim_deg": 48.7,
+      "lens_point": [
+        47.8,
+        51.4
+      ]
+    },
+    {
+      "index": 6,
+      "angle_offset_deg": 30.0,
+      "aim_deg": 56.2,
+      "lens_point": [
+        47.4,
+        53.8
+      ]
+    },
+    {
+      "index": 7,
+      "angle_offset_deg": 37.5,
+      "aim_deg": 63.7,
+      "lens_point": [
+        46.7,
+        56.6
+      ]
+    },
+    {
+      "index": 8,
+      "angle_offset_deg": 45.0,
+      "aim_deg": 71.2,
+      "lens_point": [
+        45.6,
+        59.4
+      ]
+    }
+  ],
+  "base_aim_deg_note": "0 deg = pointing right, positive = clockwise (downward), Godot convention"
+}

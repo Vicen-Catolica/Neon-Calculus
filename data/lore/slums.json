@@ -1,0 +1,26 @@
+{
+	"slums_01_sine": {
+		"source": "Terminal da Resistência — esconderijo",
+		"title": "CANAL SEGURO // SINE",
+		"author": "SINE",
+		"text": "Conexão neural estabelecida. Olá, Eduardo.\n\nVocê está no Submundo de Neon, na base da torre da OmniCorp. Acima de nós, a Axioma calcula cada passo desta cidade. Aqui embaixo, as câmeras ainda são velhas e os agentes ainda são humanos — com sono, tédio e cotas a cumprir.\n\nSegure [Q] para ver o mundo como eu vejo. Tudo o que pisca em ciano pode ser reescrito com uma equação. Mas cada alteração gera variância, e a Axioma percebe padrões fora da curva.\n\nO contrato da Resistência é simples: entrar no nível inferior e trazer um disco de dados. Não seja visto."
+	},
+	"slums_02_quota": {
+		"source": "Terminal abandonado — oficina de reparos",
+		"title": "REGISTRO DE TURNO #4471",
+		"author": "Agente R. Moraes, Guarda Corporativa",
+		"text": "Mais uma noite de ronda na Viela 9. A Axioma subiu a cota de 'contatos de baixa variância' de novo: doze por turno. Doze! Ninguém aqui embaixo é previsível o bastante para isso.\n\nO implante tocou três vezes hoje sem motivo. O técnico disse que é interferência das antenas piratas. Eu acho que é a própria torre testando se a gente ainda obedece.\n\nSe alguém ler isto: o ar-condicionado da ramen bar é o único ponto da rua que a câmera da esquina não cobre."
+	},
+	"slums_03_variance": {
+		"source": "Terminal da Resistência — passarela",
+		"title": "NOTA DE CAMPO // INFILTRADORES LÓGICOS",
+		"author": "Dra. L. Okonkwo",
+		"text": "O Score de Variância não mede crimes. Mede surpresa.\n\nQuem vive previsivelmente ganha crédito, comida e luz. Quem desvia da média é marcado, e depois de marcado, desaparece. Por isso as favelas são escuras: luz custa previsibilidade.\n\nA Axioma enxerga números, não pessoas. Uma equação resolvida no ponto certo apaga uma câmera tão bem quanto um tiro — e não deixa corpo para trás.\n\nLembrem: hackear demais também é um padrão. Respirem. Escondam-se. Calculem."
+	},
+	"slums_04_determinism": {
+		"source": "Terminal corporativo — porta de serviço",
+		"title": "MEMORANDO INTERNO — CONFIDENCIAL",
+		"author": "Divisão de Otimização Social, OmniCorp",
+		"text": "Assunto: cronograma do PROJETO DETERMINISMO.\n\nA fase de testes do controle neural direto nas favelas do setor 9 foi concluída com 94,2% de conformidade. Os 5,8% restantes foram reclassificados como 'ruído estatístico' e removidos da amostra.\n\nAtivação em larga escala prevista para o próximo ciclo de Atualização Mandatória. Após a ativação, a variância deixará de ser um problema a ser medido e passará a ser um problema resolvido.\n\nAcesso ao núcleo: somente pelo elevador de serviço da torre, a partir do nível inferior."
+	}
+}
