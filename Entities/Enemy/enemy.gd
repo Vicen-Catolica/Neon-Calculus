@@ -25,6 +25,13 @@ signal alarm_triggered(last_position: Vector2)
 ## Raio em que o guarda responde a um alarme de câmera/varredura.
 @export var alarm_response_radius: float = 900.0
 
+## Segundos para encher a barra de detecção com o jogador no limite do cone
+## (de perto enche em `detect_time_near`).
+@export var detect_time_far: float = 1.6
+@export var detect_time_near: float = 0.45
+## Quanto a barra esvazia por segundo sem ver o jogador.
+@export var detect_decay: float = 0.4
+
 @export_category("Debug Visual")
 @export var show_debug_vision: bool = true
 ## Desenha o cone de visão (laranja em patrulha, vermelho em alerta).
@@ -45,6 +52,12 @@ var last_known_player_pos: Vector2 = Vector2.ZERO
 var target_noise_pos: Vector2 = Vector2.ZERO
 var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 
+## Barra de detecção (0..1). Cheia = MaxAlert; acima de SUSPECT_AT o guarda estranha.
+var awareness: float = 0.0
+const SUSPECT_AT: float = 0.35
+## Camada própria: o jogador atravessa os guardas e eles não colidem entre si.
+const ENEMY_LAYER: int = 1 << 2
+
 var is_firing_taser: bool = false
 var taser_target_ref: Node2D = null
 
@@ -58,6 +71,10 @@ func _ready() -> void:
 		ray_cast.enabled = false
 
 	ray_cast.position = eye_offset
+	# Só colide com o mundo (camada 1); o jogador passa por dentro dos guardas
+	# e um jogador escondido não trava a rota deles.
+	collision_layer = ENEMY_LAYER
+	collision_mask = 1
 
 	if has_node("TaserLine"):
 		taser_line = $TaserLine
@@ -108,10 +125,10 @@ func _ready() -> void:
 		hackable.hacked.connect(_on_hacked)
 
 	state_machine.init(self)
+	get_player.call_deferred()
 
 func _process(_delta: float) -> void:
-	if show_debug_vision or show_vision_cone:
-		queue_redraw()
+	queue_redraw()
 	_update_animation()
 
 	if is_firing_taser and is_instance_valid(taser_target_ref):
@@ -123,12 +140,20 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y += gravity * delta
 		
-	check_sensors()
+	check_sensors(delta)
 
 func get_player() -> Node2D:
 	if not is_instance_valid(player_ref):
 		player_ref = get_tree().get_first_node_in_group("Player")
+		_ignore_player_body(player_ref)
 	return player_ref
+
+
+## O jogador também fica na camada 1 (mundo); a exceção impede que o guarda o
+## trate como parede (e que um jogador escondido trave a patrulha).
+func _ignore_player_body(p: Node) -> void:
+	if p is PhysicsBody2D:
+		add_collision_exception_with(p)
 
 func get_facing_direction() -> Vector2:
 	var is_flipped = false
@@ -148,15 +173,21 @@ func update_facing(dir_x: float) -> void:
 
 # --- SISTEMA UNIFICADO DE SENSORES ---
 
-func check_sensors() -> void:
+func check_sensors(delta: float = 0.0) -> void:
 	var target_player = get_player()
+	var st := _current_state_name()
+	if st == "maxalert":
+		awareness = 1.0
 	if not target_player:
+		_decay_awareness(delta)
 		return
 	# Distraído (implante tocando) ou desacordado: não vê nem ouve.
-	if _current_state_name() in ["distracted", "stunned"]:
+	if st in ["distracted", "stunned"]:
+		_decay_awareness(delta)
 		return
 	# Escondido: invisível e silencioso.
 	if target_player.has_method("is_detectable") and not target_player.is_detectable():
+		_decay_awareness(delta)
 		return
 
 	var ray_origin = global_position + eye_offset
@@ -176,9 +207,19 @@ func check_sensors() -> void:
 	if is_in_view_cone or is_touching:
 		if has_line_of_sight_to(target_player, player_center):
 			last_known_player_pos = target_player.global_position
-			if state_machine and state_machine.current_state and state_machine.current_state.name != "MaxAlert":
+			if st == "maxalert":
+				return
+			# Barra de detecção: enche mais rápido de perto; encostar é instantâneo.
+			var t := clampf(dist_to_player / vision_range, 0.0, 1.0)
+			var fill_time := lerpf(detect_time_near, detect_time_far, t)
+			awareness = 1.0 if is_touching else minf(awareness + delta / fill_time, 1.0)
+			if awareness >= 1.0:
 				state_machine.transition_to("MaxAlert")
+			elif awareness >= SUSPECT_AT and st == "patrol":
+				target_noise_pos = target_player.global_position
+				state_machine.transition_to("Suspicious")
 			return
+	_decay_awareness(delta)
 
 	# 2. TESTE DE AUDIÇÃO (Prioridade 2 -> Search / Suspicious)
 	if is_player_in_hearing_area and enemy_type != EnemyType.CYBORG:
@@ -208,6 +249,11 @@ func check_sensors() -> void:
 				if current_state_name == "Patrol":
 					target_noise_pos = target_player.global_position
 					state_machine.transition_to("Suspicious")
+
+func _decay_awareness(delta: float) -> void:
+	if _current_state_name() == "maxalert":
+		return
+	awareness = maxf(awareness - detect_decay * delta, 0.0)
 
 # --- VISÃO VIA NÓ RAYCAST2D ---
 
@@ -248,6 +294,7 @@ func is_player_in_los() -> bool:
 func _on_hearing_body_entered(body: Node2D) -> void:
 	if body.is_in_group("Player"):
 		player_ref = body
+		_ignore_player_body(body)
 		is_player_in_hearing_area = true
 
 func _on_hearing_body_exited(body: Node2D) -> void:
@@ -344,6 +391,7 @@ func update_state_indicator(state_name: String) -> void:
 func _draw() -> void:
 	if show_vision_cone:
 		_draw_vision_cone()
+	_draw_awareness_bar()
 	if not show_debug_vision or not is_instance_valid(ray_cast):
 		return
 
@@ -477,3 +525,18 @@ func _draw_vision_cone() -> void:
 	elif st in ["suspicious", "search", "investigate"]:
 		col = Color(1.0, 0.75, 0.1, 0.16)
 	draw_colored_polygon(pts, col)
+
+
+# --- Barra de detecção -----------------------------------------------------
+
+func _draw_awareness_bar() -> void:
+	if awareness <= 0.01 or _current_state_name() == "maxalert":
+		return
+	var w := 34.0
+	var h := 5.0
+	var top := state_indicator.position.y + state_indicator.size.y if state_indicator else eye_offset.y - 30.0
+	var pos := Vector2(-w * 0.5, top)
+	draw_rect(Rect2(pos - Vector2(1, 1), Vector2(w + 2, h + 2)), Color(0, 0, 0, 0.75))
+	var col := Color(1.0, 0.8, 0.15).lerp(Color(1.0, 0.1, 0.25), awareness)
+	draw_rect(Rect2(pos, Vector2(w * awareness, h)), col)
+	draw_rect(Rect2(pos - Vector2(1, 1), Vector2(w + 2, h + 2)), Color(col.r, col.g, col.b, 0.9), false, 1.0)

@@ -42,14 +42,14 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_2y6jp"]
 size = Vector2(90, 100)
 
-[node name="DataTerminal" type="Area2D" unique_id=572262727]
+[node name="DataTerminal" type="Area2D" unique_id=871840325]
 script = ExtResource("1_5sa5o")
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=2021712087]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=913036473]
 position = Vector2(0, -40)
 sprite_frames = SubResource("SpriteFrames_l50yo")
 animation = &"idle"
 
-[node name="@CollisionShape2D@4" type="CollisionShape2D" parent="." unique_id=1752488009]
+[node name="@CollisionShape2D@4" type="CollisionShape2D" parent="." unique_id=667582708]
 position = Vector2(0, -50)
 shape = SubResource("RectangleShape2D_2y6jp")

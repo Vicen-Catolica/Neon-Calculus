@@ -18,7 +18,8 @@ enum Mode { SWEEP, ALERT, HACKED, DISABLED }
 @export var track_speed: float = 70.0
 @export var vision_range: float = 380.0
 @export var fov_deg: float = 34.0
-@export var exposure_to_alarm: float = 0.8
+## Segundos vendo o jogador até disparar o alarme (barra de detecção abaixo da câmera).
+@export var exposure_to_alarm: float = 1.5
 @export var disabled_time: float = 8.0
 @export var world_mask: int = 1
 
@@ -253,6 +254,7 @@ func _update_cone() -> void:
 
 
 func _draw() -> void:
+	_draw_exposure_bar()
 	if _cone.size() < 3:
 		return
 	var col := Color(1.0, 0.45, 0.15, 0.13) if mode == Mode.SWEEP else Color(1.0, 0.1, 0.12, 0.28)
@@ -260,3 +262,18 @@ func _draw() -> void:
 	var edge := Color(col.r, col.g, col.b, 0.5)
 	draw_line(_cone[0], _cone[1], edge, 1.0)
 	draw_line(_cone[0], _cone[_cone.size() - 1], edge, 1.0)
+
+
+func _draw_exposure_bar() -> void:
+	if mode != Mode.ALERT or _exposure <= 0.0:
+		return
+	var ratio := clampf(_exposure / exposure_to_alarm, 0.0, 1.0)
+	var w := 30.0
+	var h := 4.0
+	var pos := Vector2(-w * 0.5, _frame_size.y * 0.5 + 4.0)
+	draw_rect(Rect2(pos - Vector2(1, 1), Vector2(w + 2, h + 2)), Color(0, 0, 0, 0.75))
+	var col := Color(1.0, 0.8, 0.15).lerp(Color(1.0, 0.1, 0.25), ratio)
+	if ratio >= 1.0 and fmod(_blink, 0.3) < 0.15:
+		col = Color(1, 1, 1)
+	draw_rect(Rect2(pos, Vector2(w * ratio, h)), col)
+	draw_rect(Rect2(pos - Vector2(1, 1), Vector2(w + 2, h + 2)), Color(col.r, col.g, col.b, 0.9), false, 1.0)

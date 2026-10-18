@@ -3,12 +3,12 @@
 [ext_resource type="Script" path="res://scripts/objects/security_camera.gd" id="1_ywm0s"]
 [ext_resource type="Script" path="res://scripts/hacking/hackable.gd" id="2_m4m2w"]
 
-[node name="SecurityCamera" type="Node2D" unique_id=749939534]
+[node name="SecurityCamera" type="Node2D" unique_id=268631327]
 script = ExtResource("1_ywm0s")
 model = 1
 
-[node name="Sprite" type="Sprite2D" parent="." unique_id=1564176695]
+[node name="Sprite" type="Sprite2D" parent="." unique_id=61245584]
 
-[node name="Hackable" type="Node2D" parent="." unique_id=2040586331]
+[node name="Hackable" type="Node2D" parent="." unique_id=1366366067]
 script = ExtResource("2_m4m2w")
 display_name = "CÂMERA"

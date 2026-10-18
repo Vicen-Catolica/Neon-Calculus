@@ -31,7 +31,7 @@ func _build() -> void:
 	var font: Font = load("res://assets/fonts/Orbitron-Bold.ttf") if ResourceLoader.exists("res://assets/fonts/Orbitron-Bold.ttf") else null
 	var dim := ColorRect.new()
 	dim.color = Color(0.0, 0.02, 0.05, 0.72)
-	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(dim)
 
 	_panel = PanelContainer.new()
@@ -42,9 +42,13 @@ func _build() -> void:
 	style.set_content_margin_all(36)
 	_panel.add_theme_stylebox_override("panel", style)
 	_panel.custom_minimum_size = Vector2(1100, 0)
-	_panel.set_anchors_preset(Control.PRESET_CENTER)
-	_panel.position = Vector2(410, 160)
-	add_child(_panel)
+	# CenterContainer em tela cheia: o painel fica centralizado em qualquer
+	# resolução. (Antes, âncora central + position fixa somava o deslocamento
+	# ao centro e o painel saía pela direita/baixo.)
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(center)
+	center.add_child(_panel)
 
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 14)

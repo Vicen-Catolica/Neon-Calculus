@@ -330,12 +330,43 @@ func _add_background(lvl: Node) -> void:
 	par.repeat_size = Vector2(1536, 0)
 	par.repeat_times = 8
 	lvl.add_child(par)
-	var fav := Sprite2D.new()
-	fav.name = "Favela"
-	fav.texture = load("res://assets/backgrounds/slums/bg_favela_dark_seamless.png")
-	fav.centered = false
-	fav.position = Vector2(-768, 16 - 340)
-	par.add_child(fav)
+	# A favela "empilhada": cópias da arte para cima, cada vez mais escuras e
+	# azuladas, cobrem toda a altura que a câmera alcança (limit_top) — antes só
+	# havia 340 px e o céu preto aparecia num pulo.
+	var tex: Texture2D = load("res://assets/backgrounds/slums/bg_favela_dark_seamless.png")
+	var h := tex.get_height()
+	var tints := [Color(1, 1, 1), Color(0.72, 0.7, 0.82), Color(0.5, 0.48, 0.62), Color(0.32, 0.3, 0.42)]
+	# de cima para baixo: a cópia da rua (0) é desenhada por último, na frente
+	for i in range(tints.size() - 1, -1, -1):
+		var fav := Sprite2D.new()
+		fav.name = "Favela%d" % i
+		fav.texture = tex
+		fav.centered = false
+		fav.modulate = tints[i]
+		# copias ímpares espelhadas e deslocadas para disfarçar a repetição
+		fav.flip_h = i % 2 == 1
+		fav.position = Vector2(-768 + (i % 2) * 400, 16 - h * (i + 1) + i * 24)
+		par.add_child(fav)
+	# Névoa nas emendas entre as cópias (esconde a linha reta do topo da arte).
+	for i in range(1, tints.size()):
+		var seam_y := 16.0 - h * i + (i - 1) * 24 + 12
+		var fog := Polygon2D.new()
+		fog.name = "SeamFog%d" % i
+		var x0 := -768.0
+		var x1 := x0 + 1536.0
+		fog.polygon = PackedVector2Array([
+			Vector2(x0, seam_y - 50), Vector2(x1, seam_y - 50), Vector2(x1, seam_y), Vector2(x0, seam_y),
+		])
+		var c := Color(0.047, 0.04, 0.1)
+		fog.vertex_colors = PackedColorArray([Color(c, 0.0), Color(c, 0.0), Color(c, 0.85), Color(c, 0.85)])
+		par.add_child(fog)
+		var fog2 := fog.duplicate() as Polygon2D
+		fog2.name = "SeamFogLow%d" % i
+		fog2.polygon = PackedVector2Array([
+			Vector2(x0, seam_y), Vector2(x1, seam_y), Vector2(x1, seam_y + 40), Vector2(x0, seam_y + 40),
+		])
+		fog2.vertex_colors = PackedColorArray([Color(c, 0.85), Color(c, 0.85), Color(c, 0.0), Color(c, 0.0)])
+		par.add_child(fog2)
 
 
 func _paint(layer: TileMapLayer, rects: Array) -> void:
@@ -365,6 +396,8 @@ func _add_tiles(lvl: Node) -> void:
 	lvl.add_child(ground)
 	_paint(ground, GROUND_RECTS)
 
+	_add_floor_band(lvl)
+
 	var st := TileMapLayer.new()
 	st.name = "Structures"
 	st.tile_set = load(STRUCT_TS)
@@ -383,6 +416,35 @@ func _add_tiles(lvl: Node) -> void:
 		# vigas de apoio sob a ponta direita
 		for y in range(row + 1, 0):
 			st.set_cell(Vector2i(x1 - 1, y), 0, Vector2i(2, 1))
+
+
+## Faixas de chão em profundidade (falso 3D, sem colisão): [x0, x1, superfície].
+const FLOOR_BANDS := [
+	[-48.0, 2000.0, 16.0],     # rua
+	[2000.0, 2064.0, -16.0],   # degrau
+	[2064.0, 5328.0, -48.0],   # quarteirão elevado até a parede final
+]
+const FLOOR_BAND_TEX := "res://assets/tilesets/slums/floor_band.png"
+const FLOOR_BAND_BACK := 22.0  # px acima da superfície (ver tools/gen_floor_band.py)
+
+
+func _add_floor_band(lvl: Node) -> void:
+	var holder := Node2D.new()
+	holder.name = "FloorBand"
+	lvl.add_child(holder)
+	var tex: Texture2D = load(FLOOR_BAND_TEX)
+	var i := 0
+	for b in FLOOR_BANDS:
+		i += 1
+		var s := Sprite2D.new()
+		s.name = "Band%d" % i
+		s.texture = tex
+		s.centered = false
+		s.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+		s.region_enabled = true
+		s.region_rect = Rect2(b[0], 0, b[1] - b[0], tex.get_height())
+		s.position = Vector2(b[0], b[2] - FLOOR_BAND_BACK)
+		holder.add_child(s)
 
 
 func _add_ladders(lvl: Node) -> void:
@@ -411,7 +473,8 @@ func _prop(parent: Node, tex: String, x: float, ground_y: float, name: String) -
 	var s := Sprite2D.new()
 	s.name = name
 	s.texture = load("res://assets/props/slums/%s.png" % tex)
-	s.position = Vector2(x, ground_y - s.texture.get_height() / 2.0 + 1.0)
+	# Base do prop no meio da faixa de chão (desenhado em 3/4, pisa "dentro" da calçada).
+	s.position = Vector2(x, ground_y - s.texture.get_height() / 2.0 - 4.0)
 	parent.add_child(s)
 	return s
 
@@ -441,11 +504,9 @@ func _add_props(lvl: Node) -> void:
 		["crates", 1000.0, street, true, 56],
 		["dumpster", 1260.0, street, true, 60],
 		["tire", 1620.0, street, false, 0],
-		["ac_unit", 1690.0, -144.0, false, 0],
 		["trash_bags", 2210.0, block, true, 70],
 		["cardboard_box", 2800.0, block, true, 60],
 		["barrel", 2890.0, block, false, 0],
-		["pipes_cable", 3180.0, block, false, 0],
 		["crates", 4050.0, block, true, 56],
 		["tire", 4480.0, block, false, 0],
 	]
@@ -455,6 +516,19 @@ func _add_props(lvl: Node) -> void:
 		_prop(props, p[0], p[1], p[2], "%s_%d" % [p[0], n])
 		if p[3]:
 			_hide_spot(spots, p[1], p[2], p[4], "Hide_%s_%d" % [p[0], n])
+	# Presos nas fachadas (sobre os tiles do prédio, não no chão nem no ar):
+	# canos no prédio T1 logo acima da boca do túnel; ar-condicionado na torre.
+	_wall_prop(props, "pipes_cable", Vector2(110 * T, -190), "pipes_cable_wall")
+	_wall_prop(props, "ac_unit", Vector2(151 * T, -250), "ac_unit_wall")
+
+
+func _wall_prop(parent: Node, tex: String, center: Vector2, name: String) -> Sprite2D:
+	var s := Sprite2D.new()
+	s.name = name
+	s.texture = load("res://assets/props/slums/%s.png" % tex)
+	s.position = center
+	parent.add_child(s)
+	return s
 
 
 func _neon(parent: Node, tex: String, pos: Vector2, hackable: bool, light_size: Vector2 = Vector2.ZERO, light_offset: Vector2 = Vector2.ZERO) -> Sprite2D:
