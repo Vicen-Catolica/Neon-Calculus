@@ -19,7 +19,7 @@ func _ready() -> void:
 	_setup_cyberpunk_styles()
 	
 	await get_tree().process_frame
-	var player = get_tree().get_first_node_in_group("Player") as Player
+	var player = get_tree().get_first_node_in_group("Player") as Eduardo
 	if player:
 		if not player.defense_changed.is_connected(_on_defense_changed):
 			player.defense_changed.connect(_on_defense_changed)

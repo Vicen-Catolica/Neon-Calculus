@@ -1,0 +1,13 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/objects/security_camera.gd" id="1_j7qyo"]
+[ext_resource type="Script" path="res://scripts/hacking/hackable.gd" id="2_wjrgs"]
+
+[node name="SecurityCamera" type="Node2D" unique_id=1580989173]
+script = ExtResource("1_j7qyo")
+
+[node name="Sprite" type="Sprite2D" parent="." unique_id=1438135609]
+
+[node name="Hackable" type="Node2D" parent="." unique_id=664510505]
+script = ExtResource("2_wjrgs")
+display_name = "CÂMERA"

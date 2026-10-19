@@ -1,0 +1,25 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/objects/security_door.gd" id="1_kwogt"]
+[ext_resource type="Texture2D" path="res://assets/objects/door/door_sheet.png" id="2_0qws5"]
+[ext_resource type="Script" path="res://scripts/hacking/hackable.gd" id="3_s0v7l"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_m0qib"]
+size = Vector2(40, 136)
+
+[node name="SecurityDoor" type="StaticBody2D" unique_id=62452297]
+script = ExtResource("1_kwogt")
+
+[node name="Sprite" type="Sprite2D" parent="." unique_id=1278967187]
+position = Vector2(0, -72)
+texture = ExtResource("2_0qws5")
+hframes = 7
+
+[node name="Shape" type="CollisionShape2D" parent="." unique_id=1131562258]
+position = Vector2(0, -68)
+shape = SubResource("RectangleShape2D_m0qib")
+
+[node name="Hackable" type="Node2D" parent="." unique_id=924960245]
+position = Vector2(0, -80)
+script = ExtResource("3_s0v7l")
+display_name = "PORTA BIOMÉTRICA"

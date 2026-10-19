@@ -24,6 +24,9 @@ signal hacking_failed
 
 var math_generator = load("res://scenes/hacking_ui/MathGenerator.cs").new()
 
+## Opacidade do fundo durante o hack: o mapa congelado continua visível atrás.
+@export_range(0.0, 1.0) var background_opacity: float = 0.75
+
 var max_steps: int = 2
 var current_step: int = 0
 var step1_target_solution: int = 0
@@ -38,6 +41,7 @@ var _blink_timer: float = 0.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	add_to_group("hacking_ui")
 	hide()
 	
 	if ai_assistant_panel:
@@ -50,9 +54,14 @@ func _ready() -> void:
 	if submit_button:
 		submit_button.pressed.connect(_on_submit_pressed)
 	
+	var bg := get_node_or_null("Background") as ColorRect
+	if bg:
+		bg.color.a = background_opacity
+
 	if numpad_grid:
+		_add_edit_buttons()
 		for btn in numpad_grid.get_children():
-			if btn is Button:
+			if btn is Button and (btn as Button).text.is_valid_int():
 				btn.pressed.connect(func(): _on_numpad_key_pressed(btn.text))
 				
 	if btn_0:
@@ -64,6 +73,42 @@ func _ready() -> void:
 	_update_accessibility_equation_size()
 	if SettingsManager.has_signal("accessibility_settings_changed"):
 		SettingsManager.accessibility_settings_changed.connect(_update_accessibility_equation_size)
+
+## Troca os espaços vazios ao lado do 0 por "C" (limpa tudo) e "DEL" (apaga
+## o último dígito), com o mesmo estilo dos botões numéricos.
+func _add_edit_buttons() -> void:
+	var template := numpad_grid.get_node_or_null("Btn1") as Button
+	if template == null:
+		return
+	var slots := [["SpacerLeft", "BtnClear", "C", _clear_input],
+		["SpacerRight", "BtnDelete", "DEL", _delete_last_digit]]
+	for slot in slots:
+		var spacer := numpad_grid.get_node_or_null(String(slot[0]))
+		if spacer == null:
+			continue
+		var btn := template.duplicate() as Button
+		btn.name = slot[1]
+		btn.text = slot[2]
+		if btn.text.length() > 1:
+			btn.add_theme_font_size_override("font_size", 17)
+		btn.pressed.connect(slot[3])
+		var idx := spacer.get_index()
+		numpad_grid.remove_child(spacer)
+		spacer.queue_free()
+		numpad_grid.add_child(btn)
+		numpad_grid.move_child(btn, idx)
+
+
+func _delete_last_digit() -> void:
+	if current_input_text.length() > 0:
+		current_input_text = current_input_text.substr(0, current_input_text.length() - 1)
+		_update_input_display()
+
+
+func _clear_input() -> void:
+	current_input_text = ""
+	_update_input_display()
+
 
 func _update_accessibility_equation_size() -> void:
 	if equation_label:
@@ -340,9 +385,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 		
 	if event is InputEventKey and event.pressed:
-		if event.keycode == KEY_BACKSPACE and current_input_text.length() > 0:
-			current_input_text = current_input_text.substr(0, current_input_text.length() - 1)
-			_update_input_display()
+		if event.keycode == KEY_BACKSPACE:
+			_delete_last_digit()
+		elif event.keycode == KEY_DELETE:
+			_clear_input()
 		elif event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER:
 			_on_submit_pressed()
 		elif event.unicode >= 48 and event.unicode <= 57:

@@ -5,4 +5,8 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <RootNamespace>NovoProjetodeJogo</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- Testes NUnit têm projeto próprio em tests/NeonCalculus.Tests -->
+    <Compile Remove="tests/**" />
+  </ItemGroup>
 </Project>
