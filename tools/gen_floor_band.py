@@ -4,6 +4,10 @@ A colisão continua na linha da superfície; esta faixa é desenhada por cima da
 borda do tileset, de BACK px acima da superfície até FRONT px abaixo, para os
 pés dos personagens e as bases dos props (desenhados em 3/4) pisarem num chão.
 
+Também gera catwalk_band.png: a grade de metal das passarelas vista de cima
+(CW_BACK px acima da superfície, CW_FRONT abaixo), para o terminal e o
+jogador pisarem "dentro" da passarela.
+
 Uso: python tools/gen_floor_band.py  ->  assets/tilesets/slums/floor_band.png
 """
 import random
@@ -105,5 +109,39 @@ def main() -> None:
     print("salvo", OUT, img.size)
 
 
+CW_BACK = 14
+CW_FRONT = 3
+CW_OUT = OUT.parent / "catwalk_band.png"
+
+
+def catwalk() -> None:
+    w, h = 64, CW_BACK + CW_FRONT
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    px = img.load()
+    frame = (70, 74, 80)
+    frame_hi = (104, 108, 112)
+    bar = (52, 55, 60)
+    hole = (14, 14, 20)
+    for y in range(h - 2):
+        t = y / (h - 3)
+        for x in range(w):
+            # grade: barras transversais (em perspectiva) e longarinas
+            is_bar = (x % 4 == 0) or (y % 4 == 0)
+            c = bar if is_bar else hole
+            c = lerp(c, (0, 0, 0), 0.45 * (1 - t))  # fundo mais escuro
+            px[x, y] = (*c, 255)
+    for x in range(w):
+        px[x, 0] = (*lerp(frame, (0, 0, 0), 0.4), 255)
+        px[x, h - 3] = (*frame_hi, 255)
+        px[x, h - 2] = (*frame, 255)
+        px[x, h - 1] = (*LIP_DARK, 255)
+    for x in range(5, w, 16):  # ferrugem
+        for y in range(h - 3, h):
+            px[x, y] = (112, 64, 36, 255)
+    img.save(CW_OUT)
+    print("salvo", CW_OUT, img.size)
+
+
 if __name__ == "__main__":
     main()
+    catwalk()

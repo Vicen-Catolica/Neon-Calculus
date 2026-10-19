@@ -7,19 +7,19 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_m0qib"]
 size = Vector2(40, 136)
 
-[node name="SecurityDoor" type="StaticBody2D" unique_id=1445979584]
+[node name="SecurityDoor" type="StaticBody2D" unique_id=62452297]
 script = ExtResource("1_kwogt")
 
-[node name="Sprite" type="Sprite2D" parent="." unique_id=65841447]
+[node name="Sprite" type="Sprite2D" parent="." unique_id=1278967187]
 position = Vector2(0, -72)
 texture = ExtResource("2_0qws5")
 hframes = 7
 
-[node name="Shape" type="CollisionShape2D" parent="." unique_id=342640006]
+[node name="Shape" type="CollisionShape2D" parent="." unique_id=1131562258]
 position = Vector2(0, -68)
 shape = SubResource("RectangleShape2D_m0qib")
 
-[node name="Hackable" type="Node2D" parent="." unique_id=1631771443]
+[node name="Hackable" type="Node2D" parent="." unique_id=924960245]
 position = Vector2(0, -80)
 script = ExtResource("3_s0v7l")
 display_name = "PORTA BIOMÉTRICA"
