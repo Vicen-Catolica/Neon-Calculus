@@ -413,8 +413,9 @@ func _on_game_state_changed(new_state: GameManager.State) -> void:
 	if hacking_now == _hacking:
 		return
 	_hacking = hacking_now
-	if _hidden:
-		# Hackeando escondido: continua agachado atrás do objeto.
+	if _hidden or (_crouching and not _can_stand()):
+		# Hackeando escondido ou embaixo de um teto baixo (túnel, puxadinho):
+		# continua agachado; levantar aqui prendia o Eduardo no teto.
 		return
 	if hacking_now:
 		_crouching = false

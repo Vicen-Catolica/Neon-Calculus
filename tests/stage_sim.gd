@@ -110,6 +110,16 @@ func _ready() -> void:
 	check("túnel passa agachado", p.global_position.x > 3800.0, "x=%.0f" % p.global_position.x)
 	Input.action_release("crouch"); Input.action_release("move_right"); await step(30)
 
+	# Hackear agachado embaixo do túnel não levanta o Eduardo.
+	tp(3550, -48); Input.action_press("crouch"); await step(20)
+	GameManager.set_state(GameManager.State.HACKING); await step(10)
+	var crouched_in_hack: bool = p._crouching
+	GameManager.set_state(GameManager.State.PLAYING); Input.action_release("crouch"); await step(10)
+	check("hackear no túnel mantém agachado", crouched_in_hack and p._crouching and absf(p.global_position.y + 48.0) < 3.0,
+		"y=%.1f" % p.global_position.y)
+	Input.action_press("move_right"); await step(60); Input.action_release("move_right"); await step(5)
+	check("depois do hack segue andando agachado no túnel", p.global_position.x > 3570.0, "x=%.0f" % p.global_position.x)
+
 	# Terminal de lore.
 	var term := lvl.get_node("DataTerminals/Terminal_slums_03_variance")
 	tp(3880, -48); await step(10)
@@ -145,6 +155,9 @@ func _ready() -> void:
 	tp(4200, -48); await step(5)
 	Input.action_press("move_right"); await step(150); Input.action_release("move_right"); await step(5)
 	check("jogador atravessa o guarda", p.global_position.x > g3.global_position.x + 20.0, "p=%.0f g=%.0f" % [p.global_position.x, g3.global_position.x])
+	# câmeras desligadas: um alarme jogaria o guarda direto em alerta máximo
+	for c in get_tree().get_nodes_in_group("security_camera"):
+		c.process_mode = Node.PROCESS_MODE_DISABLED
 	g3.waypoints = []
 	g3.state_machine.transition_to("Patrol")
 	g3.update_facing(1.0)

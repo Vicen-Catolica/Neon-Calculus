@@ -27,8 +27,8 @@ signal alarm_triggered(last_position: Vector2)
 
 ## Segundos para encher a barra de detecção com o jogador no limite do cone
 ## (de perto enche em `detect_time_near`).
-@export var detect_time_far: float = 1.6
-@export var detect_time_near: float = 0.45
+@export var detect_time_far: float = 2.0
+@export var detect_time_near: float = 0.7
 ## Quanto a barra esvazia por segundo sem ver o jogador.
 @export var detect_decay: float = 0.4
 
@@ -55,6 +55,9 @@ var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 ## Barra de detecção (0..1). Cheia = MaxAlert; acima de SUSPECT_AT o guarda estranha.
 var awareness: float = 0.0
 const SUSPECT_AT: float = 0.35
+## Nó filho que desenha a barra por cima do sprite (o _draw do próprio guarda
+## fica atrás dos filhos e o sprite cobria a barra).
+var _awareness_bar: Node2D
 ## Camada própria: o jogador atravessa os guardas e eles não colidem entre si.
 const ENEMY_LAYER: int = 1 << 2
 
@@ -124,11 +127,19 @@ func _ready() -> void:
 		hackable.ignore_body = self
 		hackable.hacked.connect(_on_hacked)
 
+	_awareness_bar = Node2D.new()
+	_awareness_bar.name = "AwarenessBar"
+	_awareness_bar.z_index = 8
+	add_child(_awareness_bar)
+	_awareness_bar.draw.connect(_draw_awareness_bar)
+
 	state_machine.init(self)
 	get_player.call_deferred()
 
 func _process(_delta: float) -> void:
 	queue_redraw()
+	if _awareness_bar:
+		_awareness_bar.queue_redraw()
 	_update_animation()
 
 	if is_firing_taser and is_instance_valid(taser_target_ref):
@@ -243,10 +254,12 @@ func check_sensors(delta: float = 0.0) -> void:
 		if is_moving:
 			if is_running_flag:
 				if current_state_name in ["Patrol", "Suspicious", "Investigate"]:
+					awareness = maxf(awareness, 0.6)
 					last_known_player_pos = target_player.global_position
 					state_machine.transition_to("Search")
 			else:
 				if current_state_name == "Patrol":
+					awareness = maxf(awareness, SUSPECT_AT)
 					target_noise_pos = target_player.global_position
 					state_machine.transition_to("Suspicious")
 
@@ -391,7 +404,6 @@ func update_state_indicator(state_name: String) -> void:
 func _draw() -> void:
 	if show_vision_cone:
 		_draw_vision_cone()
-	_draw_awareness_bar()
 	if not show_debug_vision or not is_instance_valid(ray_cast):
 		return
 
@@ -530,13 +542,24 @@ func _draw_vision_cone() -> void:
 # --- Barra de detecção -----------------------------------------------------
 
 func _draw_awareness_bar() -> void:
-	if awareness <= 0.01 or _current_state_name() == "maxalert":
+	var st := _current_state_name()
+	var alert := st == "maxalert"
+	if st in ["distracted", "stunned"] or (awareness <= 0.01 and not alert):
 		return
-	var w := 34.0
-	var h := 5.0
-	var top := state_indicator.position.y + state_indicator.size.y if state_indicator else eye_offset.y - 30.0
+	var b := _awareness_bar
+	var w := 46.0
+	var h := 6.0
+	var top := eye_offset.y - 32.0
+	if state_indicator:
+		top = state_indicator.position.y + state_indicator.size.y + 1.0
 	var pos := Vector2(-w * 0.5, top)
-	draw_rect(Rect2(pos - Vector2(1, 1), Vector2(w + 2, h + 2)), Color(0, 0, 0, 0.75))
-	var col := Color(1.0, 0.8, 0.15).lerp(Color(1.0, 0.1, 0.25), awareness)
-	draw_rect(Rect2(pos, Vector2(w * awareness, h)), col)
-	draw_rect(Rect2(pos - Vector2(1, 1), Vector2(w + 2, h + 2)), Color(col.r, col.g, col.b, 0.9), false, 1.0)
+	var ratio := 1.0 if alert else awareness
+	b.draw_rect(Rect2(pos - Vector2(2, 2), Vector2(w + 4, h + 4)), Color(0, 0, 0, 0.85))
+	var col := Color(1.0, 0.8, 0.15).lerp(Color(1.0, 0.1, 0.25), ratio)
+	if alert and fmod(Time.get_ticks_msec() / 1000.0, 0.4) < 0.2:
+		col = Color(1, 0.55, 0.6)
+	b.draw_rect(Rect2(pos, Vector2(w * ratio, h)), col)
+	b.draw_rect(Rect2(pos - Vector2(1, 1), Vector2(w + 2, h + 2)), Color(col.r, col.g, col.b, 0.95), false, 1.0)
+	# marca do ponto em que ele começa a estranhar
+	var mx := pos.x + w * SUSPECT_AT
+	b.draw_line(Vector2(mx, pos.y - 1), Vector2(mx, pos.y + h + 1), Color(0, 0, 0, 0.8), 1.0)
