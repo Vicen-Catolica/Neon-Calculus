@@ -90,7 +90,26 @@ func _ready() -> void:
 	check("C: escada leva à passarela alta (y≈-112)", absf(p.global_position.y + 112.0) < 6.0, pos())
 	tp(2600, 16); await step(10)
 	await walk_right(150)
-	check("C: cai no fosso pelo patamar", absf(p.global_position.y - 112.0) < 6.0, pos())
+	# cai no fundo (112) ou em cima da esteira (102)
+	check("C: cai no fosso pelo patamar", p.global_position.y > 98.0 and p.global_position.y < 116.0, pos())
+	# Esteira do fosso: corre para a esquerda, contra o jogador.
+	var belt := lvl.get_node("Conveyors/PitConveyor") as Conveyor
+	var hv0 := p.get_node("HackVision") as HackVision
+	tp(3050, 100); await step(15)
+	var x0 := p.global_position.x
+	check("C: pisa na esteira (y≈102)", absf(p.global_position.y - 102.0) < 4.0, pos())
+	await step(60)
+	check("C: esteira arrasta o jogador parado", p.global_position.x < x0 - 100.0, "%.0f -> %.0f" % [x0, p.global_position.x])
+	tp(3050, 100); await step(10)
+	await walk_right(120)
+	check("C: andando não vence a esteira", p.global_position.x < 3050.0, pos())
+	hv0.debug_hack(belt.get_node("Hackable"), true); await step(5)
+	check("C: hack para a esteira", not belt.running and not belt.can_be_hacked())
+	tp(3050, 100); await step(10)
+	await walk_right(120)
+	check("C: com a esteira parada dá para atravessar", p.global_position.x > 3200.0, pos())
+	await step(int(belt.stop_time * 60.0) + 20)
+	check("C: esteira volta a rodar sozinha", belt.running)
 	await climb(103 * 32 + 16, 112.0, 220)
 	check("C: escada tira do fosso (y≈16)", absf(p.global_position.y - 16.0) < 6.0, pos())
 	var dome := lvl.get_node("Cameras/AssemblyDome") as Node2D

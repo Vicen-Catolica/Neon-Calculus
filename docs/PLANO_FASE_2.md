@@ -91,7 +91,7 @@ Enquanto a arte não chega: greybox com os tiles das favelas tingidos de laranja
 2. ✅ **Builder compartilhado** — `stage_builder_base.gd`; regerar a Fase 1. *Teste:* `stage_sim` continua 100% OK.
 3. ✅ **Greybox da Fase 2** — layout A–E só com mecânicas que já existem (guardas, câmeras, escadas, passarelas, dutos, esconderijos, terminal, porta, saída). *Teste:* fase atravessável do início ao fim; screenshots de cada trecho.
 4. ✅ **Válvula de vapor + bloqueio de visão.** *Teste:* guarda/câmera não detectam através do vapor; detectam depois que ele some.
-5. **Esteira** (andar sobre, parar/inverter por hack, queda no fosso).
+5. ✅ **Esteira** (andar sobre, parar/inverter por hack, queda no fosso).
 6. **Drone de patrulha** (voo, cone, alarme, hack de reinício).
 7. **Lockdown** (sala dos servidores).
 8. **Lore** — `data/lore/industrial.json`: SINE no duto de entrada; diário de um cientista da OmniCorp sobre as "Atualizações Mandatórias"; registro de um engenheiro de manutenção sobre a fábrica de drones; mensagem que cita o Dr. Vance (gancho da Fase 3).

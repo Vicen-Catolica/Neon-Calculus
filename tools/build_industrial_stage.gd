@@ -102,6 +102,7 @@ func build() -> Node:
 	_add_terminals(lvl)
 	_add_kiosk_and_door(lvl)
 	_add_valves(lvl)
+	_add_conveyors(lvl)
 	_add_cameras(lvl)
 	_add_guards(lvl)
 	_add_exit(lvl)
@@ -191,8 +192,6 @@ func _add_machinery(lvl: Node) -> void:
 	for x in [2850.0, 3130.0]:
 		_box(m, "Arm%d" % int(x), Rect2(x, CEILING_Y, 16, 150), steel)
 		_box(m, "ArmHead%d" % int(x), Rect2(x - 14, CEILING_Y + 150, 44, 20), Color(0.5, 0.18, 0.1))
-	# C: esteira provisória no fundo do fosso (vira mecânica na etapa 5)
-	_box(m, "ConveyorPlaceholder", Rect2(2740, PIT_Y - 10, 560, 10), Color(0.32, 0.26, 0.18))
 	# E: elevador de carga no topo do poço
 	_box(m, "ElevatorCage", Rect2(5150, -1008 - 170, 160, 170), Color(0.2, 0.17, 0.16, 0.85))
 
@@ -213,8 +212,7 @@ func _add_props(lvl: Node) -> void:
 		["dumpster", 1960.0, 16.0, true, 60],        # B: antes do quiosque
 		["barrel", 2140.0, 16.0, false, 0],
 		["tire", 2560.0, 16.0, false, 0],
-		["crates", 3020.0, PIT_Y, true, 56],         # C: no escuro do fosso
-		["barrel", 2860.0, PIT_Y, false, 0],
+		["crates", 3260.0, PIT_Y, true, 56],         # C: no escuro do fosso, fora da esteira
 		["cardboard_box", 1500.0, -144.0, true, 60], # B: na passarela
 		["crates", 5000.0, -496.0, true, 56],        # E: no meio do poço
 	]
@@ -272,6 +270,18 @@ func _add_valves(lvl: Node) -> void:
 	_valve(holder, "BoilerValveCatwalk", Vector2(1850, -144), 120.0, CEILING_Y, Vector2(180, 140))
 	# D: vapor frio entre os racks, sob o 2º domo dos servidores.
 	_valve(holder, "ServerValve", Vector2(4250, 16), 120.0, SERVER_CEILING_Y, Vector2(200, 150))
+
+
+## C: esteira no fundo do fosso correndo para a esquerda, contra o jogador.
+## Andando (110 px/s) não se vence os 140 px/s; correndo (200) até dá, mas o
+## barulho chega ao guarda da passarela. O caminho furtivo é hackear e parar.
+func _add_conveyors(lvl: Node) -> void:
+	var holder := _holder(lvl, "Conveyors")
+	var c := _instance("res://scenes/objects/conveyor.tscn", "PitConveyor", Vector2(2980, PIT_Y - 10))
+	c.set("width", 420.0)
+	c.set("speed", -140.0)
+	c.set("stop_time", 10.0)
+	holder.add_child(c)
 
 
 func _add_cameras(lvl: Node) -> void:
