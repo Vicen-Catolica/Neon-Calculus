@@ -23,12 +23,12 @@ enum Mode { PATROL, ALERT, REBOOT }
 @export var reboot_time: float = 8.0
 @export var world_mask: int = 1
 
-const BODY := Color(0.2, 0.2, 0.23)
-const BODY_DARK := Color(0.05, 0.05, 0.06)
-const EYE_PATROL := Color(1.0, 0.5, 0.15)
-const EYE_ALERT := Color(1.0, 0.1, 0.15)
-const EYE_REBOOT := Color(0.0, 0.94, 1.0)
-const LENS := Vector2(0, 10)
+## Sprites (PixelLab, ver tools/gen_industrial_art.py): só a cor do olho muda.
+const TEX_PATROL: Texture2D = preload("res://assets/enemies/drone/drone_patrol.png")
+const TEX_ALERT: Texture2D = preload("res://assets/enemies/drone/drone_alert.png")
+const TEX_REBOOT: Texture2D = preload("res://assets/enemies/drone/drone_reboot.png")
+## Olho no sprite (olhando para a direita), relativo ao centro.
+const EYE := Vector2(9, 5)
 
 var mode: Mode = Mode.PATROL
 var facing: float = 1.0
@@ -70,8 +70,13 @@ func sensor_deg() -> float:
 	return sensor_tilt_deg if facing > 0.0 else 180.0 - sensor_tilt_deg
 
 
+## Sensor relativo ao drone (espelha com a direção do voo).
+func lens_local() -> Vector2:
+	return Vector2(EYE.x * facing, EYE.y)
+
+
 func lens_global() -> Vector2:
-	return global_position + LENS
+	return global_position + lens_local()
 
 
 func _physics_process(delta: float) -> void:
@@ -159,7 +164,7 @@ func _update_cone() -> void:
 	if mode == Mode.REBOOT:
 		return
 	var g_origin := lens_global()
-	_cone.append(LENS)
+	_cone.append(lens_local())
 	var space := get_world_2d().direct_space_state
 	var player := _player()
 	var steps := 8
@@ -180,27 +185,18 @@ func _draw() -> void:
 	if _cone.size() >= 3:
 		var col := Color(1.0, 0.45, 0.15, 0.12) if mode == Mode.PATROL else Color(1.0, 0.1, 0.12, 0.26)
 		draw_colored_polygon(_cone, col)
-	var bob := 0.0 if mode == Mode.REBOOT else sin(_t * 5.0) * 2.0
-	var drop := 6.0 if mode == Mode.REBOOT else 0.0
-	var o := Vector2(0, bob + drop)
-	# hélices (param no reboot)
-	var spin := mode != Mode.REBOOT and fmod(_t, 0.12) < 0.06
-	for sx in [-22.0, 22.0]:
-		draw_rect(Rect2(o + Vector2(sx - 2, -12), Vector2(4, 8)), BODY_DARK)
-		var w := 22.0 if spin else 14.0
-		draw_rect(Rect2(o + Vector2(sx - w / 2.0, -14), Vector2(w, 3)), Color(0.55, 0.55, 0.6, 0.8))
-	# corpo
-	draw_rect(Rect2(o + Vector2(-20, -6), Vector2(40, 16)), BODY_DARK)
-	draw_rect(Rect2(o + Vector2(-18, -4), Vector2(36, 12)), BODY)
-	draw_rect(Rect2(o + Vector2(-24, -6), Vector2(48, 3)), BODY_DARK)
-	# olho/sensor
-	var eye := EYE_PATROL
+	# flutua; no reboot desce um pouco e fica parado
+	var bob := 0.0 if mode == Mode.REBOOT else roundf(sin(_t * 5.0) * 2.0)
+	var o := Vector2(0, bob + (6.0 if mode == Mode.REBOOT else 0.0))
+	var tex := TEX_PATROL
 	if mode == Mode.ALERT:
-		eye = EYE_ALERT if fmod(_t, 0.3) < 0.18 else Color(1, 0.6, 0.6)
+		tex = TEX_ALERT if fmod(_t, 0.3) < 0.18 else TEX_PATROL
 	elif mode == Mode.REBOOT:
-		eye = EYE_REBOOT if fmod(_t, 0.8) < 0.4 else BODY_DARK
-	draw_rect(Rect2(o + Vector2(-6 + 4 * facing, 4), Vector2(12, 8)), BODY_DARK)
-	draw_rect(Rect2(o + Vector2(-4 + 4 * facing, 6), Vector2(8, 4)), eye)
+		tex = TEX_REBOOT if fmod(_t, 0.8) < 0.4 else TEX_PATROL
+	var size := tex.get_size()
+	draw_set_transform(o, 0.0, Vector2(facing, 1.0))
+	draw_texture(tex, -size / 2.0)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	_draw_exposure_bar(o)
 
 
@@ -208,6 +204,6 @@ func _draw_exposure_bar(o: Vector2) -> void:
 	if mode != Mode.ALERT or _exposure <= 0.0:
 		return
 	var ratio := clampf(_exposure / exposure_to_alarm, 0.0, 1.0)
-	var pos := o + Vector2(-15, -26)
+	var pos := o + Vector2(-15, -32)
 	draw_rect(Rect2(pos - Vector2(1, 1), Vector2(32, 6)), Color(0, 0, 0, 0.75))
 	draw_rect(Rect2(pos, Vector2(30 * ratio, 4)), Color(1.0, 0.8, 0.15).lerp(Color(1.0, 0.1, 0.25), ratio))

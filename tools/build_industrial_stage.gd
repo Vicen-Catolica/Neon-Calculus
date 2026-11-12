@@ -14,15 +14,14 @@ extends "res://tools/stage_builder_base.gd"
 ##   D  sala dos servidores de refrigeração (teto baixo), porta biométrica na saída
 ##   E  poço do elevador de carga: 8 andares de grade até o elevador para o P&D
 
-const GROUND_TS := "res://assets/tilesets/slums/slums_ground.tres"
+const GROUND_TS := "res://assets/tilesets/industrial/industrial_ground.tres"
 const OUT_LEVEL := "res://scenes/levels/industrial/industrial_stage2.tscn"
 ## Fase 3 (P&D) ainda não existe: a saída fica desligada até lá.
 const NEXT_STAGE := ""
 
-## Tons provisórios: chão de chapa enferrujada, estruturas de aço escuro.
-const GROUND_TINT := Color(0.78, 0.6, 0.5)
-const WALL_TINT := Color(0.42, 0.34, 0.31)
-const PROP_TINT := Color(0.85, 0.72, 0.62)
+## Chão em cor cheia; paredes/teto escurecidos para não lerem como piso.
+const WALL_TINT := Color(0.5, 0.46, 0.46)
+const PROP_TINT := Color(0.92, 0.9, 0.9)
 const CEILING_Y := -368.0        # face de baixo do teto principal
 const SERVER_CEILING_Y := -176.0 # face de baixo do teto da sala D
 const PIT_Y := 112.0             # fundo do fosso (C)
@@ -79,6 +78,8 @@ const LADDERS := [
 	[154, -32, -880.0],
 ]
 
+## Placas com o nome de cada trecho (ajuda no playtest; desligadas com a arte final).
+const SHOW_ZONE_LABELS := false
 const ZONES := [
 	["A // DUTO DE MANUTENÇÃO", Vector2(-180, -330)],
 	["B // CASA DE CALDEIRAS", Vector2(1120, -330)],
@@ -107,7 +108,8 @@ func build() -> Node:
 	_add_drones(lvl)
 	_add_guards(lvl)
 	_add_exit(lvl)
-	_add_zone_labels(lvl)
+	if SHOW_ZONE_LABELS:
+		_add_zone_labels(lvl)
 	_player_and_ui(lvl, Vector2(64, 16))
 	return lvl
 
@@ -121,50 +123,41 @@ func _add_background(lvl: Node) -> void:
 	bg.position = Vector2(-1200, -1800)
 	bg.size = Vector2(7600, 2400)
 	lvl.add_child(bg)
-	# Salão ao fundo: colunas, vigas e tubulações em silhueta (parallax).
-	var par := Parallax2D.new()
-	par.name = "BackgroundFar"
-	par.scroll_scale = Vector2(0.4, 1.0)
-	par.repeat_size = Vector2(960, 0)
-	par.repeat_times = 10
-	lvl.add_child(par)
-	var dark := Color(0.1, 0.075, 0.07)
-	var mid := Color(0.13, 0.095, 0.085)
 	# Acima do teto principal (visível ao lado do poço): concreto maciço.
 	var mass := ColorRect.new()
 	mass.name = "AboveCeiling"
 	mass.color = Color(0.085, 0.065, 0.06)
 	mass.position = Vector2(-1200, -1800)
 	mass.size = Vector2(151 * T + 16 + 1200, 1800 - 496)
+	# Salão da fábrica ao fundo (PixelLab), em parallax, empilhado até o topo
+	# do poço e cada vez mais escuro para cima.
+	var par := Parallax2D.new()
+	par.name = "BackgroundFar"
+	par.scroll_scale = Vector2(0.4, 1.0)
+	par.repeat_size = Vector2(1536, 0)
+	par.repeat_times = 8
+	lvl.add_child(par)
+	var tex: Texture2D = load("res://assets/backgrounds/industrial/bg_industrial_seamless.png")
+	var h := tex.get_height()
+	var tints := [Color(1, 1, 1), Color(0.7, 0.66, 0.66), Color(0.5, 0.47, 0.48), Color(0.36, 0.34, 0.36)]
+	for k in range(tints.size() - 1, -1, -1):
+		var hall := Sprite2D.new()
+		hall.name = "Hall%d" % k
+		hall.texture = tex
+		hall.centered = false
+		hall.modulate = tints[k]
+		hall.flip_h = k % 2 == 1
+		hall.position = Vector2(-768, 40 - h * (k + 1))
+		par.add_child(hall)
 	lvl.add_child(mass)
-	var shapes := [
-		[Rect2(60, -1600, 70, 1620), dark],     # coluna
-		[Rect2(540, -1600, 70, 1620), dark],
-		[Rect2(-200, -300, 1400, 26), mid],     # viga
-		[Rect2(-200, -720, 1400, 26), mid],
-		[Rect2(250, -1600, 18, 1620), mid],     # cano vertical
-		[Rect2(290, -1600, 10, 1620), mid],
-		[Rect2(-200, -180, 1400, 12), mid],     # cano horizontal
-		[Rect2(700, -560, 160, 240), dark],     # tanque
-	]
-	var i := 0
-	for s in shapes:
-		i += 1
-		var r := ColorRect.new()
-		r.name = "Silhouette%d" % i
-		r.position = s[0].position
-		r.size = s[0].size
-		r.color = s[1]
-		par.add_child(r)
 
 
 # --- Terreno -----------------------------------------------------------------
 
 func _add_tiles(lvl: Node) -> void:
 	_terrain_layer(lvl, "Buildings", GROUND_TS, WALL_RECTS, WALL_TINT)
-	_terrain_layer(lvl, "Ground", GROUND_TS, GROUND_RECTS, GROUND_TINT)
-	_floor_band(lvl, _surface_runs(GROUND_RECTS + WALL_RECTS))
-	(lvl.get_node("FloorBand") as CanvasItem).modulate = GROUND_TINT
+	_terrain_layer(lvl, "Ground", GROUND_TS, GROUND_RECTS)
+	# Sem a faixa de calçada da favela: aqui o topo é o friso + faixa de perigo do tile.
 	_structures(lvl, CATWALKS)
 	_catwalk_band(lvl, CATWALKS)
 
@@ -183,12 +176,8 @@ func _box(parent: Node, node_name: String, rect: Rect2, color: Color) -> ColorRe
 
 func _add_machinery(lvl: Node) -> void:
 	var m := _holder(lvl, "Machinery")
-	var boiler := Color(0.17, 0.115, 0.1)
 	var steel := Color(0.22, 0.2, 0.2)
-	# B: caldeiras ao fundo, encostadas no teto
-	_box(m, "Boiler1", Rect2(1340, -330, 150, 330), boiler)
-	_box(m, "Boiler2", Rect2(2260, -330, 150, 330), boiler)
-	_box(m, "BoilerPipe", Rect2(1490, -250, 770, 14), steel)
+	# (as caldeiras agora estão no fundo gerado)
 	# C: braços robóticos pendurados no teto sobre o fosso
 	for x in [2850.0, 3130.0]:
 		_box(m, "Arm%d" % int(x), Rect2(x, CEILING_Y, 16, 150), steel)
@@ -199,7 +188,8 @@ func _add_machinery(lvl: Node) -> void:
 
 # --- Props e esconderijos ----------------------------------------------------
 
-const PROP_DIR := "res://assets/props/slums/"
+const PROP_DIR := "res://assets/props/industrial/"
+const SLUM_PROPS := "res://assets/props/slums/"
 
 
 func _add_props(lvl: Node) -> void:
@@ -208,13 +198,16 @@ func _add_props(lvl: Node) -> void:
 	var spots := _holder(lvl, "HideSpots")
 	# [textura, x, chão, esconderijo?, largura]
 	var list := [
-		["barrel", -120.0, 16.0, false, 0],
-		["crates", 1180.0, 16.0, true, 56],          # B: atrás da 1ª caldeira
-		["dumpster", 1960.0, 16.0, true, 60],        # B: antes do quiosque
-		["barrel", 2140.0, 16.0, false, 0],
-		["tire", 2560.0, 16.0, false, 0],
+		["drum", -120.0, 16.0, false, 0],
+		["generator", 30.0, 16.0, false, 0],         # A: sala de chegada
+		["locker", 1180.0, 16.0, true, 80],          # B: armários de vestiário
+		["crates", 1960.0, 16.0, true, 56],          # B: antes do quiosque
+		["gas_cylinders", 2150.0, 16.0, false, 0],
+		["tool_cart", 2560.0, 16.0, false, 0],
+		["hazard_barrier", 2640.0, 16.0, false, 0],  # C: beira do fosso
 		["crates", 3260.0, PIT_Y, true, 56],         # C: no escuro do fosso, fora da esteira
-		["cardboard_box", 1500.0, -144.0, true, 60], # B: na passarela
+		["crates", 1500.0, -144.0, true, 56],        # B: na passarela
+		["drum", 4400.0, 16.0, false, 0],            # D
 		["crates", 5000.0, -496.0, true, 56],        # E: no meio do poço
 	]
 	var n := 0
@@ -223,16 +216,15 @@ func _add_props(lvl: Node) -> void:
 		_prop(props, PROP_DIR + p[0] + ".png", p[1], p[2], "%s_%d" % [p[0], n])
 		if p[3]:
 			_hide_spot(spots, p[1], p[2], p[4], "Hide_%s_%d" % [p[0], n])
-	_wall_prop(props, PROP_DIR + "pipes_cable.png", Vector2(520, -150), "pipes_duct")
-	_wall_prop(props, PROP_DIR + "ac_unit.png", Vector2(4300, -260), "ac_unit_wall")
-	# D: racks de servidor (greybox) — esconderijos escuros entre as câmeras
+	_wall_prop(props, SLUM_PROPS + "pipes_cable.png", Vector2(520, -150), "pipes_duct")
+	_wall_prop(props, PROP_DIR + "control_panel.png", Vector2(4590, -80), "control_panel_door")
+	_wall_prop(props, SLUM_PROPS + "ac_unit.png", Vector2(4300, -260), "ac_unit_wall")
+	# D: racks de servidor — esconderijos escuros entre as câmeras
 	var racks := _holder(lvl, "ServerRacks")
 	for x in [3800.0, 4160.0, 4520.0]:
-		_box(racks, "Rack%d" % int(x), Rect2(x - 28, 16 - 120, 56, 120), Color(0.12, 0.13, 0.15))
-		for k in 5:
-			_box(racks, "Led%d_%d" % [int(x), k], Rect2(x - 18 + (k % 2) * 30, 16 - 108 + k * 20, 4, 3), Color(0.2, 0.9, 0.5))
+		_prop(racks, PROP_DIR + "server_rack.png", x, 16.0, "Rack%d" % int(x))
 		if x != 4520.0:
-			_hide_spot(spots, x, 16.0, 60, "Hide_rack_%d" % int(x))
+			_hide_spot(spots, x, 16.0, 80, "Hide_rack_%d" % int(x))
 
 
 # --- Objetos interativos -----------------------------------------------------

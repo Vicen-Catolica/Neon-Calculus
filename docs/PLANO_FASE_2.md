@@ -95,7 +95,7 @@ Enquanto a arte não chega: greybox com os tiles das favelas tingidos de laranja
 6. ✅ **Drone de patrulha** (voo, cone, alarme, hack de reinício).
 7. ✅ **Lockdown** (sala dos servidores).
 8. **Lore** — `data/lore/industrial.json`: SINE no duto de entrada; diário de um cientista da OmniCorp sobre as "Atualizações Mandatórias"; registro de um engenheiro de manutenção sobre a fábrica de drones; mensagem que cita o Dr. Vance (gancho da Fase 3).
-9. **Arte final** — trocar placeholders conforme os assets chegam.
+9. ✅ **Arte final** — trocar placeholders conforme os assets chegam.
 10. **Testes e CI** — `tests/stage2_sim.gd` (um OK/FALHOU por mecânica, como o da Fase 1); CI do GitHub passa a usar Godot .NET e roda `dotnet test` e as simulações headless (hoje o job de testes é só um `echo`).
 11. **Playtest e ajuste** — tempos de vapor/drone/lockdown, dificuldade das equações do andar 2.
 
