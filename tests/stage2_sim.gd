@@ -206,5 +206,46 @@ func _ready() -> void:
 			missing.append(t.get("entry_id"))
 	check("terminais têm lore no JSON", missing.is_empty(), str(missing))
 
+	# Lockdown da sala dos servidores (D).
+	var zone := lvl.get_node("ServerLockdown") as LockdownZone
+	var shutter := lvl.get_node("LockdownShutterWest") as SecurityDoor
+	var exit_door := lvl.get_node("SecurityDoor") as SecurityDoor
+	var exit_h := exit_door.get_node("Hackable") as Hackable
+	check("porta blindada começa aberta e fora da visão hacker", shutter.is_open and not shutter.get_node("Hackable").enabled)
+	tp(3400, 16); await step(5)
+	GameManager.raise_alarm(Vector2(3000, 16)); await step(5)
+	check("alarme com o jogador fora da sala não fecha nada", not zone.active)
+	tp(4000, 16); await step(10)
+	check("zona sabe que o jogador está dentro", zone.is_player_inside())
+	GameManager.raise_alarm(p.global_position); await step(30)
+	check("alarme dentro da sala inicia o lockdown", zone.active)
+	check("portas fecham", not shutter.is_open and not exit_door.is_open)
+	tp(4500, 16); await step(5)
+	await walk_right(200)
+	check("lockdown: saída bloqueada", p.global_position.x < 4700.0, pos())
+	tp(3800, 16); await step(5)
+	Input.action_press("move_left"); await step(200); release_all(); await step(10)
+	check("lockdown: entrada bloqueada", p.global_position.x > 3590.0, pos())
+	check("saída vira equação +1 e mais curta", exit_h.get_difficulty().x == 3 and exit_h.time_limit_mult < 1.0,
+		"nível=%d tempo x%.2f" % [exit_h.get_difficulty().x, exit_h.time_limit_mult])
+	var t_before := zone.time_left
+	await step(60)
+	check("contagem regressiva anda", zone.time_left < t_before - 0.8, "%.1f -> %.1f" % [t_before, zone.time_left])
+	hv.debug_hack(exit_h, true); await step(60)
+	check("hackear a saída encerra o lockdown", not zone.active and zone.done)
+	check("portas reabrem", shutter.is_open and exit_door.is_open)
+	check("saída volta à dificuldade normal", exit_h.get_difficulty().x == 2 and exit_h.time_limit_mult == 1.0)
+	GameManager.raise_alarm(p.global_position); await step(5)
+	check("lockdown não dispara de novo na mesma fase", not zone.active)
+
+	# Alarme vindo de um guarda em alerta máximo também tranca a sala.
+	zone.done = false
+	(lvl.get_node("Guards/Guard4") as Enemy).alarm_triggered.emit(p.global_position); await step(5)
+	check("alerta máximo de guarda inicia o lockdown", zone.active)
+	# Tempo esgotado: unidades pesadas = capturado.
+	zone.time_left = 0.05
+	await step(5)
+	check("tempo esgotado captura o Eduardo", p.is_dead and not zone.active)
+
 	print("TUDO OK — 0 falha(s)" if fails == 0 else "%d FALHA(S)" % fails)
 	get_tree().quit(1 if fails > 0 else 0)

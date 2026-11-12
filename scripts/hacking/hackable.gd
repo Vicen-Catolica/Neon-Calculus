@@ -16,6 +16,10 @@ enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK, VALVE, CONVEYOR, DRONE }
 ## Variância somada ao hackear com sucesso / ao falhar.
 @export var variance_cost: float = 12.0
 @export var variance_fail_cost: float = 25.0
+## Somado ao nível da equação (ex.: saída de um lockdown = +1).
+@export var difficulty_bonus: int = 0
+## Multiplica o tempo limite da equação (< 1 = desafio rápido).
+@export var time_limit_mult: float = 1.0
 ## Colisor do próprio alvo, ignorado no teste de linha de visão (ex.: porta).
 @export var ignore_body: CollisionObject2D
 
@@ -46,7 +50,7 @@ func get_difficulty() -> Vector2i:
 		Kind.CYBORG:
 			floor_level += 1
 			sub_topic = 1
-	return Vector2i(clampi(floor_level, 1, 4), sub_topic)
+	return Vector2i(clampi(floor_level + difficulty_bonus, 1, 4), sub_topic)
 
 
 func can_be_hacked() -> bool:

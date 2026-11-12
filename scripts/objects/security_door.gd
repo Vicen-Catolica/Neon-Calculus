@@ -6,6 +6,8 @@ extends StaticBody2D
 signal opened
 
 @export var start_open: bool = false
+## false = porta de lockdown/blindagem: não aparece como alvo de hack.
+@export var hackable_enabled: bool = true
 
 var is_open: bool = false
 
@@ -21,6 +23,7 @@ func _ready() -> void:
 	hackable.kind = Hackable.Kind.DOOR
 	hackable.ignore_body = self
 	hackable.hacked.connect(open)
+	hackable.enabled = hackable_enabled
 	if start_open:
 		is_open = true
 		sprite.frame = 6
@@ -49,3 +52,15 @@ func open() -> void:
 	tw.tween_callback(func():
 		shape.set_deferred("disabled", true)
 		opened.emit())
+
+
+## Fecha a porta (lockdown). Volta a bloquear a passagem na hora.
+func close() -> void:
+	if not is_open:
+		return
+	is_open = false
+	shape.set_deferred("disabled", false)
+	var tw := create_tween()
+	for f in [5, 4, 3, 2, 0]:
+		tw.tween_callback(func(): sprite.frame = f)
+		tw.tween_interval(0.06)

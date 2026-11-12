@@ -38,6 +38,9 @@ var eq_data: Dictionary = {}
 var current_floor_level: int = 1
 var current_sub_topic: int = 0
 var _blink_timer: float = 0.0
+## Multiplicador do tempo limite do próximo hack (definido por quem abre a
+## interface; volta a 1 depois de usado). < 1 = desafio rápido (lockdown).
+var time_limit_mult: float = 1.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -194,7 +197,11 @@ func _calculate_dynamic_time_limit() -> float:
 			time_calculated += 5.2
 
 	time_calculated *= 2.0
-	return clamp(time_calculated, 30.0, 240.0)
+	var mult := time_limit_mult
+	time_limit_mult = 1.0
+	if mult < 1.0:
+		return clamp(time_calculated * mult, 15.0, 240.0)
+	return clamp(time_calculated * mult, 30.0, 240.0)
 
 func _setup_equation_steps(stage: int, subtopic: int) -> void:
 	if stage == 1 or (stage == 3 and subtopic == 1):

@@ -179,6 +179,7 @@ func _start_hack(h: Hackable) -> void:
 	if not _hacking_ui.hacking_failed.is_connected(_on_hack_failed):
 		_hacking_ui.hacking_failed.connect(_on_hack_failed, CONNECT_ONE_SHOT)
 	var d := h.get_difficulty()
+	_hacking_ui.set("time_limit_mult", h.time_limit_mult)
 	_hacking_ui.start_hacking(d.x, d.y)
 
 

@@ -251,6 +251,29 @@ func _add_kiosk_and_door(lvl: Node) -> void:
 	lvl.add_child(_instance("res://scenes/objects/axioma_kiosk.tscn", "AxiomaKiosk", Vector2(2080, 16)))
 	# Porta biométrica na passagem D -> E.
 	lvl.add_child(_instance("res://scenes/objects/security_door.tscn", "SecurityDoor", Vector2(146 * T + 40, 16)))
+	# Porta blindada na entrada de D: aberta, só fecha no lockdown (não é hackeável).
+	var shutter := _instance("res://scenes/objects/security_door.tscn", "LockdownShutterWest", Vector2(3590, 16))
+	shutter.set("start_open", true)
+	shutter.set("hackable_enabled", false)
+	lvl.add_child(shutter)
+	_add_lockdown(lvl)
+
+
+## D: se um alarme soar com o jogador na sala dos servidores, a Axioma fecha as
+## duas portas e o jogador tem 25 s para hackear a saída (equação +1 e mais curta).
+func _add_lockdown(lvl: Node) -> void:
+	var room := Rect2(3610, SERVER_CEILING_Y, 4680 - 3610, 16 - SERVER_CEILING_Y)
+	var zone := Area2D.new()
+	zone.name = "ServerLockdown"
+	zone.set_script(load("res://scripts/core/lockdown_zone.gd"))
+	zone.position = room.get_center()
+	zone.add_child(_rect_shape(room.size))
+	zone.set("door_paths", [NodePath("../LockdownShutterWest")] as Array[NodePath])
+	zone.set("exit_door_path", NodePath("../SecurityDoor"))
+	zone.set("countdown", 25.0)
+	zone.set("tint_rect", room)
+	zone.set("axioma_message", "Variância intolerável no Setor 2-D. Eduardo: erro de cálculo identificado.\nSetor isolado. Unidades pesadas a caminho.")
+	lvl.add_child(zone)
 
 
 ## Válvula de vapor apoiada no chão `pos`; o cano sobe até o teto `ceiling_y`.
