@@ -7,7 +7,7 @@ Plano de trabalho para a segunda fase, no mesmo formato por etapas usado na Fase
 ## 1. Ponto de partida
 
 - **Fase 1 (favelas) pronta** no branch `feature/slums-stage-1` (11 commits à frente do `master`; ainda não foi para o `develop`). A saída dela leva ao antigo `scenes/Stage2/stage2.tscn`, um placeholder da equipe.
-- A Fase 1 é **gerada por script** (`tools/build_slums_stage.gd`). A Fase 2 segue o mesmo padrão: `tools/build_industrial_stage.gd` → `scenes/levels/industrial/industrial_stage2.tscn`.
+- As fases são **geradas por script**: `tools/build_slums_stage.gd` e `tools/build_industrial_stage.gd` herdam de `tools/stage_builder_base.gd` (terreno, passarelas, escadas, props, neon, terminais, câmeras, guardas, saída, player/UI). As cenas de objetos compartilhadas vêm de `tools/build_objects.gd` (rodar só quando um objeto mudar). A regeração é determinística, exceto os `unique_id` dos nós.
 - Sistemas prontos e reaproveitáveis: Eduardo completo, visão hacker + `Hackable`, interface de equação (C#, com validador e testes), guardas com FSM, câmeras (parede/domo), porta biométrica, quiosque, esconderijos + luz, terminais de lore, Score de Variância + Varredura de Rotina, HUD, game over.
 - Já previsto no código, mas sem uso: `Enemy.EnemyType.CYBORG` e `Hackable.Kind.CYBORG`.
 - Ambiente (Linux/distrobox): `godot` 4.7.2 .NET, `dotnet` 8, `git`. Verificações: `dotnet test tests/NeonCalculus.Tests` e `godot --headless --path . res://tests/stage_sim.tscn`. Screenshots: `LIBGL_ALWAYS_SOFTWARE=1 godot --path . --windowed --resolution 1920x1080 res://tests/stage_shots.tscn -- <cena> "<x:y;...>" <pasta>`.
@@ -87,8 +87,8 @@ Enquanto a arte não chega: greybox com os tiles das favelas tingidos de laranja
 
 ## 6. Etapas (ordem de execução)
 
-1. **Infra multi-fase** — `level.gd` genérico, transição/loading, checkpoint/save, "Continuar" no menu, importar `caught`/`hide`/`crouch hacking` e usar `caught` no game over. *Teste:* terminar a Fase 1 leva a uma Fase 2 vazia com a tela de transição; fechar e "Continuar" volta ao andar 2.
-2. **Builder compartilhado** — `stage_builder_base.gd`; regerar a Fase 1. *Teste:* `stage_sim` continua 100% OK.
+1. ✅ **Infra multi-fase** — `level.gd` genérico, transição/loading, checkpoint/save, "Continuar" no menu, importar `caught`/`hide`/`crouch hacking` e usar `caught` no game over. *Teste:* terminar a Fase 1 leva a uma Fase 2 vazia com a tela de transição; fechar e "Continuar" volta ao andar 2.
+2. ✅ **Builder compartilhado** — `stage_builder_base.gd`; regerar a Fase 1. *Teste:* `stage_sim` continua 100% OK.
 3. **Greybox da Fase 2** — layout A–E só com mecânicas que já existem (guardas, câmeras, escadas, passarelas, dutos, esconderijos, terminal, porta, saída). *Teste:* fase atravessável do início ao fim; screenshots de cada trecho.
 4. **Válvula de vapor + bloqueio de visão.** *Teste:* guarda/câmera não detectam através do vapor; detectam depois que ele some.
 5. **Esteira** (andar sobre, parar/inverter por hack, queda no fosso).
