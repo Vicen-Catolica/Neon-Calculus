@@ -8,7 +8,7 @@ signal hacked
 signal hack_failed
 
 ## Novos tipos sempre no fim: o valor numérico fica salvo nas cenas.
-enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK, VALVE, CONVEYOR }
+enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK, VALVE, CONVEYOR, DRONE }
 
 @export var kind: Kind = Kind.CAMERA
 @export var display_name: String = "ALVO"
@@ -23,6 +23,7 @@ const KIND_LABEL := {
 	Kind.CAMERA: "CÂMERA", Kind.DOOR: "PORTA", Kind.GUARD: "AGENTE",
 	Kind.CYBORG: "UNIDADE LÓGICA", Kind.LIGHT: "LUZ NEON", Kind.KIOSK: "QUIOSQUE AXIOMA",
 	Kind.VALVE: "VÁLVULA DE VAPOR", Kind.CONVEYOR: "ESTEIRA",
+	Kind.DRONE: "DRONE DE PATRULHA",
 }
 
 
@@ -40,7 +41,7 @@ func get_difficulty() -> Vector2i:
 	var floor_level: int = GameManager.current_floor
 	var sub_topic := 0
 	match kind:
-		Kind.DOOR, Kind.GUARD:
+		Kind.DOOR, Kind.GUARD, Kind.DRONE:
 			sub_topic = 1
 		Kind.CYBORG:
 			floor_level += 1

@@ -63,6 +63,8 @@ func _ready() -> void:
 		g.process_mode = Node.PROCESS_MODE_DISABLED
 	for c in get_tree().get_nodes_in_group("security_camera"):
 		c.process_mode = Node.PROCESS_MODE_DISABLED
+	for d in get_tree().get_nodes_in_group("drones"):
+		d.process_mode = Node.PROCESS_MODE_DISABLED
 
 	check("andar 2 no GameManager", GameManager.current_floor == 2)
 	check("spawn no chão da sala de chegada", absf(p.global_position.y - 16.0) < 3.0, pos())
@@ -167,6 +169,35 @@ func _ready() -> void:
 	check("cooldown antes do próximo hack", not valve.can_be_hacked())
 	await step(int(valve.cooldown * 60.0) + 20)
 	check("válvula rearma depois do cooldown", valve.can_be_hacked())
+
+	# Drone do fosso: vê, dispara alarme, e o hack o reinicia.
+	var drone := lvl.get_node("Drones/PitDrone") as PatrolDrone
+	var alarms := [0]
+	GameManager.alarm_raised.connect(func(_p: Vector2) -> void: alarms[0] += 1)
+	belt.stop()
+	drone.point_a = Vector2(2900, -30)
+	drone.point_b = Vector2(3300, -30)
+	drone.global_position = Vector2(2900, -30)
+	drone.facing = 1.0
+	tp(2945, 100); await step(10)
+	drone.process_mode = Node.PROCESS_MODE_INHERIT
+	await step(5)
+	check("drone vê o jogador no fosso", drone.mode == PatrolDrone.Mode.ALERT, PatrolDrone.Mode.keys()[drone.mode])
+	await step(90)
+	check("drone dispara o alarme", alarms[0] > 0, "alarmes=%d" % alarms[0])
+	hv.debug_hack(drone.get_node("Hackable"), true); await step(5)
+	check("hack reinicia o drone", drone.mode == PatrolDrone.Mode.REBOOT and not drone.sees_player())
+	check("drone reiniciando não aceita novo hack", not drone.can_be_hacked())
+	var x_reboot := drone.global_position.x
+	await step(60)
+	check("drone parado durante o reboot", absf(drone.global_position.x - x_reboot) < 0.5)
+	tp(2000, 16)  # sai do alcance antes de o drone religar
+	await step(int(drone.reboot_time * 60.0))
+	check("drone volta a patrulhar", drone.mode == PatrolDrone.Mode.PATROL, PatrolDrone.Mode.keys()[drone.mode])
+	var x_patrol := drone.global_position.x
+	await step(60)
+	check("drone voa entre os pontos", absf(drone.global_position.x - x_patrol) > 30.0, "%.0f -> %.0f" % [x_patrol, drone.global_position.x])
+	drone.process_mode = Node.PROCESS_MODE_DISABLED
 
 	# Lore: todo terminal aponta para uma entrada existente.
 	var missing := []

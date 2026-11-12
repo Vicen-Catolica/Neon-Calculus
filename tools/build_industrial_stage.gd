@@ -104,6 +104,7 @@ func build() -> Node:
 	_add_valves(lvl)
 	_add_conveyors(lvl)
 	_add_cameras(lvl)
+	_add_drones(lvl)
 	_add_guards(lvl)
 	_add_exit(lvl)
 	_add_zone_labels(lvl)
@@ -297,6 +298,23 @@ func _add_cameras(lvl: Node) -> void:
 		{"sweep_min_deg": 60.0, "sweep_max_deg": 120.0, "vision_range": 220.0, "fov_deg": 28.0})
 	_camera(holder, false, "ShaftCamera", Vector2(166 * T + 16 - 35, _y(-18)),
 		{"facing_left": true, "sweep_min_deg": 15.0, "sweep_max_deg": 65.0, "vision_range": 420.0})
+
+
+## C: drones de patrulha (abaixo da passarela alta, para o sensor alcançar o chão).
+func _add_drones(lvl: Node) -> void:
+	var holder := _holder(lvl, "Drones")
+	# Sobre o fosso: o caminho escuro deixa de ser de graça — espere a volta ou hackeie.
+	_drone(holder, "PitDrone", Vector2(2780, -30), Vector2(3220, -30), 230.0)
+	# Entrada de C: vigia o quiosque, o terminal e a base da escada da passarela.
+	_drone(holder, "FloorDrone", Vector2(2160, -60), Vector2(2650, -60), 220.0)
+
+
+func _drone(parent: Node, node_name: String, a: Vector2, b: Vector2, vision: float) -> void:
+	var d := _instance("res://scenes/enemies/patrol_drone.tscn", node_name, a)
+	d.set("point_a", a)
+	d.set("point_b", b)
+	d.set("vision_range", vision)
+	parent.add_child(d)
 
 
 func _add_guards(lvl: Node) -> void:

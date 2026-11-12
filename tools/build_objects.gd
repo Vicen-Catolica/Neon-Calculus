@@ -1,7 +1,7 @@
 extends "res://tools/stage_builder_base.gd"
 ## Gera as cenas de objetos compartilhadas entre as fases: guardas (v1/v2),
 ## câmeras (parede/domo), porta biométrica, quiosque da Axioma, terminal de dados,
-## válvula de vapor, esteira e a interface de furtividade/lore. Uso, na raiz do projeto:
+## válvula de vapor, esteira, drone de patrulha e a interface de furtividade/lore. Uso, na raiz do projeto:
 ##   godot --headless --path . res://tools/build_objects.tscn
 ## Reexecutar sobrescreve essas cenas (não edite-as à mão; edite este script).
 
@@ -22,6 +22,7 @@ func _build_object_scenes() -> void:
 	_build_data_terminal()
 	_build_steam_valve()
 	_build_conveyor()
+	_build_drone()
 	_build_ui()
 
 
@@ -197,6 +198,14 @@ func _build_conveyor() -> void:
 	c.set_script(load("res://scripts/objects/conveyor.gd"))
 	c.add_child(_hackable("ESTEIRA", Vector2(0, -24)))
 	_save(c, "res://scenes/objects/conveyor.tscn")
+
+
+func _build_drone() -> void:
+	var d := Node2D.new()
+	d.name = "PatrolDrone"
+	d.set_script(load("res://scripts/enemies/patrol_drone.gd"))
+	d.add_child(_hackable("DRONE DE PATRULHA", Vector2(0, 2)))
+	_save(d, "res://scenes/enemies/patrol_drone.tscn")
 
 
 func _build_ui() -> void:
