@@ -7,6 +7,11 @@ tools/art_src/industrial/ (gerados com create_image_pixen):
   armário e rack em 2x para terem altura de móvel ao lado do Eduardo)
 - drone.png       -> assets/enemies/drone/drone_{patrol,alert,reboot}.png
   (só a cor do olho muda)
+- valve.png       -> assets/objects/valve/valve_{closed,open}.png + pipe_segment.png
+  (volante vermelho fechado / ciano aberto; fatia do topo repete o cano até o teto)
+- conveyor.png    -> assets/objects/conveyor/conveyor_{left,mid,right}.png
+  (pontas + trecho do meio que se repete e "anda")
+- robot_arm.png, elevator.png -> assets/props/industrial/
 
 O tileset é feito por tools/gen_industrial_tiles.py (textura plates.png).
 
@@ -85,7 +90,58 @@ def drone() -> None:
     print("drone", im.size, "olho px:", int(eye.sum()))
 
 
+def _cropped(name: str) -> Image.Image:
+    im = Image.open(os.path.join(SRC, name)).convert("RGBA")
+    return im.crop(im.getbbox())
+
+
+def valve() -> None:
+    im = _cropped("valve.png")
+    a = np.array(im)
+    red = (a[:, :, 0] > 140) & (a[:, :, 1] < 80) & (a[:, :, 2] < 80) & (a[:, :, 3] > 0)
+    im.save(out("assets/objects/valve/valve_closed.png"))
+    b = a.copy()
+    lum = b[:, :, 0][red].astype(float) / 255.0
+    for i, v in enumerate((0, 235, 255)):
+        b[:, :, i][red] = np.clip(v * (0.45 + 0.55 * lum), 0, 255).astype(np.uint8)
+    Image.fromarray(b, "RGBA").save(out("assets/objects/valve/valve_open.png"))
+    # fatia de 6 px do topo do cano: repete para cima até o teto
+    im.crop((0, 0, im.width, 6)).save(out("assets/objects/valve/pipe_segment.png"))
+    ys, xs = np.nonzero(red)
+    print("válvula", im.size, "volante y=%d..%d x=%d..%d" % (ys.min(), ys.max(), xs.min(), xs.max()))
+
+
+def conveyor() -> None:
+    im = _cropped("conveyor.png")
+    a = np.array(im).astype(int)
+    cap = 16
+    # período do padrão do meio (rolos/garras): menor diferença entre colunas
+    best, best_err = 16, 1e9
+    for p in range(8, 41):
+        x0, x1 = cap + 4, im.width - cap - 4 - p
+        if x1 <= x0:
+            continue
+        err = np.abs(a[:, x0:x1] - a[:, x0 + p:x1 + p]).mean()
+        if err < best_err:
+            best, best_err = p, err
+    mid_x = im.width // 2 - best // 2
+    im.crop((0, 0, cap, im.height)).save(out("assets/objects/conveyor/conveyor_left.png"))
+    im.crop((im.width - cap, 0, im.width, im.height)).save(out("assets/objects/conveyor/conveyor_right.png"))
+    im.crop((mid_x, 0, mid_x + best, im.height)).save(out("assets/objects/conveyor/conveyor_mid.png"))
+    print("esteira", im.size, "período do meio", best, "erro %.1f" % best_err)
+
+
+def machines() -> None:
+    for name in ("robot_arm", "elevator"):
+        im = _cropped(name + ".png")
+        im.save(out("assets/props/industrial/%s.png" % name))
+        print(name, im.size)
+
+
 if __name__ == "__main__":
     background()
     props()
     drone()
+    valve()
+    conveyor()
+    machines()

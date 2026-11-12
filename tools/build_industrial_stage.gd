@@ -97,12 +97,12 @@ func build() -> Node:
 	var lvl := _new_level("IndustrialStage2", 2, -208, 166 * T + 16, -1300, 300)
 	_add_background(lvl)
 	_add_machinery(lvl)   # atrás do terreno e das passarelas
+	_add_valves(lvl)      # idem: o cano desce do teto por trás das passarelas
 	_add_tiles(lvl)
 	_ladders(lvl, LADDERS)
 	_add_props(lvl)
 	_add_terminals(lvl)
 	_add_kiosk_and_door(lvl)
-	_add_valves(lvl)
 	_add_conveyors(lvl)
 	_add_cameras(lvl)
 	_add_drones(lvl)
@@ -162,28 +162,17 @@ func _add_tiles(lvl: Node) -> void:
 	_catwalk_band(lvl, CATWALKS)
 
 
-# --- Máquinas (greybox: caixas coloridas no lugar da arte) --------------------
-
-func _box(parent: Node, node_name: String, rect: Rect2, color: Color) -> ColorRect:
-	var r := ColorRect.new()
-	r.name = node_name
-	r.position = rect.position
-	r.size = rect.size
-	r.color = color
-	parent.add_child(r)
-	return r
-
+# --- Máquinas (braços robóticos e elevador) -----------------------------------
 
 func _add_machinery(lvl: Node) -> void:
 	var m := _holder(lvl, "Machinery")
-	var steel := Color(0.22, 0.2, 0.2)
-	# (as caldeiras agora estão no fundo gerado)
+	# (as caldeiras estão no fundo gerado)
 	# C: braços robóticos pendurados no teto sobre o fosso
 	for x in [2850.0, 3130.0]:
-		_box(m, "Arm%d" % int(x), Rect2(x, CEILING_Y, 16, 150), steel)
-		_box(m, "ArmHead%d" % int(x), Rect2(x - 14, CEILING_Y + 150, 44, 20), Color(0.5, 0.18, 0.1))
-	# E: elevador de carga no topo do poço
-	_box(m, "ElevatorCage", Rect2(5150, -1008 - 170, 160, 170), Color(0.2, 0.17, 0.16, 0.85))
+		var arm := _wall_prop(m, PROP_DIR + "robot_arm.png", Vector2(x, CEILING_Y + 75), "Arm%d" % int(x))
+		arm.flip_h = x > 3000.0
+	# E: elevador de carga no topo do poço (o jogador entra nele = saída da fase)
+	_prop(m, PROP_DIR + "elevator.png", 5230.0, -1008.0 + 12.0, "ElevatorCage")
 
 
 # --- Props e esconderijos ----------------------------------------------------

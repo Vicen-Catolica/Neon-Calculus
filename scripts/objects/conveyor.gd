@@ -4,8 +4,9 @@ extends StaticBody2D
 ## para a esquerda): o CharacterBody2D herda a velocidade do chão pelo
 ## constant_linear_velocity. Hackear para a esteira por `stop_time` segundos.
 ##
-## Origem = centro da superfície da esteira (onde se pisa). Arte provisória
-## desenhada em código (greybox).
+## Origem = centro da superfície da esteira (onde se pisa). Arte do PixelLab
+## (tools/gen_industrial_art.py): pontas fixas + trecho do meio que se repete e
+## "anda" no sentido da esteira.
 
 signal running_changed(running: bool)
 
@@ -15,13 +16,14 @@ signal running_changed(running: bool)
 ## Espessura desenhada/colidida da esteira, para baixo da superfície.
 @export var thickness: float = 10.0
 
-const BELT := Color(0.16, 0.14, 0.13)
 const BELT_DARK := Color(0.05, 0.04, 0.04)
-const STRIPE := Color(0.36, 0.3, 0.22)
-const ROLLER := Color(0.3, 0.26, 0.24)
 const LIGHT_ON := Color(1.0, 0.45, 0.12)
 const LIGHT_OFF := Color(0.0, 0.94, 1.0)
-const STRIPE_GAP := 16.0
+const TEX_LEFT: Texture2D = preload("res://assets/objects/conveyor/conveyor_left.png")
+const TEX_MID: Texture2D = preload("res://assets/objects/conveyor/conveyor_mid.png")
+const TEX_RIGHT: Texture2D = preload("res://assets/objects/conveyor/conveyor_right.png")
+## As garras da lona ficam um pouco acima da superfície de colisão.
+const SPRITE_TOP := -3.0
 
 var running: bool = true
 var _stop_left: float = 0.0
@@ -30,6 +32,7 @@ var _scroll: float = 0.0
 
 func _ready() -> void:
 	add_to_group("conveyor")
+	texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	var shape := CollisionShape2D.new()
 	shape.name = "Shape"
 	var r := RectangleShape2D.new()
@@ -68,7 +71,7 @@ func _apply() -> void:
 
 func _process(delta: float) -> void:
 	if running:
-		_scroll = fposmod(_scroll + speed * delta, STRIPE_GAP)
+		_scroll = fposmod(_scroll + speed * delta, TEX_MID.get_width())
 		queue_redraw()
 	else:
 		_stop_left -= delta
@@ -78,20 +81,14 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var half := width / 2.0
-	# rolos nas pontas e no meio
-	var n := int(width / 64.0)
-	for i in n + 1:
-		var x := -half + 8.0 + (width - 16.0) * float(i) / float(maxi(n, 1))
-		draw_rect(Rect2(x - 7, thickness - 2, 14, 10), BELT_DARK)
-		draw_rect(Rect2(x - 5, thickness, 10, 6), ROLLER)
-	# lona com faixas que andam no sentido da esteira
-	draw_rect(Rect2(-half, -2, width, thickness + 4), BELT_DARK)
-	draw_rect(Rect2(-half + 2, 0, width - 4, thickness), BELT)
-	var x0 := -half + 2.0 + _scroll
-	while x0 < half - 6.0:
-		draw_rect(Rect2(x0, 2, 4, thickness - 4), STRIPE)
-		x0 += STRIPE_GAP
-	# luz de estado na ponta: laranja rodando, ciano parada (hackeada)
+	var cap := TEX_LEFT.get_width()
+	var h := TEX_MID.get_height()
+	var mid_w := width - cap * 2.0
+	draw_texture(TEX_LEFT, Vector2(-half, SPRITE_TOP))
+	draw_texture(TEX_RIGHT, Vector2(half - cap, SPRITE_TOP))
+	draw_texture_rect_region(TEX_MID, Rect2(-half + cap, SPRITE_TOP, mid_w, h),
+		Rect2(-_scroll, 0, mid_w, h))
+	# luz de estado nas pontas: laranja rodando, ciano parada (hackeada)
 	var lc := LIGHT_ON if running else LIGHT_OFF
 	draw_rect(Rect2(-half - 10, -14, 8, 8), BELT_DARK)
 	draw_rect(Rect2(-half - 9, -13, 6, 6), lc)

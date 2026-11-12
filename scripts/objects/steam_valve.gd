@@ -6,7 +6,8 @@ extends Node2D
 ## O jogador atravessa o vapor normalmente (não tem colisão).
 ##
 ## Origem = chão sob o bico. O cano desce do teto até `nozzle_height` acima do
-## chão. Arte provisória desenhada em código (greybox).
+## chão. Arte do PixelLab (tools/gen_industrial_art.py): válvula + fatia de cano
+## repetida até o teto; o volante fica ciano enquanto a válvula está aberta.
 
 signal steam_changed(active: bool)
 
@@ -18,10 +19,11 @@ signal steam_changed(active: bool)
 @export var nozzle_height: float = 210.0
 @export var pipe_length: float = 600.0
 
-const PIPE := Color(0.24, 0.21, 0.2)
-const PIPE_DARK := Color(0.05, 0.04, 0.04)
-const WHEEL_IDLE := Color(0.75, 0.2, 0.12)
-const WHEEL_OPEN := Color(0.0, 0.94, 1.0)
+const TEX_CLOSED: Texture2D = preload("res://assets/objects/valve/valve_closed.png")
+const TEX_OPEN: Texture2D = preload("res://assets/objects/valve/valve_open.png")
+const TEX_PIPE: Texture2D = preload("res://assets/objects/valve/pipe_segment.png")
+## Centro do volante no sprite (y a partir do topo).
+const WHEEL_Y := 32.0
 const STEAM := Color(0.86, 0.86, 0.84, 0.55)
 
 var active: bool = false
@@ -37,7 +39,7 @@ func _ready() -> void:
 	var h := get_node_or_null("Hackable") as Hackable
 	if h:
 		h.kind = Hackable.Kind.VALVE
-		h.position = Vector2(0, -nozzle_height - 46)  # no volante
+		h.position = Vector2(0, -nozzle_height - TEX_CLOSED.get_height() + WHEEL_Y)  # no volante
 		h.hacked.connect(open)
 	_build_steam()
 	queue_redraw()
@@ -104,7 +106,7 @@ func _build_steam() -> void:
 	_particles.emitting = false
 	_particles.amount = 70
 	_particles.lifetime = 1.4
-	_particles.position = Vector2(0, -nozzle_height + 8)
+	_particles.position = Vector2(0, -nozzle_height + 2)
 	_particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
 	_particles.emission_rect_extents = Vector2(10, 4)
 	_particles.direction = Vector2(0, 1)
@@ -128,18 +130,11 @@ func _build_steam() -> void:
 
 
 func _draw() -> void:
+	var tex := TEX_OPEN if active else TEX_CLOSED
+	var size := tex.get_size()
+	var body_top := -nozzle_height - size.y
+	# cano do teto até o topo da válvula (fatia repetida)
 	var top := -nozzle_height - pipe_length
-	# cano vertical vindo do teto, com contorno escuro
-	draw_rect(Rect2(-9, top, 18, pipe_length), PIPE_DARK)
-	draw_rect(Rect2(-7, top, 14, pipe_length), PIPE)
-	# bico
-	draw_rect(Rect2(-13, -nozzle_height - 6, 26, 10), PIPE_DARK)
-	draw_rect(Rect2(-11, -nozzle_height - 4, 22, 6), PIPE)
-	# volante da válvula, ao lado do cano
-	var c := Vector2(0, -nozzle_height - 46)
-	var wheel := WHEEL_OPEN if active else WHEEL_IDLE
-	draw_rect(Rect2(c.x - 13, c.y - 13, 26, 26), PIPE_DARK)
-	draw_rect(Rect2(c.x - 11, c.y - 11, 22, 22), wheel)
-	draw_rect(Rect2(c.x - 7, c.y - 7, 14, 14), PIPE_DARK)
-	draw_rect(Rect2(c.x - 2, c.y - 11, 4, 22), wheel)
-	draw_rect(Rect2(c.x - 11, c.y - 2, 22, 4), wheel)
+	if body_top > top:
+		draw_texture_rect(TEX_PIPE, Rect2(-size.x / 2.0, top, size.x, body_top - top), true)
+	draw_texture(tex, Vector2(-size.x / 2.0, body_top))
