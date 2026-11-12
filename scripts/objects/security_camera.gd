@@ -218,6 +218,8 @@ func _sees_player() -> bool:
 	var diff := absf(wrapf(rad_to_deg(to.angle()) - aim_deg, -180.0, 180.0))
 	if diff > fov_deg * 0.5:
 		return false
+	if VisionBlocker.line_blocked(get_tree(), origin, target):
+		return false
 	var q := PhysicsRayQueryParameters2D.create(origin, target, world_mask)
 	q.exclude = [(player as CollisionObject2D).get_rid()]
 	return get_world_2d().direct_space_state.intersect_ray(q).is_empty()
@@ -250,6 +252,7 @@ func _update_cone() -> void:
 		var hit := space.intersect_ray(q)
 		if not hit.is_empty():
 			end = hit["position"]
+		end = VisionBlocker.clip(get_tree(), g_origin, end)
 		_cone.append(end - global_position)
 
 

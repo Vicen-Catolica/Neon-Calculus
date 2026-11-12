@@ -1,0 +1,12 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/objects/steam_valve.gd" id="1_j4pnp"]
+[ext_resource type="Script" path="res://scripts/hacking/hackable.gd" id="2_spcm7"]
+
+[node name="SteamValve" type="Node2D" unique_id=340742751]
+script = ExtResource("1_j4pnp")
+
+[node name="Hackable" type="Node2D" parent="." unique_id=942106414]
+position = Vector2(0, -256)
+script = ExtResource("2_spcm7")
+display_name = "VÁLVULA DE VAPOR"

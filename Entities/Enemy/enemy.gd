@@ -273,6 +273,9 @@ func _decay_awareness(delta: float) -> void:
 func has_line_of_sight_to(target_player: Node2D, target_pos: Vector2) -> bool:
 	if not is_instance_valid(ray_cast):
 		return false
+	# Vapor/fumaça: não colide, mas tapa a visão.
+	if VisionBlocker.line_blocked(get_tree(), ray_cast.global_position, target_pos):
+		return false
 
 	ray_cast.target_position = ray_cast.to_local(target_pos)
 	ray_cast.collision_mask = vision_mask if vision_mask != 0 else 3
@@ -530,6 +533,7 @@ func _draw_vision_cone() -> void:
 		var hit := space.intersect_ray(q)
 		if not hit.is_empty():
 			end = hit["position"]
+		end = VisionBlocker.clip(get_tree(), g_origin, end)
 		pts.append(end - global_position)
 	var col := Color(1.0, 0.55, 0.15, 0.10)
 	if st == "maxalert":

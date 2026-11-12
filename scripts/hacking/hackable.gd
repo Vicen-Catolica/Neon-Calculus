@@ -7,7 +7,8 @@ extends Node2D
 signal hacked
 signal hack_failed
 
-enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK }
+## Novos tipos sempre no fim: o valor numérico fica salvo nas cenas.
+enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK, VALVE }
 
 @export var kind: Kind = Kind.CAMERA
 @export var display_name: String = "ALVO"
@@ -21,6 +22,7 @@ enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK }
 const KIND_LABEL := {
 	Kind.CAMERA: "CÂMERA", Kind.DOOR: "PORTA", Kind.GUARD: "AGENTE",
 	Kind.CYBORG: "UNIDADE LÓGICA", Kind.LIGHT: "LUZ NEON", Kind.KIOSK: "QUIOSQUE AXIOMA",
+	Kind.VALVE: "VÁLVULA DE VAPOR",
 }
 
 

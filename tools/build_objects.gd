@@ -1,7 +1,7 @@
 extends "res://tools/stage_builder_base.gd"
 ## Gera as cenas de objetos compartilhadas entre as fases: guardas (v1/v2),
-## câmeras (parede/domo), porta biométrica, quiosque da Axioma, terminal de dados
-## e a interface de furtividade/lore. Uso, na raiz do projeto:
+## câmeras (parede/domo), porta biométrica, quiosque da Axioma, terminal de dados,
+## válvula de vapor e a interface de furtividade/lore. Uso, na raiz do projeto:
 ##   godot --headless --path . res://tools/build_objects.tscn
 ## Reexecutar sobrescreve essas cenas (não edite-as à mão; edite este script).
 
@@ -20,6 +20,7 @@ func _build_object_scenes() -> void:
 	_build_door()
 	_build_kiosk()
 	_build_data_terminal()
+	_build_steam_valve()
 	_build_ui()
 
 
@@ -178,6 +179,15 @@ func _build_data_terminal() -> void:
 	t.add_child(spr)
 	t.add_child(_rect_shape(Vector2(90, 100), Vector2(0, -50)))
 	_save(t, "res://scenes/objects/data_terminal.tscn")
+
+
+func _build_steam_valve() -> void:
+	var v := Node2D.new()
+	v.name = "SteamValve"
+	v.set_script(load("res://scripts/objects/steam_valve.gd"))
+	# Hackable no volante (nozzle_height padrão 210 + 46).
+	v.add_child(_hackable("VÁLVULA DE VAPOR", Vector2(0, -256)))
+	_save(v, "res://scenes/objects/steam_valve.tscn")
 
 
 func _build_ui() -> void:

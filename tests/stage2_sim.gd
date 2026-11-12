@@ -122,6 +122,33 @@ func _ready() -> void:
 	var exit := lvl.get_node("LevelExit") as Area2D
 	check("E: elevador (saída) alcançável no topo", exit.overlaps_body(p))
 
+	# Vapor: guarda e câmera não enxergam através nem dentro da nuvem.
+	var valve := lvl.get_node("SteamValves/BoilerValveFloor") as SteamValve
+	var guard := lvl.get_node("Guards/Guard1") as Enemy
+	guard.global_position = Vector2(1350, 16)
+	tp(1760, 16); await step(5)
+	check("sem vapor o guarda vê o jogador", guard.has_line_of_sight_to(p, p.get_aim_point()))
+	check("válvula fechada pode ser hackeada", valve.can_be_hacked())
+	hv.debug_hack(valve.get_node("Hackable"), true); await step(5)
+	check("hack abre o vapor", valve.active and valve.is_blocking())
+	check("vapor tapa a visão do guarda", not guard.has_line_of_sight_to(p, p.get_aim_point()))
+	tp(1560, 16); await step(5)
+	check("dentro do vapor o jogador some", not guard.has_line_of_sight_to(p, p.get_aim_point()))
+	check("válvula aberta não aceita novo hack", not valve.can_be_hacked())
+	var server := lvl.get_node("SteamValves/ServerValve") as SteamValve
+	var dome2 := lvl.get_node("Cameras/ServerDome2") as Node2D
+	var lens: Vector2 = dome2.global_position + dome2.lens_local()
+	server.open()
+	check("vapor dos servidores tapa o domo", VisionBlocker.line_blocked(get_tree(), lens, Vector2(4250, -40)))
+	server.close()
+	check("sem vapor o domo vê de novo", not VisionBlocker.line_blocked(get_tree(), lens, Vector2(4250, -40)))
+	await step(int(valve.steam_time * 60.0) + 20)
+	check("vapor acaba sozinho", not valve.active)
+	check("guarda volta a ver depois do vapor", guard.has_line_of_sight_to(p, p.get_aim_point()))
+	check("cooldown antes do próximo hack", not valve.can_be_hacked())
+	await step(int(valve.cooldown * 60.0) + 20)
+	check("válvula rearma depois do cooldown", valve.can_be_hacked())
+
 	# Lore: todo terminal aponta para uma entrada existente.
 	var missing := []
 	for t in lvl.get_node("DataTerminals").get_children():

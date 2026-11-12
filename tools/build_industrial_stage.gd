@@ -101,6 +101,7 @@ func build() -> Node:
 	_add_props(lvl)
 	_add_terminals(lvl)
 	_add_kiosk_and_door(lvl)
+	_add_valves(lvl)
 	_add_cameras(lvl)
 	_add_guards(lvl)
 	_add_exit(lvl)
@@ -251,6 +252,26 @@ func _add_kiosk_and_door(lvl: Node) -> void:
 	lvl.add_child(_instance("res://scenes/objects/axioma_kiosk.tscn", "AxiomaKiosk", Vector2(2080, 16)))
 	# Porta biométrica na passagem D -> E.
 	lvl.add_child(_instance("res://scenes/objects/security_door.tscn", "SecurityDoor", Vector2(146 * T + 40, 16)))
+
+
+## Válvula de vapor apoiada no chão `pos`; o cano sobe até o teto `ceiling_y`.
+func _valve(parent: Node, node_name: String, pos: Vector2, nozzle_height: float, ceiling_y: float,
+		cloud: Vector2 = Vector2(200, 170)) -> void:
+	var v := _instance("res://scenes/objects/steam_valve.tscn", node_name, pos)
+	v.set("nozzle_height", nozzle_height)
+	v.set("pipe_length", pos.y - nozzle_height - ceiling_y)
+	v.set("cloud_size", cloud)
+	parent.add_child(v)
+
+
+func _add_valves(lvl: Node) -> void:
+	var holder := _holder(lvl, "SteamValves")
+	# B: no meio da patrulha do chão — o vapor esconde quem atravessa por baixo do domo.
+	_valve(holder, "BoilerValveFloor", Vector2(1560, 16), 150.0, CEILING_Y, Vector2(200, 150))  # bico logo abaixo da passarela
+	# B: na passarela, entre o guarda de cima e a escada da direita.
+	_valve(holder, "BoilerValveCatwalk", Vector2(1850, -144), 120.0, CEILING_Y, Vector2(180, 140))
+	# D: vapor frio entre os racks, sob o 2º domo dos servidores.
+	_valve(holder, "ServerValve", Vector2(4250, 16), 120.0, SERVER_CEILING_Y, Vector2(200, 150))
 
 
 func _add_cameras(lvl: Node) -> void:
