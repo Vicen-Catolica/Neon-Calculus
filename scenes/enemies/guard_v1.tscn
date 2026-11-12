@@ -18,7 +18,7 @@ radius = 300.0
 radius = 14.0
 height = 118.0
 
-[node name="Guard" type="CharacterBody2D" unique_id=1123139661]
+[node name="Guard" type="CharacterBody2D" unique_id=100880829]
 script = ExtResource("1_6kcnk")
 move_speed = 70.0
 chase_speed = 165.0
@@ -30,56 +30,56 @@ eye_offset = Vector2(0, -102)
 show_debug_vision = false
 show_vision_cone = true
 
-[node name="Sensors" type="Node2D" parent="." unique_id=1028199326]
+[node name="Sensors" type="Node2D" parent="." unique_id=600959757]
 
-[node name="HearingArea" type="Area2D" parent="Sensors" unique_id=1803004196]
+[node name="HearingArea" type="Area2D" parent="Sensors" unique_id=1288560144]
 visible = false
 
-[node name="HearingCollision" type="CollisionShape2D" parent="Sensors/HearingArea" unique_id=1712574709]
+[node name="HearingCollision" type="CollisionShape2D" parent="Sensors/HearingArea" unique_id=725462139]
 position = Vector2(0, -60)
 shape = SubResource("CircleShape2D_21ok4")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1524255851]
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=14897202]
 position = Vector2(-2, -62)
 sprite_frames = ExtResource("2_i8hof")
 animation = &"idle"
 autoplay = "idle"
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=2100659137]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=487220448]
 position = Vector2(0, -59)
 shape = SubResource("CapsuleShape2D_6bqe4")
 
-[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=280052194]
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1810534012]
 
-[node name="VisibleOnScreenEnabler2D" type="VisibleOnScreenEnabler2D" parent="." unique_id=1825525103]
+[node name="VisibleOnScreenEnabler2D" type="VisibleOnScreenEnabler2D" parent="." unique_id=525513999]
 rect = Rect2(-900, -500, 1800, 800)
 
-[node name="AttackTimer" type="Timer" parent="." unique_id=1469401645]
+[node name="AttackTimer" type="Timer" parent="." unique_id=1590545339]
 wait_time = 0.7
 
-[node name="StateMachine" type="Node" parent="." unique_id=606241453 node_paths=PackedStringArray("initial_state")]
+[node name="StateMachine" type="Node" parent="." unique_id=522867981 node_paths=PackedStringArray("initial_state")]
 script = ExtResource("3_iib27")
 initial_state = NodePath("Patrol")
 
-[node name="Patrol" type="Node" parent="StateMachine" unique_id=318294657]
+[node name="Patrol" type="Node" parent="StateMachine" unique_id=376900822]
 script = ExtResource("4_ekj3k")
 
-[node name="Suspicious" type="Node" parent="StateMachine" unique_id=1019322455]
+[node name="Suspicious" type="Node" parent="StateMachine" unique_id=2081515112]
 script = ExtResource("5_utnnn")
 
-[node name="Search" type="Node" parent="StateMachine" unique_id=604046369]
+[node name="Search" type="Node" parent="StateMachine" unique_id=1594195125]
 script = ExtResource("6_wpc43")
 
-[node name="MaxAlert" type="Node" parent="StateMachine" unique_id=764856859]
+[node name="MaxAlert" type="Node" parent="StateMachine" unique_id=416261022]
 script = ExtResource("7_sgp2c")
 
-[node name="Distracted" type="Node" parent="StateMachine" unique_id=1278547874]
+[node name="Distracted" type="Node" parent="StateMachine" unique_id=570487208]
 script = ExtResource("8_6jjmm")
 
-[node name="Investigate" type="Node" parent="StateMachine" unique_id=1558004099]
+[node name="Investigate" type="Node" parent="StateMachine" unique_id=2041814118]
 script = ExtResource("9_u24hd")
 
-[node name="StateIndicator" type="Label" parent="." unique_id=992838307]
+[node name="StateIndicator" type="Label" parent="." unique_id=1913174630]
 custom_minimum_size = Vector2(40, 30)
 offset_left = -20.0
 offset_top = -160.0
@@ -89,12 +89,12 @@ pivot_offset = Vector2(20, 15)
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="TaserLine" type="Line2D" parent="." unique_id=1228342493]
+[node name="TaserLine" type="Line2D" parent="." unique_id=1387844308]
 visible = false
 width = 3.0
 default_color = Color(0, 0.94, 1, 1)
 
-[node name="Hackable" type="Node2D" parent="." unique_id=1251839432]
+[node name="Hackable" type="Node2D" parent="." unique_id=1353139575]
 position = Vector2(0, -90)
 script = ExtResource("10_2qmls")
 display_name = "AGENTE"

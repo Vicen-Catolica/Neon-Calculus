@@ -8,7 +8,7 @@ const T := 32
 const GROUND_TS := "res://assets/tilesets/slums/slums_ground.tres"
 const STRUCT_TS := "res://assets/tilesets/slums/slums_structures.tres"
 const OUT_LEVEL := "res://scenes/levels/slums/slums_stage1.tscn"
-const NEXT_STAGE := "res://scenes/Stage2/stage2.tscn"
+const NEXT_STAGE := "res://scenes/levels/industrial/industrial_stage2.tscn"
 
 var _root: Node
 
@@ -371,7 +371,7 @@ func _all_ground_rects() -> Array:
 func _build_level() -> void:
 	var lvl := Node2D.new()
 	lvl.name = "SlumsStage1"
-	lvl.set_script(load("res://scripts/core/slums_level.gd"))
+	lvl.set_script(load("res://scripts/core/level.gd"))
 	lvl.set("limit_left", -48)
 	lvl.set("limit_right", 166 * T + 16)
 	lvl.set("limit_top", -1400)
@@ -964,8 +964,8 @@ func _add_exit(lvl: Node) -> void:
 	lvl.add_child(dark)
 
 	var exit := Area2D.new()
-	exit.name = "ExitToStage2"
-	exit.set_script(load("res://scenes/Stage1/NextStage.gd"))
+	exit.name = "LevelExit"
+	exit.set_script(load("res://scripts/core/level_exit.gd"))
 	exit.set("next_stage", NEXT_STAGE)
 	exit.position = Vector2(4 * T + 16, _y(-36))
 	exit.add_child(_rect_shape(Vector2(120, 40), Vector2(0, -20)))

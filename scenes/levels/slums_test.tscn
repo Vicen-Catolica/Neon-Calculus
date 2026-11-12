@@ -1,6 +1,6 @@
 [gd_scene format=4]
 
-[ext_resource type="Script" path="res://scripts/core/slums_level.gd" id="1_v1g7o"]
+[ext_resource type="Script" path="res://scripts/core/level.gd" id="1_v1g7o"]
 [ext_resource type="Texture2D" path="res://assets/backgrounds/slums/bg_favela_dark_seamless.png" id="2_avc80"]
 [ext_resource type="TileSet" path="res://assets/tilesets/slums/slums_ground.tres" id="3_aknjv"]
 [ext_resource type="TileSet" path="res://assets/tilesets/slums/slums_structures.tres" id="4_0ik1w"]

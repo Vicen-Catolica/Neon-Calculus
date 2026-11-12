@@ -1,0 +1,102 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/core/level.gd" id="1_8mw8p"]
+[ext_resource type="Script" path="res://scripts/core/routine_sweep.gd" id="2_brjyq"]
+[ext_resource type="PackedScene" path="res://scenes/player/eduardo.tscn" id="3_ily73"]
+[ext_resource type="Script" path="res://scripts/player/eduardo.gd" id="4_g220o"]
+[ext_resource type="PackedScene" path="res://scenes/Hud/HUD.tscn" id="5_87pf3"]
+[ext_resource type="Script" path="res://scenes/Hud/hud.gd" id="6_xwcbf"]
+[ext_resource type="PackedScene" path="res://scenes/ui/stealth_hud.tscn" id="7_vm8i1"]
+[ext_resource type="Script" path="res://scripts/ui/stealth_hud.gd" id="8_xvmyt"]
+[ext_resource type="PackedScene" path="res://scenes/hacking_ui/HackingInterface.tscn" id="9_d48ti"]
+[ext_resource type="Script" path="res://scenes/hacking_ui/hacking_interface.gd" id="10_bycwk"]
+[ext_resource type="PackedScene" path="res://scenes/ui/lore_reader.tscn" id="11_fst3r"]
+[ext_resource type="Script" path="res://scripts/ui/lore_reader.gd" id="12_brsob"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tg675"]
+size = Vector2(2528, 320)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_tlbih"]
+size = Vector2(64, 1000)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_km1hp"]
+size = Vector2(64, 1000)
+
+[node name="IndustrialStage2" type="Node2D" unique_id=988787087]
+script = ExtResource("1_8mw8p")
+floor_number = 2
+limit_left = -32
+limit_right = 2432
+limit_top = -700
+limit_bottom = 300
+
+[node name="Background" type="ColorRect" parent="." unique_id=749521570]
+offset_left = -1000.0
+offset_top = -1600.0
+offset_right = 3400.0
+offset_bottom = 400.0
+color = Color(0.07, 0.055, 0.05, 1)
+
+[node name="Solid" type="StaticBody2D" parent="." unique_id=1257803650]
+
+[node name="@CollisionShape2D@7" type="CollisionShape2D" parent="Solid" unique_id=1349510296]
+position = Vector2(1200, 176)
+shape = SubResource("RectangleShape2D_tg675")
+
+[node name="@CollisionShape2D@9" type="CollisionShape2D" parent="Solid" unique_id=767410718]
+position = Vector2(-32, -400)
+shape = SubResource("RectangleShape2D_tlbih")
+
+[node name="@CollisionShape2D@11" type="CollisionShape2D" parent="Solid" unique_id=751154448]
+position = Vector2(2432, -400)
+shape = SubResource("RectangleShape2D_km1hp")
+
+[node name="@ColorRect@8" type="ColorRect" parent="." unique_id=1132952078]
+offset_left = -64.0
+offset_top = 16.0
+offset_right = 2464.0
+offset_bottom = 336.0
+color = Color(0.24, 0.17, 0.12, 1)
+
+[node name="@ColorRect@10" type="ColorRect" parent="." unique_id=1615923916]
+offset_left = -64.0
+offset_top = -900.0
+offset_bottom = 100.0
+color = Color(0.24, 0.17, 0.12, 1)
+
+[node name="@ColorRect@12" type="ColorRect" parent="." unique_id=960814427]
+offset_left = 2400.0
+offset_top = -900.0
+offset_right = 2464.0
+offset_bottom = 100.0
+color = Color(0.24, 0.17, 0.12, 1)
+
+[node name="WipSign" type="Label" parent="." unique_id=835206861]
+offset_left = 420.0
+offset_top = -260.0
+offset_right = 420.0
+offset_bottom = -260.0
+theme_override_font_sizes/font_size = 28
+theme_override_colors/font_color = Color(1, 0.41568628, 0.101960786, 1)
+text = "SETOR INDUSTRIAL // EM CONSTRUÇÃO"
+
+[node name="RoutineSweep" type="Node2D" parent="." unique_id=388209302]
+script = ExtResource("2_brjyq")
+
+[node name="Eduardo" type="CharacterBody2D" parent="." unique_id=323735433 groups=["Player"] instance=ExtResource("3_ily73")]
+position = Vector2(96, 16)
+script = ExtResource("4_g220o")
+
+[node name="Hud" type="CanvasLayer" parent="." unique_id=1461386447 instance=ExtResource("5_87pf3")]
+script = ExtResource("6_xwcbf")
+
+[node name="StealthHUD" type="CanvasLayer" parent="." unique_id=427252413 instance=ExtResource("7_vm8i1")]
+script = ExtResource("8_xvmyt")
+
+[node name="HackingInterface" type="CanvasLayer" parent="." unique_id=561738698 instance=ExtResource("9_d48ti")]
+process_mode = 3
+visible = false
+script = ExtResource("10_bycwk")
+
+[node name="LoreReader" type="CanvasLayer" parent="." unique_id=1999638029 instance=ExtResource("11_fst3r")]
+script = ExtResource("12_brsob")

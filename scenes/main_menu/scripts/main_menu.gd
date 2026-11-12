@@ -340,6 +340,14 @@ func _setup_buttons() -> void:
 			btn.mouse_exited.connect(_on_btn_unhover.bind(btn))
 			btn.pressed.connect(_on_btn_pressed.bind(btn))
 
+	# Sem checkpoint gravado não há o que continuar.
+	var cont := menu_container.get_node_or_null("BtnContinue") as Button
+	if cont and not SaveGame.has_save():
+		cont.disabled = true
+		# self_modulate: as animações de entrada/hover mexem em modulate.
+		cont.self_modulate = Color(1, 1, 1, 0.35)
+		cont.mouse_default_cursor_shape = Control.CURSOR_ARROW
+
 
 func _apply_button_styles(btn: Button) -> void:
 	if _font:
@@ -443,6 +451,8 @@ func _animate_intro() -> void:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 func _on_btn_hover(btn: Button) -> void:
+	if btn.disabled:
+		return
 	_play_hover_sfx()
 	if _btn_tweens.has(btn) and is_instance_valid(_btn_tweens[btn]):
 		_btn_tweens[btn].kill()
@@ -479,9 +489,14 @@ func _on_btn_pressed(btn: Button) -> void:
 
 	match btn.name:
 		"BtnStart":
+			# Novo jogo: apaga o checkpoint e a lore lida.
+			SaveGame.clear()
+			GameManager.reset_progress()
 			_change_scene_with_fade(start_scene)
 		"BtnContinue":
-			pass
+			var scene := SaveGame.restore()
+			if scene != "":
+				_change_scene_with_fade(scene)
 		"BtnOptions":
 			_open_options()
 		"BtnExit":
@@ -571,7 +586,11 @@ func _change_scene_with_fade(target_scene: String) -> void:
 		var tween = create_tween()
 		tween.tween_property(bgm, "volume_db", -80.0, 0.3)
 		await tween.finished
-	get_tree().change_scene_to_file(target_scene)
+	# Andares passam pela tela de transição da Axioma; o resto troca direto.
+	if GameManager.level_title(target_scene) != "":
+		LevelTransition.change_level(target_scene)
+	else:
+		get_tree().change_scene_to_file(target_scene)
 
 
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

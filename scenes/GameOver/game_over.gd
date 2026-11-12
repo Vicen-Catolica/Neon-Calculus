@@ -274,15 +274,23 @@ func _connect_signals() -> void:
 
 
 func _on_restart_pressed() -> void:
-	get_tree().paused = false
 	queue_free()
-	get_tree().reload_current_scene()
+	# Volta ao checkpoint gravado (início do andar); sem save, recomeça a cena atual.
+	var scene := SaveGame.restore()
+	if scene == "" and get_tree().current_scene:
+		scene = get_tree().current_scene.scene_file_path
+	if scene != "":
+		LevelTransition.change_level(scene)
+	else:
+		get_tree().paused = false
+		get_tree().reload_current_scene()
 
 
 func _on_menu_pressed() -> void:
 	get_tree().paused = false
 	queue_free()
-	if ResourceLoader.exists("res://scenes/main_menu/main_menu.tscn"):
-		get_tree().change_scene_to_file("res://scenes/main_menu/main_menu.tscn")
+	Engine.time_scale = 1.0
+	if ResourceLoader.exists(GameManager.MAIN_MENU_SCENE):
+		get_tree().change_scene_to_file(GameManager.MAIN_MENU_SCENE)
 	else:
 		get_tree().reload_current_scene()

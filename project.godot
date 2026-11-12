@@ -22,6 +22,8 @@ buses/default_bus_layout="uid://dyxtp740c3gs4"
 
 SettingsManager="*uid://bj80syu8ugvhp"
 GameManager="*res://scripts/core/game_manager.gd"
+SaveGame="*res://scripts/core/save_game.gd"
+LevelTransition="*res://scripts/ui/level_transition.gd"
 
 [display]
 

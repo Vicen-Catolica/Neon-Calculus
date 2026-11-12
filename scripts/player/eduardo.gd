@@ -9,6 +9,10 @@ signal state_changed(new_state: State)
 enum State { IDLE, WALK, RUN, CROUCH, CROUCH_WALK, JUMP, FALL, CLIMB, HACK }
 
 const GAME_OVER_SCENE: PackedScene = preload("res://scenes/GameOver/GameOver.tscn")
+const HIDDEN_TINT := Color(0.62, 0.65, 0.8)
+const HIDE_LAST_FRAME := 3
+## Segundos (tempo real) da animação "caught" antes da tela de game over.
+const CAUGHT_DELAY := 0.9
 
 @export_group("Movimento")
 @export var walk_speed: float = 110.0
@@ -248,9 +252,9 @@ func _try_hide() -> bool:
 	velocity = Vector2.ZERO
 	global_position.x = spot.global_position.x
 	z_index = -1
-	sprite.modulate = Color(0.35, 0.38, 0.5)
-	if sprite.animation != &"crouch_idle":
-		sprite.play(&"crouching")
+	# A arte "hide" já escurece o Eduardo; o tom só puxa para a sombra azulada.
+	sprite.modulate = HIDDEN_TINT
+	sprite.play(&"hide")
 	_set_state(State.CROUCH)
 	return true
 
@@ -269,8 +273,9 @@ func _process_hidden(delta: float, dir: float) -> void:
 	if Input.is_action_just_pressed("interact_world") or dir != 0.0 or Input.is_action_just_pressed("jump"):
 		_unhide()
 		return
-	if not (sprite.animation == &"crouching" and sprite.is_playing()):
-		_play(&"crouch_idle")
+	# Escondido: termina a entrada e segura o último quadro (agachado na sombra).
+	if not (sprite.animation == &"hide" and sprite.is_playing()):
+		_hold_frame(&"hide", HIDE_LAST_FRAME)
 
 
 # --- Escadas -----------------------------------------------------------
@@ -415,7 +420,12 @@ func _on_game_state_changed(new_state: GameManager.State) -> void:
 	_hacking = hacking_now
 	if _hidden or (_crouching and not _can_stand()):
 		# Hackeando escondido ou embaixo de um teto baixo (túnel, puxadinho):
-		# continua agachado; levantar aqui prendia o Eduardo no teto.
+		# continua agachado (levantar aqui prendia o Eduardo no teto) e usa a
+		# animação agachada, que já traz as partículas no próprio quadro.
+		if hacking_now:
+			sprite.play(&"crouch_hack")
+		elif not _hidden:
+			sprite.play(&"crouch_idle")
 		return
 	if hacking_now:
 		_crouching = false
@@ -457,4 +467,11 @@ func die() -> void:
 		return
 	is_dead = true
 	get_tree().call_group("hud", "hide_hud")
+	# Atingido pelo taser: cai no chão ("caught") e só então a tela de game over.
+	if _hidden:
+		_unhide()
+	fx.visible = false
+	velocity = Vector2.ZERO
+	sprite.play(&"caught")
+	await get_tree().create_timer(CAUGHT_DELAY, true, false, true).timeout
 	get_tree().root.add_child(GAME_OVER_SCENE.instantiate())

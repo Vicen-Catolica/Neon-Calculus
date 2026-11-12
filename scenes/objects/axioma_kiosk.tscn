@@ -40,15 +40,15 @@ animations = [{
 "speed": 2.0
 }]
 
-[node name="AxiomaKiosk" type="Node2D" unique_id=1997656586]
+[node name="AxiomaKiosk" type="Node2D" unique_id=128112311]
 script = ExtResource("1_rg1lc")
 
-[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1407709620]
+[node name="Sprite" type="AnimatedSprite2D" parent="." unique_id=1120923084]
 position = Vector2(0, -48)
 sprite_frames = SubResource("SpriteFrames_ivw61")
 animation = &"locked"
 
-[node name="Hackable" type="Node2D" parent="." unique_id=97158807]
+[node name="Hackable" type="Node2D" parent="." unique_id=1340599349]
 position = Vector2(4, -66)
 script = ExtResource("8_3i4d7")
 display_name = "QUIOSQUE AXIOMA"

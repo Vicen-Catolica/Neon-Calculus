@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=76 format=3]
+[gd_resource type="SpriteFrames" load_steps=90 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/characters/eduardo/idle/frame_1.png" id="1"]
 [ext_resource type="Texture2D" path="res://assets/characters/eduardo/idle/frame_2.png" id="2"]
@@ -75,6 +75,20 @@
 [ext_resource type="Texture2D" path="res://assets/characters/eduardo/ladder_climb/frame_4.png" id="73"]
 [ext_resource type="Texture2D" path="res://assets/characters/eduardo/ladder_climb/frame_5.png" id="74"]
 [ext_resource type="Texture2D" path="res://assets/characters/eduardo/ladder_climb/frame_6.png" id="75"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/hide/frame_1.png" id="76"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/hide/frame_2.png" id="77"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/hide/frame_3.png" id="78"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/hide/frame_4.png" id="79"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/crouch_hack/frame_1.png" id="80"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/crouch_hack/frame_2.png" id="81"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/crouch_hack/frame_3.png" id="82"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/crouch_hack/frame_4.png" id="83"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/caught/frame_1.png" id="84"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/caught/frame_2.png" id="85"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/caught/frame_3.png" id="86"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/caught/frame_4.png" id="87"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/caught/frame_5.png" id="88"]
+[ext_resource type="Texture2D" path="res://assets/characters/eduardo/caught/frame_6.png" id="89"]
 
 [resource]
 animations = [{
@@ -432,5 +446,73 @@ animations = [{
 }],
 "loop": true,
 "name": &"ladder_climb",
+"speed": 9.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("76")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("77")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("78")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("79")
+}],
+"loop": false,
+"name": &"hide",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("80")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("81")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("82")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("83")
+}],
+"loop": true,
+"name": &"crouch_hack",
+"speed": 6.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("84")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("85")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("86")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("87")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("88")
+},
+{
+"duration": 1.0,
+"texture": ExtResource("89")
+}],
+"loop": false,
+"name": &"caught",
 "speed": 9.0
 }]
