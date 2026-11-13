@@ -162,7 +162,7 @@ func _build_ui() -> void:
 	_ui.layer = 9
 	_ui.visible = false
 	add_child(_ui)
-	var font: Font = load("res://assets/fonts/Orbitron-Bold.ttf") if ResourceLoader.exists("res://assets/fonts/Orbitron-Bold.ttf") else null
+	var font: Font = load("res://assets/fonts/ui_font.tres") if ResourceLoader.exists("res://assets/fonts/ui_font.tres") else null
 	_title = _label(font, 44, RED, 230)  # abaixo do aviso de alarme do HUD (y 150)
 	_title.text = "AXIOMA // LOCKDOWN"
 	_msg = _label(font, 20, Color(1, 0.75, 0.75), 295)

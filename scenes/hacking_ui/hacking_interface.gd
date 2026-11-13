@@ -42,6 +42,19 @@ var _blink_timer: float = 0.0
 ## interface; volta a 1 depois de usado). < 1 = desafio rápido (lockdown).
 var time_limit_mult: float = 1.0
 
+## Penalidade de tempo por resposta errada (segundos).
+const ERROR_PENALTY := 3.0
+## Quanto tempo (real) o resultado fica na tela antes de fechar.
+const RESULT_HOLD := 0.9
+const FEEDBACK_OK := Color("#39ff14")
+const FEEDBACK_ERR := Color("#ff2d55")
+const FEEDBACK_WARN := Color("#ffd23f")
+
+## Linha de retorno logo abaixo da resposta (acerto, erro, tempo esgotado).
+var _feedback: Label
+## Fechando a tela (acerto/tempo esgotado): ignora teclado e botões.
+var _busy: bool = false
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	add_to_group("hacking_ui")
@@ -52,6 +65,9 @@ func _ready() -> void:
 		ai_assistant_panel.modulate = Color(1, 1, 1, 1)
 	
 	if hack_timer:
+		# O mundo fica a 5% da velocidade durante o hack (Engine.time_scale), mas o
+		# cronômetro do jogador é sempre em tempo real.
+		hack_timer.ignore_time_scale = true
 		hack_timer.timeout.connect(_on_hack_timer_timeout)
 		
 	if submit_button:
@@ -73,6 +89,7 @@ func _ready() -> void:
 	if input_line and input_line is LineEdit:
 		input_line.text_submitted.connect(func(_text): _on_submit_pressed())
 
+	_build_feedback()
 	_update_accessibility_equation_size()
 	if SettingsManager.has_signal("accessibility_settings_changed"):
 		SettingsManager.accessibility_settings_changed.connect(_update_accessibility_equation_size)
@@ -102,6 +119,57 @@ func _add_edit_buttons() -> void:
 		numpad_grid.move_child(btn, idx)
 
 
+## Tween que ignora o Engine.time_scale (o mundo está em câmera lenta no hack).
+func _tween() -> Tween:
+	return create_tween().set_ignore_time_scale(true)
+
+
+func _wait_real(sec: float) -> void:
+	await get_tree().create_timer(sec, true, false, true).timeout
+
+
+func _build_feedback() -> void:
+	_feedback = Label.new()
+	_feedback.name = "FeedbackLabel"
+	_feedback.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_feedback.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_feedback.custom_minimum_size = Vector2(380, 44)
+	_feedback.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_feedback.add_theme_font_override("font", load("res://assets/fonts/ui_font.tres"))
+	_feedback.add_theme_font_size_override("font_size", 16)
+	_feedback.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	_feedback.add_theme_constant_override("outline_size", 4)
+	var box := find_child("InputBoxPanel", true, false)
+	if box and box.get_parent():
+		box.get_parent().add_child(_feedback)
+		box.get_parent().move_child(_feedback, box.get_index() + 1)
+	else:
+		add_child(_feedback)
+
+
+func _show_feedback(text: String, color: Color) -> void:
+	if _feedback == null:
+		return
+	_feedback.text = text
+	_feedback.add_theme_color_override("font_color", color)
+	_feedback.modulate.a = 1.0
+	_feedback.pivot_offset = _feedback.size / 2.0
+	var t := _tween()
+	t.tween_property(_feedback, "scale", Vector2(1.12, 1.12), 0.08)
+	t.tween_property(_feedback, "scale", Vector2.ONE, 0.12)
+
+
+## Pisca a caixa da resposta numa cor (verde = certo, vermelho = errado).
+func _flash_input(color: Color) -> void:
+	var box := find_child("InputBoxPanel", true, false) as CanvasItem
+	if box == null:
+		return
+	var t := _tween()
+	for i in 2:
+		t.tween_property(box, "modulate", color, 0.07)
+		t.tween_property(box, "modulate", Color.WHITE, 0.09)
+
+
 func _delete_last_digit() -> void:
 	if current_input_text.length() > 0:
 		current_input_text = current_input_text.substr(0, current_input_text.length() - 1)
@@ -125,6 +193,10 @@ func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 	current_floor_level = floor_level
 	current_sub_topic = sub_topic
 	error_count = 0
+	_busy = false
+	if _feedback:
+		_feedback.text = "Digite o valor de x e confirme (Enter)."
+		_feedback.add_theme_color_override("font_color", Color(0.6, 0.8, 0.85))
 	
 	if ai_assistant_panel:
 		ai_assistant_panel.hide()
@@ -160,7 +232,7 @@ func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 		equation_label.text = str(eq_data.get("Expression", ""))
 	
 		equation_label.pivot_offset = equation_label.size / 2.0
-		var tween = create_tween()
+		var tween = _tween()
 		tween.tween_property(equation_label, "scale", Vector2(1.15, 1.15), 0.15)
 		tween.tween_property(equation_label, "scale", Vector2(1.0, 1.0), 0.15)
 
@@ -237,30 +309,47 @@ func _get_current_user_value() -> String:
 	if current_input_text != "":
 		return current_input_text
 	if input_line and input_line is LineEdit:
-		return input_line.text.replace("X = [", "").replace("]", "").strip_edges()
+		return input_line.text.replace("x = [", "").replace("]", "").strip_edges()
 	return ""
 
 func _on_submit_pressed() -> void:
+	if _busy or not visible:
+		return
 	var raw_input = _get_current_user_value()
 	if raw_input == "":
-		_trigger_error()
+		# Confirmar vazio não pune: só avisa.
+		_show_feedback("Digite um número antes de confirmar.", FEEDBACK_WARN)
 		return
-		
+
 	var user_val = raw_input.to_int()
-	
+
 	if user_val == final_target_solution:
+		_busy = true
+		if input_line:
+			input_line.text = "x = %d" % user_val
+		_show_feedback("CORRETO! x = %d. ACESSO CONCEDIDO." % user_val, FEEDBACK_OK)
+		_flash_input(FEEDBACK_OK)
+		if hack_timer:
+			hack_timer.paused = true
+		await _wait_real(RESULT_HOLD)
 		_complete_hack(true)
 	else:
-		_trigger_error()
+		_trigger_error(user_val)
 
-func _trigger_error() -> void:
+func _trigger_error(wrong_value: int = 0) -> void:
 	error_count += 1
 	current_input_text = ""
 	_update_input_display()
-	
+
 	if hack_timer:
-		hack_timer.start(max(0.1, hack_timer.time_left - 3.0))
-		
+		hack_timer.start(max(0.1, hack_timer.time_left - ERROR_PENALTY))
+
+	var msg := "INCORRETO: x = %d não resolve a equação. -%d s. Tente de novo." % [wrong_value, int(ERROR_PENALTY)]
+	if error_count >= 2:
+		msg += "\nA SINE abriu o passo a passo ao lado."
+	_show_feedback(msg, FEEDBACK_ERR)
+	_flash_input(FEEDBACK_ERR)
+
 	if error_count >= 2:
 		_activate_ai_assistant()
 
@@ -275,7 +364,7 @@ func _activate_ai_assistant() -> void:
 			ai_assistant_panel.show()
 			ai_assistant_panel.modulate = Color("#ffaa00")
 			
-			var tween = create_tween()
+			var tween = _tween()
 			tween.tween_property(ai_hint_label, "visible_ratio", 1.0, 1.2).from(0.0)
 	else:
 		_flash_ai_assistant()
@@ -284,7 +373,7 @@ func _flash_ai_assistant() -> void:
 	if not ai_assistant_panel:
 		return
 		
-	var tween = create_tween()
+	var tween = _tween()
 	var alert_red := Color("#ff0055")
 	var base_amber := Color("#ffaa00")
 	
@@ -293,76 +382,90 @@ func _flash_ai_assistant() -> void:
 	tween.tween_property(ai_assistant_panel, "modulate", alert_red, 0.08)
 	tween.tween_property(ai_assistant_panel, "modulate", base_amber, 0.08)
 
+## Passo a passo da SINE. Usa o "x" minúsculo da equação e as mesmas contas
+## que o gerador (scripts/hacking/EquationGenerator.cs) usou para montá-la.
 func _generate_step_by_step_hint() -> String:
-	var text = ">>> A.I. ASSISTANT PROTOCOL\n"
+	var text = ">>> SINE // PASSO A PASSO\n"
 	text += "---------------------------\n"
-	
+
 	match current_floor_level:
 		1:
 			if current_sub_topic == 0:
+				# x + a = res
 				var a = int(eq_data.get("ParamA", 0))
 				var res = int(eq_data.get("ParamRes", 0))
-				var op = " - " + str(a) if a >= 0 else " - (" + str(a) + ")"
-				text += "[!] ANÁLISE DE RETA REAL:\n"
-				text += " > Isolando a variável X:\n"
-				text += "    X = " + str(res) + op + "\n"
-				text += " > Calcule o valor final."
+				text += "[!] ADIÇÃO E SUBTRAÇÃO:\n"
+				if a >= 0:
+					text += " > Tire " + str(a) + " dos dois lados:\n"
+					text += "    x = " + str(res) + " - " + str(a) + "\n"
+				else:
+					text += " > Some " + str(-a) + " aos dois lados:\n"
+					text += "    x = " + str(res) + " + " + str(-a) + "\n"
+				text += " > Calcule o resultado."
 			else:
+				# count·x = res
 				var count = int(eq_data.get("ParamA", 1))
 				var res = int(eq_data.get("ParamRes", 0))
-				text += "[!] BLOCOS ÁLGEBRICOS:\n"
-				text += " > Divida a soma total:\n"
-				text += "    X = " + str(res) + " / " + str(count)
+				text += "[!] MULTIPLICAÇÃO:\n"
+				text += " > " + str(count) + " vezes x dá " + str(res) + ".\n"
+				text += " > Divida os dois lados por " + str(count) + ":\n"
+				text += "    x = " + str(res) + " / " + str(count)
 		2:
+			# mult·x ± b = total
 			var mult = int(eq_data.get("ParamMult", 1))
 			var b_val = int(eq_data.get("ParamB", 0))
 			var total = int(eq_data.get("ParamTotal", 0))
-			var op = " - " + str(b_val) if b_val >= 0 else " + " + str(abs(b_val))
 			var diff = total - b_val
-			text += "[!] EQUAÇÃO DE 1º GRAU:\n"
-			text += " 1. Transfira a constante:\n"
-			text += "    " + str(mult) + "X = " + str(total) + op + " = " + str(diff) + "\n"
-			text += " 2. Divida pelo multiplicador:\n"
-			text += "    X = " + str(diff) + " / " + str(mult)
+			text += "[!] EQUAÇÃO DO 1º GRAU:\n"
+			if b_val >= 0:
+				text += " 1. Tire " + str(b_val) + " dos dois lados:\n"
+				text += "    " + str(mult) + "x = " + str(total) + " - " + str(b_val) + " = " + str(diff) + "\n"
+			else:
+				text += " 1. Some " + str(-b_val) + " aos dois lados:\n"
+				text += "    " + str(mult) + "x = " + str(total) + " + " + str(-b_val) + " = " + str(diff) + "\n"
+			text += " 2. Divida por " + str(mult) + ":\n"
+			text += "    x = " + str(diff) + " / " + str(mult)
 		3:
 			if current_sub_topic == 0:
+				# x / base = num / den
 				var base_val = int(eq_data.get("ParamBase", 1))
 				var r_num = int(eq_data.get("ParamRightNum", 1))
 				var r_den = int(eq_data.get("ParamRightDen", 1))
 				var prod = base_val * r_num
 				text += "[!] REGRA DE TRÊS:\n"
-				text += " 1. Multiplicação cruzada:\n"
-				text += "    " + str(base_val) + " · " + str(r_num) + " = " + str(prod) + "\n"
+				text += " 1. Multiplique em cruz:\n"
+				text += "    x · " + str(r_den) + " = " + str(base_val) + " · " + str(r_num) + " = " + str(prod) + "\n"
 				text += " 2. Divida por " + str(r_den) + ":\n"
-				text += "    X = " + str(prod) + " / " + str(r_den)
+				text += "    x = " + str(prod) + " / " + str(r_den)
 			else:
 				var area = int(eq_data.get("ParamArea", 1))
 				var alt = int(eq_data.get("ParamAltura", 1))
-				text += "[!] GEOMETRIA PLANAR:\n"
-				text += " > Fórmula: Base · Altura = Área\n"
-				text += " > Isolando Base (X):\n"
-				text += "    X = " + str(area) + " / " + str(alt)
+				text += "[!] ÁREA DO RETÂNGULO:\n"
+				text += " > Área = base · altura\n"
+				text += " > A base é o x:\n"
+				text += "    x = " + str(area) + " / " + str(alt)
 		4:
 			if current_sub_topic == 0:
+				# k(x + offset) = total
 				var k = int(eq_data.get("ParamK", 1))
 				var offset_val = int(eq_data.get("ParamOffset", 0))
 				var total = int(eq_data.get("ParamTotal", 0))
 				var mult_off = k * offset_val
 				var diff = total - mult_off
-				text += "[!] DISTRIBUTIVA:\n"
-				text += " 1. Expanda os termos:\n"
-				text += "    " + str(k) + "X + " + str(mult_off) + " = " + str(total) + "\n"
-				text += " 2. Subtraia e divida por " + str(k) + ":\n"
-				text += "    X = " + str(diff) + " / " + str(k)
+				text += "[!] PROPRIEDADE DISTRIBUTIVA:\n"
+				text += " 1. Distribua o " + str(k) + ":\n"
+				text += "    " + str(k) + "x + " + str(mult_off) + " = " + str(total) + "\n"
+				text += " 2. Tire " + str(mult_off) + " e divida por " + str(k) + ":\n"
+				text += "    x = " + str(diff) + " / " + str(k)
 			else:
 				var a = int(eq_data.get("ParamAngA", 0))
 				var b = int(eq_data.get("ParamAngB", 0))
 				var soma = a + b
-				text += "[!] GEOMETRIA TRIANGULAR:\n"
-				text += " > Soma interna = 180°\n"
-				text += " > Ângulos: " + str(a) + "° + " + str(b) + "° = " + str(soma) + "°\n"
-				text += " > X = 180° - " + str(soma) + "°"
-				
+				text += "[!] ÂNGULOS DO TRIÂNGULO:\n"
+				text += " > Os três ângulos somam 180°.\n"
+				text += " > " + str(a) + "° + " + str(b) + "° = " + str(soma) + "°\n"
+				text += " > x = 180° - " + str(soma) + "°"
+
 	return text
 
 func _process(delta: float) -> void:
@@ -376,13 +479,16 @@ func _process(delta: float) -> void:
 		else:
 			timer_label.add_theme_color_override("font_color", Color("#00f0ff"))
 
-	_blink_timer += delta
+	# delta já vem multiplicado pelo time_scale; o cursor pisca em tempo real.
+	_blink_timer += delta / maxf(Engine.time_scale, 0.01)
 	var footer_label: Label = find_child("FooterStatusLabel", true, false)
 	if footer_label:
 		var cursor = "_" if fmod(_blink_timer, 0.8) < 0.4 else " "
 		footer_label.text = "SYS_STATUS // AGUARDANDO ENTRADA" + cursor
 
 func _on_numpad_key_pressed(digit: String) -> void:
+	if _busy:
+		return
 	if current_input_text.length() < 4:
 		current_input_text += digit
 		_update_input_display()
@@ -404,16 +510,26 @@ func _unhandled_input(event: InputEvent) -> void:
 func _update_input_display() -> void:
 	if input_line:
 		if current_input_text == "":
-			input_line.text = "X = [    ]"
+			input_line.text = "x = [    ]"
 		else:
-			input_line.text = "X = [ " + current_input_text + " ]"
+			input_line.text = "x = [ " + current_input_text + " ]"
 
 func _on_hack_timer_timeout() -> void:
+	if _busy:
+		return
+	_busy = true
+	if timer_label:
+		timer_label.text = "00:00"
+	_show_feedback("TEMPO ESGOTADO. A invasão falhou.", FEEDBACK_ERR)
+	_flash_input(FEEDBACK_ERR)
+	await _wait_real(RESULT_HOLD)
 	_complete_hack(false)
 
 func _complete_hack(success: bool) -> void:
+	_busy = false
 	if hack_timer:
 		hack_timer.stop()
+		hack_timer.paused = false
 		
 	# Para a música de hacking ao concluir (sucesso ou falha)
 	if bgm_player and bgm_player.playing:

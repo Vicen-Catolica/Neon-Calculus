@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://bx3nywghmsixx" path="res://scenes/hacking_ui/hacking_interface.gd" id="1_edu43"]
 [ext_resource type="Shader" uid="uid://3ljodtwsqimo" path="res://scenes/hacking_ui/HackingInterface.gdshader" id="2_dkc27"]
 [ext_resource type="FontFile" uid="uid://b7b4e0l00k2m6" path="res://assets/fonts/Orbitron-Bold.ttf" id="2_n6573"]
+[ext_resource type="FontVariation" path="res://assets/fonts/ui_font.tres" id="9_uifont"]
 [ext_resource type="Script" uid="uid://cjw7x4cjuh83g" path="res://scenes/hacking_ui/math_visualizer.gd" id="3_5dxew"]
 [ext_resource type="AudioStream" uid="uid://bwr0kwuu5742n" path="res://assets/Music/Overclocked_Resolve.mp3" id="5_opal3"]
 
@@ -323,7 +324,7 @@ offset_right = 300.0
 offset_bottom = 40.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_fonts/font = ExtResource("9_uifont")
 theme_override_font_sizes/font_size = 25
 text = "TERMINAL DE DESCRIPTOGRAFIA - CONEXÃO ESTÁVEL"
 horizontal_alignment = 1
@@ -349,7 +350,7 @@ alignment = 1
 [node name="TimerHeader" type="Label" parent="MainMargin/MainVBox/HeaderHBox/TimerContainer/TimerVBox" unique_id=1974181074]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_fonts/font = ExtResource("9_uifont")
 theme_override_font_sizes/font_size = 25
 text = "TEMPO RESTANTE"
 horizontal_alignment = 1
@@ -387,9 +388,9 @@ theme_override_constants/separation = 14
 [node name="AIHeaderLabel" type="Label" parent="MainMargin/MainVBox/ContentArea/AIAssistantPanel/AIVBox" unique_id=1244282067]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.6666667, 0, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_fonts/font = ExtResource("9_uifont")
 theme_override_font_sizes/font_size = 25
-text = "// A.I. CORE DIAGNOSTIC"
+text = "// SINE: ASSISTENTE"
 
 [node name="AIHSeparator" type="HSeparator" parent="MainMargin/MainVBox/ContentArea/AIAssistantPanel/AIVBox" unique_id=535352667]
 modulate = Color(1, 0.6666667, 0, 1)
@@ -400,7 +401,7 @@ theme_override_constants/separation = 6
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(1, 0.8117647, 0.4, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_fonts/font = ExtResource("9_uifont")
 theme_override_font_sizes/font_size = 25
 autowrap_mode = 2
 
@@ -434,7 +435,7 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_fonts/font = ExtResource("9_uifont")
 theme_override_font_sizes/font_size = 15
 text = "DESAFIO DE MATEMÁTICA:"
 horizontal_alignment = 1
@@ -443,7 +444,7 @@ horizontal_alignment = 1
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_fonts/font = ExtResource("9_uifont")
 theme_override_font_sizes/font_size = 14
 horizontal_alignment = 1
 
@@ -676,7 +677,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_nf6lf")
 layout_mode = 2
 size_flags_horizontal = 2
 theme_override_colors/font_color = Color(0, 0.9411765, 1, 1)
-theme_override_fonts/font = ExtResource("2_n6573")
+theme_override_fonts/font = ExtResource("9_uifont")
 theme_override_font_sizes/font_size = 25
 text = "SYS_STATUS // AGUARDANDO ENTRADA_"
 
@@ -696,4 +697,3 @@ unique_name_in_owner = true
 [node name="BGMPlayer" type="AudioStreamPlayer" parent="." unique_id=1299447350]
 stream = ExtResource("5_opal3")
 
-[connection signal="pressed" from="MainMargin/MainVBox/ContentArea/CenterCalculatorContainer/ChallengePanel/ChallengeVBox/SubmitButton" to="." method="_on_submit_button_pressed"]

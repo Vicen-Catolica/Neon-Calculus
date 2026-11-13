@@ -116,8 +116,8 @@ func _build_ui() -> void:
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_label.add_theme_color_override("font_color", ORANGE)
 	_label.add_theme_font_size_override("font_size", 26)
-	if ResourceLoader.exists("res://assets/fonts/Orbitron-Bold.ttf"):
-		_label.add_theme_font_override("font", load("res://assets/fonts/Orbitron-Bold.ttf"))
+	if ResourceLoader.exists("res://assets/fonts/ui_font.tres"):
+		_label.add_theme_font_override("font", load("res://assets/fonts/ui_font.tres"))
 	add_child(_label)
 
 

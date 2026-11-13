@@ -29,7 +29,7 @@ var _btn_tweens: Dictionary = {}
 
 
 func _ready() -> void:
-	_font = load("res://assets/fonts/Orbitron-Bold.ttf")
+	_font = load("res://assets/fonts/ui_font.tres")
 	
 	_create_crt_overlay()
 	_create_hud_frames_and_brackets()
@@ -315,11 +315,13 @@ func _create_logo_enhancements() -> void:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 func _setup_buttons() -> void:
+	_add_how_to_button()
 	var button_configs = {
 		"BtnStart": "[ 01 ]  INICIAR",
 		"BtnContinue": "[ 02 ]  CONTINUAR",
-		"BtnOptions": "[ 03 ]  OPÇÕES",
-		"BtnExit": "[ 04 ]  SAIR"
+		"BtnHowTo": "[ 03 ]  COMO JOGAR",
+		"BtnOptions": "[ 04 ]  OPÇÕES",
+		"BtnExit": "[ 05 ]  SAIR"
 	}
 
 	for btn in menu_container.get_children():
@@ -347,6 +349,20 @@ func _setup_buttons() -> void:
 		# self_modulate: as animações de entrada/hover mexem em modulate.
 		cont.self_modulate = Color(1, 1, 1, 0.35)
 		cont.mouse_default_cursor_shape = Control.CURSOR_ARROW
+
+
+## "Como jogar" (objetivo, controles e regras): mesmo estilo dos outros botões,
+## logo depois de "Continuar".
+func _add_how_to_button() -> void:
+	if menu_container.has_node("BtnHowTo"):
+		return
+	var src := menu_container.get_node_or_null("BtnOptions") as Button
+	if src == null:
+		return
+	var btn := src.duplicate() as Button
+	btn.name = "BtnHowTo"
+	menu_container.add_child(btn)
+	menu_container.move_child(btn, src.get_index())
 
 
 func _apply_button_styles(btn: Button) -> void:
@@ -497,6 +513,9 @@ func _on_btn_pressed(btn: Button) -> void:
 			var scene := SaveGame.restore()
 			if scene != "":
 				_change_scene_with_fade(scene)
+		"BtnHowTo":
+			var how := HowToPlay.new()
+			add_child(how)
 		"BtnOptions":
 			_open_options()
 		"BtnExit":

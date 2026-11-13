@@ -41,9 +41,9 @@ func _ready() -> void:
 
 
 func _create_extra_cyberpunk_elements() -> void:
-	# Carrega a fonte Orbitron padrão do projeto
-	if ResourceLoader.exists("res://assets/fonts/Orbitron-Bold.ttf"):
-		custom_font = load("res://assets/fonts/Orbitron-Bold.ttf")
+	# Fonte de interface do projeto (Exo 2: acentos do português legíveis)
+	if ResourceLoader.exists("res://assets/fonts/ui_font.tres"):
+		custom_font = load("res://assets/fonts/ui_font.tres")
 
 	# Subtítulo formatado como alerta de terminal
 	if vbox_container and not vbox_container.has_node("SubtitleLabel"):

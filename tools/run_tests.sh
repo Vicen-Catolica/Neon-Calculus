@@ -2,7 +2,7 @@
 # Roda toda a verificação do projeto — o mesmo roteiro no CI e na máquina local.
 #   1. importa o projeto (texturas, classes) em modo headless
 #   2. compila o C# do jogo e roda os testes NUnit do gerador de equações
-#   3. roda as simulações headless (uma cena de teste por mecânica/fase)
+#   3. roda as simulações headless (fases, fluxo entre andares e interface)
 #
 # Uma simulação passa se: sai com código 0, imprime "TUDO OK" e não teve
 # nenhum "SCRIPT ERROR" no log (erros de GDScript não mudam o código de saída).
@@ -15,7 +15,7 @@ set -u
 GODOT="${GODOT:-godot}"
 SIM_TIMEOUT="${SIM_TIMEOUT:-300}"
 # SIMS="a b" roda só essas simulações (útil para depurar uma fase).
-read -r -a SIMS <<< "${SIMS:-stage_sim route_sim flow_sim stage2_sim}"
+read -r -a SIMS <<< "${SIMS:-stage_sim route_sim flow_sim stage2_sim ui_sim}"
 LOG_DIR="$(mktemp -d)"
 fail=0
 

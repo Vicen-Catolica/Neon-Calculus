@@ -62,8 +62,8 @@ func _setup_cyberpunk_styles() -> void:
 	defense_bar.add_theme_stylebox_override("background", bg_style)
 	defense_bar.add_theme_stylebox_override("fill", fill_style)
 
-	if ResourceLoader.exists("res://assets/fonts/Orbitron-Bold.ttf"):
-		var custom_font = load("res://assets/fonts/Orbitron-Bold.ttf")
+	if ResourceLoader.exists("res://assets/fonts/ui_font.tres"):
+		var custom_font = load("res://assets/fonts/ui_font.tres")
 		label_title.add_theme_font_override("font", custom_font)
 		label_status.add_theme_font_override("font", custom_font)
 		label_values.add_theme_font_override("font", custom_font)

@@ -33,7 +33,7 @@ var _font: Font
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_player = get_parent() as Node2D
-	_font = load("res://assets/fonts/Orbitron-Bold.ttf") if ResourceLoader.exists("res://assets/fonts/Orbitron-Bold.ttf") else ThemeDB.fallback_font
+	_font = load("res://assets/fonts/ui_font.tres") if ResourceLoader.exists("res://assets/fonts/ui_font.tres") else ThemeDB.fallback_font
 	_layer = CanvasLayer.new()
 	_layer.layer = 5
 	_layer.follow_viewport_enabled = true

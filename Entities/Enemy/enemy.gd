@@ -114,8 +114,8 @@ func _ready() -> void:
 	hearing_area.body_entered.connect(_on_hearing_body_entered)
 	hearing_area.body_exited.connect(_on_hearing_body_exited)
 	
-	if ResourceLoader.exists("res://assets/fonts/Orbitron-Bold.ttf") and state_indicator:
-		var custom_font = load("res://assets/fonts/Orbitron-Bold.ttf")
+	if ResourceLoader.exists("res://assets/fonts/ui_font.tres") and state_indicator:
+		var custom_font = load("res://assets/fonts/ui_font.tres")
 		state_indicator.add_theme_font_override("font", custom_font)
 		state_indicator.add_theme_font_size_override("font_size", 22)
 		

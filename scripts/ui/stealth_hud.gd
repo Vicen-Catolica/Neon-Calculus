@@ -23,7 +23,7 @@ func _ready() -> void:
 	layer = 8
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	add_to_group("stealth_hud")
-	_font = load("res://assets/fonts/Orbitron-Bold.ttf") if ResourceLoader.exists("res://assets/fonts/Orbitron-Bold.ttf") else null
+	_font = load("res://assets/fonts/ui_font.tres") if ResourceLoader.exists("res://assets/fonts/ui_font.tres") else null
 	_build()
 	GameManager.variance_changed.connect(_on_variance_changed)
 	GameManager.alarm_raised.connect(_on_alarm)

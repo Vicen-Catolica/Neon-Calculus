@@ -28,7 +28,7 @@ func _ready() -> void:
 
 
 func _build() -> void:
-	var font: Font = load("res://assets/fonts/Orbitron-Bold.ttf") if ResourceLoader.exists("res://assets/fonts/Orbitron-Bold.ttf") else null
+	var font: Font = load("res://assets/fonts/ui_font.tres") if ResourceLoader.exists("res://assets/fonts/ui_font.tres") else null
 	var dim := ColorRect.new()
 	dim.color = Color(0.0, 0.02, 0.05, 0.72)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

@@ -42,7 +42,7 @@ func _ready() -> void:
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 func _apply_cyberpunk_theme() -> void:
-	_font = load("res://assets/fonts/Orbitron-Bold.ttf")
+	_font = load("res://assets/fonts/ui_font.tres")
 
 	# ── Imagem de fundo (por trás do overlay) ──
 	var bg_tex = load("res://assets/images/Background.jpg")
