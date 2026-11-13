@@ -5,6 +5,7 @@ on:
     branches:
       - master
       - develop
+      - "feature/**"
 
   pull_request:
     branches:
@@ -17,49 +18,33 @@ permissions:
   contents: read
 
 jobs:
-  validate:
-    name: Validate Godot Project
+  test:
+    name: Build e testes (Godot .NET)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Godot
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Setup Godot 4.7.2 .NET
         uses: chickensoft-games/setup-godot@v2
         with:
-          version: 4.7.0
-          use-dotnet: false
-          include-prereleases: false
+          version: 4.7.2
+          use-dotnet: true
+          include-templates: false
 
-      - name: Check Godot version
+      - name: Versão do Godot
         run: godot --version
 
-      - name: Import project
-        run: |
-          godot --headless --editor --quit
-
-      - name: Validate project
-        run: |
-          godot --headless --editor --quit --path .
-
-  test:
-    name: Run Tests
-    runs-on: ubuntu-latest
-    needs: validate
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Godot
-        uses: chickensoft-games/setup-godot@v2
-        with:
-          version: 4.7.0
-          use-dotnet: false
-          include-prereleases: false
-
-      - name: Run tests
-        run: |
-          echo "No automated tests configured yet."
-          echo "Tests will be added when the test suite is implemented."
+      # Mesmo roteiro da máquina local: import, build C#, NUnit e as simulações
+      # headless (Fase 1, rota da Fase 1, fluxo entre andares, Fase 2).
+      - name: Testes
+        run: tools/run_tests.sh
+        env:
+          SIM_TIMEOUT: "420"

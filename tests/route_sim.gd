@@ -121,4 +121,4 @@ func _ready() -> void:
 	check("patamar está dentro da saída", (exit as Area2D).overlaps_body(p))
 
 	print("\n%s — %d falha(s)" % ["TUDO OK" if fails == 0 else "HÁ FALHAS", fails])
-	get_tree().quit()
+	get_tree().quit(1 if fails > 0 else 0)
