@@ -92,6 +92,26 @@ func _run() -> void:
 	p = get_tree().get_first_node_in_group("Player")
 	check("Eduardo vivo depois de reiniciar", p != null and not p.is_dead)
 
+	# Saída da Fase 2 (elevador de carga) -> Fase 3.
+	var l3: String = GameManager.LEVELS[3]["scene"]
+	exit = lvl.get_node("LevelExit") as LevelExit
+	check("saída da Fase 2 aponta para a Fase 3", exit.next_stage == l3, exit.next_stage)
+	check("título da Fase 3 na transição", GameManager.level_title(l3) == "Setor de P&D")
+	exit._on_body_entered(p)
+	dt = await wait_transition()
+	lvl = get_tree().current_scene as Level
+	check("elevador leva à Fase 3", lvl != null and lvl.floor_number == 3)
+	check("transição para a Fase 3 em menos de 2 s", dt < 2.0, "%.2f s" % dt)
+	check("andar 3 no GameManager e no save", GameManager.current_floor == 3 and int(SaveGame.load_checkpoint()["floor"]) == 3)
+	GameManager.reset_progress()
+	check("continuar aponta para a Fase 3", SaveGame.restore() == l3 and GameManager.current_floor == 3)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	p = get_tree().get_first_node_in_group("Player")
+	check("Eduardo nasce no chão da Fase 3", p != null and p.is_on_floor(), str(p.global_position) if p else "")
+	var exit3 := lvl.get_node("LevelExit") as LevelExit
+	check("saída da Fase 3 desligada até existir a Fase 4", exit3.next_stage == "")
+
 	# Restaura o save do jogador.
 	SaveGame.clear()
 	if not backup.is_empty():

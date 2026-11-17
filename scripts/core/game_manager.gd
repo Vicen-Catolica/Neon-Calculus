@@ -16,6 +16,7 @@ enum State { PLAYING, HACK_VISION, HACKING, PAUSED, GAME_OVER }
 const LEVELS := {
 	1: {"scene": "res://scenes/levels/slums/slums_stage1.tscn", "title": "Submundo de Neon"},
 	2: {"scene": "res://scenes/levels/industrial/industrial_stage2.tscn", "title": "Setor Industrial"},
+	3: {"scene": "res://scenes/levels/rnd/rnd_stage3.tscn", "title": "Setor de P&D"},
 }
 const MAIN_MENU_SCENE := "res://scenes/main_menu/main_menu.tscn"
 
