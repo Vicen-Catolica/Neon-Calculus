@@ -23,6 +23,7 @@ func _build_object_scenes() -> void:
 	_build_steam_valve()
 	_build_conveyor()
 	_build_drone()
+	_build_laser()
 	_build_ui()
 
 
@@ -190,6 +191,21 @@ func _build_steam_valve() -> void:
 	# Hackable no volante (nozzle_height padrão 210 + 46).
 	v.add_child(_hackable("VÁLVULA DE VAPOR", Vector2(0, -256)))
 	_save(v, "res://scenes/objects/steam_valve.tscn")
+
+
+func _build_laser() -> void:
+	var l := Node2D.new()
+	l.name = "LaserBarrier"
+	l.set_script(load("res://scripts/objects/laser_barrier.gd"))
+	l.add_child(_hackable("BARREIRA LASER", Vector2(0, -182)))
+	var beam := Area2D.new()
+	beam.name = "Beam"
+	beam.monitorable = false
+	var cs := CollisionShape2D.new()
+	cs.name = "Shape"
+	beam.add_child(cs)
+	l.add_child(beam)
+	_save(l, "res://scenes/objects/laser_barrier.tscn")
 
 
 func _build_conveyor() -> void:

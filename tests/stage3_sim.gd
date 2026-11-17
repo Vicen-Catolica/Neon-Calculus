@@ -101,9 +101,53 @@ func _ready() -> void:
 	check("B: cubículo da esquerda fica no escuro", not p.is_in_light() and p.can_hide())
 
 	# C: corredor de teto baixo; duto de 96 px por cima (só agachado).
+	# C: barreiras a laser (fixa, depois duas temporizadas fora de sincronia).
+	var alarms := [0]
+	GameManager.alarm_raised.connect(func(_pp: Vector2) -> void: alarms[0] += 1)
+	var fixed := lvl.get_node("Lasers/Laser2760") as LaserBarrier
+	var t1 := lvl.get_node("Lasers/Laser3020") as LaserBarrier
+	var t2 := lvl.get_node("Lasers/Laser3280") as LaserBarrier
+	var fixed_h := fixed.get_node("Hackable") as Hackable
+	check("C: laser fixo começa ligado", fixed.is_on() and fixed.mode == LaserBarrier.Mode.ALWAYS)
+	check("C: laser é alvo de equação do andar (regra de três)", fixed_h.get_difficulty() == Vector2i(3, 0) and fixed_h.get_label() == "BARREIRA LASER")
+	var trips := [0]
+	fixed.tripped.connect(func(_b: Node2D) -> void: trips[0] += 1)
+	var v0 := GameManager.variance
 	tp(2700, 16); await step(10)
-	await walk("move_right", 200)
-	check("C: corredor atravessável pelo chão", p.global_position.x > 3000.0, pos())
+	await walk("move_right", 60)
+	check("C: cruzar o feixe dispara o alarme", trips[0] == 1 and alarms[0] >= 1 and GameManager.variance > v0,
+		"toques=%d alarmes=%d" % [trips[0], alarms[0]])
+	check("C: o laser não segura o jogador", p.global_position.x > 2770.0, pos())
+	hv.debug_hack(fixed_h, true); await step(3)
+	check("C: hack desliga o laser fixo", not fixed.is_on() and fixed.is_hacked() and not fixed.can_be_hacked())
+	tp(2700, 16); await step(5)
+	await walk("move_right", 60)
+	check("C: desligado, passa sem alarme", trips[0] == 1 and p.global_position.x > 2770.0, pos())
+	await step(int((fixed.hack_off_time - fixed.warn_time) * 60.0) + 10)
+	check("C: pisca antes de religar", fixed.is_warning() and not fixed.is_on())
+	await step(int(fixed.warn_time * 60.0) + 10)
+	check("C: laser fixo religa sozinho", fixed.is_on() and fixed.can_be_hacked())
+	# Temporizados: ligam e desligam, fora de sincronia.
+	var seen_on := false
+	var seen_off := false
+	var apart := false
+	for i in 300:
+		await step(1)
+		seen_on = seen_on or t1.is_on()
+		seen_off = seen_off or not t1.is_on()
+		apart = apart or t1.is_on() != t2.is_on()
+	check("C: laser temporizado liga e desliga", seen_on and seen_off)
+	check("C: os dois temporizados ficam fora de sincronia", apart)
+	var trips_t := [0]
+	t1.tripped.connect(func(_b: Node2D) -> void: trips_t[0] += 1)
+	while t1.is_on():
+		await step(1)
+	tp(2985, 16); await step(2)
+	await walk("move_right", 35)
+	check("C: passa no ritmo, com o feixe desligado", trips_t[0] == 0 and p.global_position.x > 3030.0, pos())
+	hv.debug_hack(t1.get_node("Hackable"), true)
+	await step(int(t1.on_time * 60.0) + int(t1.off_time * 60.0) + 30)
+	check("C: hack segura o temporizado desligado", not t1.is_on() and t1.is_hacked())
 	await climb(79 * 32 + 16, 16.0)
 	check("C: escada leva à boca do duto (y≈-272)", absf(p.global_position.y + 272.0) < 6.0, pos())
 	tp(2570, -272); await step(10)

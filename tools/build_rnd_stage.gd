@@ -5,13 +5,13 @@ extends "res://tools/stage_builder_base.gd"
 ##
 ## GREYBOX (etapa 3 do docs/PLANO_FASE_3.md): layout definitivo com as mecânicas
 ## que já existem. Arte provisória: tiles industriais clareados/azulados e props
-## de tools/gen_rnd_placeholders.py. Lasers (etapa 4), ciborgue com cena própria
+## de tools/gen_rnd_placeholders.py. Lasers prontos (etapa 4). Ciborgue com cena própria
 ## (etapa 5) e cela do Dr. Vance (etapa 6) ainda são marcadores.
 ##
 ## Percurso, da esquerda para a direita (teto em y = -368):
 ##   A  doca do elevador de carga + recepção: luz demais, apague para se esconder
 ##   B  escritórios open-space: chão com cubículos + mezanino
-##   C  corredor de segurança (teto baixo) — lasers na etapa 4 — ou o duto por cima
+##   C  corredor de segurança (teto baixo) com 3 lasers, ou o duto por cima
 ##   D  laboratórios de P&D: ciborgue no chão, mezanino com o Lab 07; lockdown
 ##   E  átrio do elevador executivo: 6 andares de passarela até a saída
 
@@ -100,7 +100,7 @@ func build() -> Node:
 	_add_lights(lvl)
 	_add_terminals(lvl)
 	_add_kiosk_and_doors(lvl)
-	_add_laser_slots(lvl)
+	_add_lasers(lvl)
 	_add_cameras(lvl)
 	_add_guards(lvl)
 	_add_exit(lvl)
@@ -234,21 +234,23 @@ func _add_lockdown(lvl: Node) -> void:
 	lvl.add_child(zone)
 
 
-## C: posições das barreiras a laser (a etapa 4 troca os marcadores pelos lasers).
-func _add_laser_slots(lvl: Node) -> void:
-	var holder := _holder(lvl, "LaserSlots")
-	for x in [2760.0, 3020.0, 3280.0]:
-		var m := Marker2D.new()
-		m.name = "LaserSlot%d" % int(x)
-		m.position = Vector2(x, 16)
-		holder.add_child(m)
-		if SHOW_ZONE_LABELS:
-			var r := ColorRect.new()
-			r.name = "Beam"
-			r.color = Color(1.0, 0.2, 0.3, 0.35)
-			r.position = Vector2(-2, CORRIDOR_Y - 16)
-			r.size = Vector2(4, 16 - CORRIDOR_Y)
-			m.add_child(r)
+## C: barreiras a laser do chão ao teto do corredor. A 1ª é fixa (hackear para
+## passar); as outras duas ligam e desligam fora de sincronia (passar no ritmo,
+## ou hackear para segurar desligado). Quem vai pelo duto não precisa de nenhuma.
+func _add_lasers(lvl: Node) -> void:
+	var holder := _holder(lvl, "Lasers")
+	# [x, modo, fase]
+	var list := [
+		[2760.0, LaserBarrier.Mode.ALWAYS, 0.0],
+		[3020.0, LaserBarrier.Mode.TIMED, 0.0],
+		[3280.0, LaserBarrier.Mode.TIMED, 2.0],
+	]
+	for l in list:
+		var laser := _instance("res://scenes/objects/laser_barrier.tscn", "Laser%d" % int(l[0]), Vector2(l[0], 16))
+		laser.set("height", 16.0 - CORRIDOR_Y)
+		laser.set("mode", l[1])
+		laser.set("phase", l[2])
+		holder.add_child(laser)
 
 
 func _add_cameras(lvl: Node) -> void:

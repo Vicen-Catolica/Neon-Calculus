@@ -87,7 +87,7 @@ Enquanto a arte não chega: greybox com os tiles industriais clareados e retâng
 1. ✅ **Ligação e esqueleto** — `GameManager.LEVELS[3]`, saída da Fase 2 → Fase 3, `build_rnd_stage.gd` vazio (chão + player + saída). *Teste:* terminar a Fase 2 leva à Fase 3 com a transição "Acessando... Setor de P&D"; "Continuar" volta ao andar 3.
 2. ✅ **Caixa de diálogo** + `DialogueTrigger` + diálogo de elevador. *Teste:* texto em tempo real com o mundo pausado, avança com Enter, não reabre após recarregar o checkpoint.
 3. ✅ **Greybox da Fase 3** — layout A–E só com o que já existe (agentes, câmeras, luzes, esconderijos, quiosque, escadas, passarelas, dutos, terminais, porta, lockdown, saída). *Teste:* atravessável do início ao fim; screenshots de cada trecho.
-4. **Barreira a laser** (fixa e temporizada, hack, alarme). *Teste:* tocar no feixe dispara alarme; hackeado, passa; religa depois do tempo.
+4. ✅ **Barreira a laser** (fixa e temporizada, hack, alarme). *Teste:* tocar no feixe dispara alarme; hackeado, passa; religa depois do tempo.
 5. **Ciborgue** (cena, ajustes de FSM, hack = ponto cego). *Teste:* não reage a quiosque/ruído; detecta mais rápido que o agente; hackeado, não vê por ~6 s.
 6. **Dr. Vance** (cela, diálogo, recompensa salva e aplicada nos hacks). *Teste:* resgatar → `vance_rescued` no save; SINE abre no 1º erro; tempo +15%; sem resgate, nada muda.
 7. **Lore** — `data/lore/rnd.json`: SINE na doca; e-mail corporativo sobre as "Atualizações Mandatórias"; relatório de testes do Projeto Determinismo (cobaias); diário da Dra. Kessler (continuação do terminal da Fase 2); registro da conversão de humanos em Unidades Lógicas; gancho para o Núcleo.

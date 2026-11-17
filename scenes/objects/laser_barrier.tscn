@@ -1,0 +1,17 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/objects/laser_barrier.gd" id="1_1uae3"]
+[ext_resource type="Script" path="res://scripts/hacking/hackable.gd" id="2_bfd5g"]
+
+[node name="LaserBarrier" type="Node2D" unique_id=484938574]
+script = ExtResource("1_1uae3")
+
+[node name="Hackable" type="Node2D" parent="." unique_id=922617591]
+position = Vector2(0, -182)
+script = ExtResource("2_bfd5g")
+display_name = "BARREIRA LASER"
+
+[node name="Beam" type="Area2D" parent="." unique_id=1431602640]
+monitorable = false
+
+[node name="Shape" type="CollisionShape2D" parent="Beam" unique_id=733137593]
