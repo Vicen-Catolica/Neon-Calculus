@@ -37,6 +37,8 @@ func build() -> Node:
 	_terrain_layer(lvl, "Buildings", GROUND_TS, WALL_RECTS, WALL_TINT)
 	_terrain_layer(lvl, "Ground", GROUND_TS, GROUND_RECTS, GROUND_TINT)
 	_add_exit(lvl)
+	# Diálogo de elevador (GDD §9): SINE e Eduardo assim que a porta abre.
+	_dialogue_trigger(lvl, "rnd_elevator", Vector2(64, 16))
 	_player_and_ui(lvl, Vector2(64, 16))
 	return lvl
 

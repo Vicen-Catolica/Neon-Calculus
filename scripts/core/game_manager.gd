@@ -9,6 +9,7 @@ signal sweep_triggered
 ## Câmera/varredura detectou o jogador: guardas próximos vão até a posição.
 signal alarm_raised(world_position: Vector2)
 signal lore_unlocked(entry_id: String)
+signal dialogue_seen(dialogue_id: String)
 
 enum State { PLAYING, HACK_VISION, HACKING, PAUSED, GAME_OVER }
 
@@ -32,6 +33,8 @@ var variance_limit: float = 100.0
 var current_floor: int = 1
 ## Logs de lore já lidos (ids do JSON), persistem entre fases.
 var lore_read: Array[String] = []
+## Diálogos já vistos (ids de data/dialogue/*.json): não repetem no mesmo save.
+var dialogues_seen: Array[String] = []
 ## Variância somada por cada alarme disparado.
 const ALARM_VARIANCE: float = 20.0
 ## Segundos sem hack/alarme até a variância começar a cair.
@@ -106,6 +109,13 @@ func mark_lore_read(entry_id: String) -> void:
 	lore_unlocked.emit(entry_id)
 
 
+func mark_dialogue_seen(dialogue_id: String) -> void:
+	if dialogue_id in dialogues_seen:
+		return
+	dialogues_seen.append(dialogue_id)
+	dialogue_seen.emit(dialogue_id)
+
+
 ## Nome do andar de uma cena (para a tela de transição); "" se não for um andar.
 func level_title(scene_path: String) -> String:
 	for n in LEVELS:
@@ -114,9 +124,10 @@ func level_title(scene_path: String) -> String:
 	return ""
 
 
-## Novo jogo: esquece lore lida e variância (o save é apagado pelo SaveGame).
+## Novo jogo: esquece lore lida, diálogos vistos e variância (o save é apagado pelo SaveGame).
 func reset_progress() -> void:
 	lore_read.clear()
+	dialogues_seen.clear()
 	current_floor = 1
 	reset_variance()
 

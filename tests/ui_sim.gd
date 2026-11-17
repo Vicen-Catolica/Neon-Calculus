@@ -125,6 +125,36 @@ func _ready() -> void:
 	await frames(2)
 	check("Como jogar fecha", not is_instance_valid(how))
 
+	# --- Caixa de diálogo ---
+	var script_lines: Array = Dialogue.lines_for("rnd_elevator")
+	var unknown := script_lines.filter(func(l): return not Dialogue.SPEAKERS.has(String(l["who"])))
+	check("roteiro do elevador carrega do JSON", script_lines.size() >= 4 and unknown.is_empty(), "%d falas" % script_lines.size())
+	var ended: Array = []
+	Dialogue.finished.connect(func(id: String) -> void: ended.append(id), CONNECT_ONE_SHOT)
+	GameManager.set_state(GameManager.State.HACK_VISION)  # mundo a 25%
+	Dialogue.play("teste_ui", [{"who": "SINE", "text": "Linha um com bastante texto para digitar."}, {"who": "EDUARDO", "text": "Linha dois."}, {"who": "AXIOMA", "text": "Três."}])
+	check("diálogo abre e pausa o jogo", Dialogue.is_open() and tree.paused and Engine.time_scale == 1.0)
+	await real(0.3)
+	check("texto aparece aos poucos", not Dialogue.is_line_complete())
+	await real(1.0)
+	check("digitação termina em tempo real", Dialogue.is_line_complete())
+	var esc := InputEventAction.new()
+	esc.action = "ui_cancel"
+	esc.pressed = true
+	Input.parse_input_event(esc)  # Esc com diálogo aberto não abre a pausa
+	await frames(2)
+	check("Esc pula o diálogo (sem abrir a pausa)", not Dialogue.is_open() and not PauseMenu.is_open() and ended == ["teste_ui"])
+	check("fim do diálogo devolve o jogo", not tree.paused and GameManager.state == GameManager.State.PLAYING)
+	check("diálogo marcado como visto", "teste_ui" in GameManager.dialogues_seen)
+	Dialogue.play("teste_ui2", [{"who": "SINE", "text": "Primeira fala."}, {"who": "VANCE", "text": "Segunda."}])
+	Dialogue.advance()
+	check("primeiro E completa a fala", Dialogue.is_line_complete() and Dialogue.current_speaker() == "SINE")
+	Dialogue.advance()
+	check("segundo E passa para a próxima fala", Dialogue.current_speaker() == "VANCE")
+	Dialogue.advance(); Dialogue.advance()
+	check("última fala fecha o diálogo", not Dialogue.is_open() and not tree.paused)
+	GameManager.dialogues_seen.clear()
+
 	# --- Menu de pausa ---
 	var ev := InputEventAction.new()
 	ev.action = "ui_cancel"

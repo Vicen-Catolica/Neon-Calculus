@@ -429,6 +429,18 @@ func _exit(lvl: Node, next_stage: String, pos: Vector2, size: Vector2 = Vector2(
 	return exit
 
 
+## Gatilho de diálogo (data/dialogue/*.json): área apoiada no chão em `pos`.
+func _dialogue_trigger(lvl: Node, dialogue_id: String, pos: Vector2, size: Vector2 = Vector2(160, 128)) -> Area2D:
+	var t := Area2D.new()
+	t.name = "Dialogue_" + dialogue_id
+	t.set_script(load("res://scripts/core/dialogue_trigger.gd"))
+	t.set("dialogue_id", dialogue_id)
+	t.position = pos
+	t.add_child(_rect_shape(size, Vector2(0, -size.y / 2.0)))
+	lvl.add_child(t)
+	return t
+
+
 ## Varredura de Rotina, Eduardo e toda a interface (HUD, furtividade, hacking, lore).
 func _player_and_ui(lvl: Node, spawn: Vector2) -> void:
 	var sweep := Node2D.new()

@@ -1,0 +1,12 @@
+{
+	"rnd_elevator": [
+		{"who": "SINE", "text": "Elevador parado. Andar 3: Administração e P&D. Luz ambiente em 92%. Aqui quase não existe sombra, Eduardo."},
+		{"who": "EDUARDO", "text": "Então a gente fabrica sombra. Painel de luz apagado, sombra pronta."},
+		{"who": "SINE", "text": "Cada luz apagada sobe a variância. E há Unidades Lógicas nos laboratórios: ciborgues. Não ouvem passos e não caem em distração."},
+		{"who": "EDUARDO", "text": "Ótimo. Finalmente alguém previsível."},
+		{"who": "SINE", "text": "Previsível e perfeito. Só um hack muda a rotina deles. Probabilidade de cruzar o andar sem alarme: 23%."},
+		{"who": "EDUARDO", "text": "Ontem eram 41."},
+		{"who": "SINE", "text": "Ontem não havia ciborgues. O Laboratório 07 fica neste andar. Se o Dr. Vance estiver lá, ele sabe onde a Axioma é cega."},
+		{"who": "EDUARDO", "text": "Então a gente passa no 07. Abre a porta, SINE."}
+	]
+}

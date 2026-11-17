@@ -25,6 +25,7 @@ GameManager="*res://scripts/core/game_manager.gd"
 SaveGame="*res://scripts/core/save_game.gd"
 LevelTransition="*res://scripts/ui/level_transition.gd"
 PauseMenu="*res://scripts/ui/pause_menu.gd"
+Dialogue="*res://scripts/ui/dialogue_box.gd"
 
 [display]
 

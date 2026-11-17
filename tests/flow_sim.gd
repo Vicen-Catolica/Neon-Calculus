@@ -103,8 +103,16 @@ func _run() -> void:
 	check("elevador leva à Fase 3", lvl != null and lvl.floor_number == 3)
 	check("transição para a Fase 3 em menos de 2 s", dt < 2.0, "%.2f s" % dt)
 	check("andar 3 no GameManager e no save", GameManager.current_floor == 3 and int(SaveGame.load_checkpoint()["floor"]) == 3)
+	for i in 10:
+		await get_tree().process_frame
+	check("diálogo de elevador abre ao chegar", Dialogue.is_open() and Dialogue.current_speaker() == "SINE")
+	check("diálogo pausa o jogo", get_tree().paused)
+	Dialogue.skip()
+	check("diálogo visto vai para o save", "rnd_elevator" in SaveGame.load_checkpoint().get("dialogues_seen", []))
+	check("jogo volta depois do diálogo", not get_tree().paused and GameManager.state == GameManager.State.PLAYING)
 	GameManager.reset_progress()
 	check("continuar aponta para a Fase 3", SaveGame.restore() == l3 and GameManager.current_floor == 3)
+	check("continuar lembra o diálogo visto", "rnd_elevator" in GameManager.dialogues_seen)
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	p = get_tree().get_first_node_in_group("Player")
@@ -116,6 +124,9 @@ func _run() -> void:
 	SaveGame.clear()
 	if not backup.is_empty():
 		GameManager.lore_read.clear()
+		GameManager.dialogues_seen.clear()
+		for id in backup.get("dialogues_seen", []):
+			GameManager.dialogues_seen.append(String(id))
 		for id in backup.get("lore_read", []):
 			GameManager.lore_read.append(String(id))
 		SaveGame.save_checkpoint(int(backup["floor"]), String(backup["scene"]))
