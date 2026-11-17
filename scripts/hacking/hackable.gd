@@ -20,6 +20,8 @@ enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK, VALVE, CONVEYOR, DRONE }
 @export var difficulty_bonus: int = 0
 ## Multiplica o tempo limite da equação (< 1 = desafio rápido).
 @export var time_limit_mult: float = 1.0
+## Falso: Esc não abandona o hack (lockdown).
+@export var abortable: bool = true
 ## Colisor do próprio alvo, ignorado no teste de linha de visão (ex.: porta).
 @export var ignore_body: CollisionObject2D
 

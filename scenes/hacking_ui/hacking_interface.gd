@@ -2,6 +2,8 @@ extends CanvasLayer
 
 signal hacking_succeeded
 signal hacking_failed
+## Esc no meio do hack (GDD §4). `alert`: o abandono deixou rastro e soou um alarme.
+signal hacking_aborted(alert: bool)
 
 @onready var equation_label: Label = find_child("EquationLabel", true, false)
 @onready var subtitle_label: Label = find_child("SubtitleLabel", true, false)
@@ -54,6 +56,11 @@ const FEEDBACK_WARN := Color("#ffd23f")
 var _feedback: Label
 ## Fechando a tela (acerto/tempo esgotado): ignora teclado e botões.
 var _busy: bool = false
+## Falso sob lockdown: o hack da saída não pode ser abandonado (GDD §4).
+var can_abort: bool = true
+var _time_total: float = 0.0
+## Chance máxima de alerta ao abortar com o relógio cheio (cai com o tempo gasto).
+const ABORT_ALERT_MAX := 0.6
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -195,7 +202,7 @@ func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 	error_count = 0
 	_busy = false
 	if _feedback:
-		_feedback.text = "Digite o valor de x e confirme (Enter)."
+		_feedback.text = "Digite o valor de x e confirme (Enter)." + ("   [Esc] abortar" if can_abort else "   Lockdown: não há como abortar.")
 		_feedback.add_theme_color_override("font_color", Color(0.6, 0.8, 0.85))
 	
 	if ai_assistant_panel:
@@ -225,6 +232,7 @@ func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 		math_visualizer.setup_visual(floor_level, sub_topic, eq_data)
 	
 	var time_limit = _calculate_dynamic_time_limit()
+	_time_total = time_limit
 	if hack_timer:
 		hack_timer.start(time_limit)
 
@@ -497,6 +505,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
 		
+	if event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		abort_hack()
+		return
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_BACKSPACE:
 			_delete_last_digit()
@@ -513,6 +525,41 @@ func _update_input_display() -> void:
 			input_line.text = "x = [    ]"
 		else:
 			input_line.text = "x = [ " + current_input_text + " ]"
+
+## Chance de o abandono soar um alarme: proporcional ao tempo que ainda restava
+## (GDD §4: "chance essa que escala com o tempo restante do hacking").
+func abort_alert_chance() -> float:
+	if hack_timer == null or _time_total <= 0.0:
+		return 0.0
+	return ABORT_ALERT_MAX * clampf(hack_timer.time_left / _time_total, 0.0, 1.0)
+
+
+## Esc: fecha o hack sem resolver (conta como falha). `roll` < 0 sorteia; os
+## testes passam um valor fixo. Sob lockdown só avisa e continua.
+func abort_hack(roll: float = -1.0) -> void:
+	if not visible or _busy:
+		return
+	if not can_abort:
+		_show_feedback("LOCKDOWN: a saída precisa ser hackeada. Não há como abortar.", FEEDBACK_WARN)
+		_flash_input(FEEDBACK_WARN)
+		return
+	_busy = true
+	if hack_timer:
+		hack_timer.paused = true
+	var alert := (randf() if roll < 0.0 else roll) < abort_alert_chance()
+	if alert:
+		_show_feedback("HACK ABORTADO. A Axioma rastreou a conexão: ALERTA!", FEEDBACK_ERR)
+		_flash_input(FEEDBACK_ERR)
+	else:
+		_show_feedback("HACK ABORTADO. Conexão encerrada sem rastro.", FEEDBACK_WARN)
+	await _wait_real(0.6)
+	_complete_hack(false)
+	hacking_aborted.emit(alert)
+	if alert:
+		var p := get_tree().get_first_node_in_group("Player") as Node2D
+		if p:
+			GameManager.raise_alarm(p.global_position)
+
 
 func _on_hack_timer_timeout() -> void:
 	if _busy:

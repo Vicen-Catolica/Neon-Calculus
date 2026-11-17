@@ -25,6 +25,9 @@ func _ready() -> void:
 		if vision:
 			Input.action_press("hack_vision")
 		for f in 45:
+			# Diálogo de chegada pausa o jogo e cobre a tela: fotos sem ele.
+			if Dialogue.is_open():
+				Dialogue.skip()
 			await get_tree().physics_frame
 		if vision:
 			var hv: Node = p.get_node("HackVision")

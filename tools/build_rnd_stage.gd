@@ -3,10 +3,17 @@ extends "res://tools/stage_builder_base.gd"
 ##   godot --headless --path . res://tools/build_rnd_stage.tscn
 ## Reexecutar sobrescreve a cena gerada (não edite-a à mão; edite este script).
 ##
-## ESQUELETO (etapa 1 do docs/PLANO_FASE_3.md): só a doca de chegada, um
-## corredor e a saída, para ligar a Fase 2 à Fase 3 com transição e checkpoint.
-## O layout A–E entra no greybox (etapa 3). Arte provisória: tiles industriais
-## clareados e tingidos de azul-gelo.
+## GREYBOX (etapa 3 do docs/PLANO_FASE_3.md): layout definitivo com as mecânicas
+## que já existem. Arte provisória: tiles industriais clareados/azulados e props
+## de tools/gen_rnd_placeholders.py. Lasers (etapa 4), ciborgue com cena própria
+## (etapa 5) e cela do Dr. Vance (etapa 6) ainda são marcadores.
+##
+## Percurso, da esquerda para a direita (teto em y = -368):
+##   A  doca do elevador de carga + recepção: luz demais, apague para se esconder
+##   B  escritórios open-space: chão com cubículos + mezanino
+##   C  corredor de segurança (teto baixo) — lasers na etapa 4 — ou o duto por cima
+##   D  laboratórios de P&D: ciborgue no chão, mezanino com o Lab 07; lockdown
+##   E  átrio do elevador executivo: 6 andares de passarela até a saída
 
 const GROUND_TS := "res://assets/tilesets/industrial/industrial_ground.tres"
 const OUT_LEVEL := "res://scenes/levels/rnd/rnd_stage3.tscn"
@@ -15,16 +22,69 @@ const NEXT_STAGE := ""
 
 const GROUND_TINT := Color(0.78, 0.84, 0.92)
 const WALL_TINT := Color(0.55, 0.6, 0.68)
+const CEILING_Y := -368.0     # face de baixo do teto principal
+const CORRIDOR_Y := -176.0    # face de baixo do teto do corredor C
+const DUCT_Y := -272.0        # piso do duto sobre o corredor (vão de 96 px)
+const EXIT_POS := Vector2(5300, -752)
 
 const GROUND_RECTS := [
-	[-12, 0, 60, 12],
+	[-12, 0, 175, 12],
 ]
 
 const WALL_RECTS := [
-	[-12, -16, -7, -1],   # parede esquerda (doca do elevador de carga)
-	[-8, -16, 60, -12],   # teto (face de baixo em -368)
-	[56, -16, 60, -1],    # parede direita
+	[-12, -16, -7, -1],    # parede esquerda (doca do elevador de carga)
+	[-8, -16, 78, -12],    # teto principal (face de baixo em -368)...
+	[81, -16, 155, -12],   # ...com uma chaminé nas colunas 79–80 (boca do duto)
+	[78, -21, 81, -17],    # tampa da chaminé: dá para ficar em pé no topo da escada
+	[80, -9, 110, -6],     # C: teto do corredor; em cima dele, o duto (96 px)
+	[151, -11, 155, -5],   # verga da porta D -> E (vão de 160 px)
+	[151, -30, 155, -17],  # parede esquerda do átrio, acima do teto
+	[170, -30, 175, -1],   # parede direita do átrio
+	[151, -34, 175, -31],  # tampa do átrio
 ]
+
+## Passarelas (mão única): [x0, x1, linha, vigas de apoio?]
+const CATWALKS := [
+	[40, 74, -5, false],     # B: mezanino dos escritórios (y = -144)
+	[116, 146, -5, false],   # D: mezanino dos laboratórios (Lab 07)
+	[78, 79, -9, false],     # C: patamar da escada na boca do duto (y = -272)
+	# E: átrio, um andar a cada 128 px
+	[156, 169, -4, false],
+	[156, 169, -8, false],
+	[156, 169, -12, false],
+	[156, 169, -16, false],
+	[156, 169, -20, false],
+	[156, 169, -24, false],  # topo: elevador executivo (y = -752)
+]
+
+## Escadas: [célula x, linha do topo, y da base]
+const LADDERS := [
+	[41, -5, 16.0],          # B: chão -> mezanino
+	[73, -5, 16.0],
+	[79, -9, 16.0],          # C: chão -> duto (sobe junto à parede do corredor)
+	[111, -9, 16.0],         # C: duto -> chão de D
+	[117, -5, 16.0],         # D: chão -> mezanino
+	[145, -5, 16.0],
+	[167, -4, 16.0],         # E: zigue-zague até o topo
+	[158, -8, -112.0],
+	[167, -12, -240.0],
+	[158, -16, -368.0],
+	[167, -20, -496.0],
+	[158, -24, -624.0],
+]
+
+## Placas com o nome de cada trecho (playtest do greybox; desligar com a arte final).
+const SHOW_ZONE_LABELS := true
+const ZONES := [
+	["A // DOCA + RECEPÇÃO", Vector2(-180, -330)],
+	["B // ESCRITÓRIOS", Vector2(1140, -330)],
+	["C // CORREDOR DE SEGURANÇA (duto por cima)", Vector2(2580, -330)],
+	["D // LABORATÓRIOS P&D — LAB 07 no mezanino", Vector2(3640, -330)],
+	["E // ÁTRIO", Vector2(4995, -860)],
+]
+
+const PROP_DIR := "res://assets/props/rnd/"
+const LIGHT_TEX := "res://assets/props/rnd/ceiling_light_flicker_2f.png"
 
 
 func out_path() -> String:
@@ -32,40 +92,217 @@ func out_path() -> String:
 
 
 func build() -> Node:
-	var lvl := _new_level("RndStage3", 3, -208, 56 * T, -700, 300)
+	var lvl := _new_level("RndStage3", 3, -208, 170 * T + 16, -1100, 300)
 	_add_background(lvl)
-	_terrain_layer(lvl, "Buildings", GROUND_TS, WALL_RECTS, WALL_TINT)
-	_terrain_layer(lvl, "Ground", GROUND_TS, GROUND_RECTS, GROUND_TINT)
+	_add_tiles(lvl)
+	_ladders(lvl, LADDERS)
+	_add_props(lvl)
+	_add_lights(lvl)
+	_add_terminals(lvl)
+	_add_kiosk_and_doors(lvl)
+	_add_laser_slots(lvl)
+	_add_cameras(lvl)
+	_add_guards(lvl)
 	_add_exit(lvl)
+	if SHOW_ZONE_LABELS:
+		_add_zone_labels(lvl)
 	# Diálogo de elevador (GDD §9): SINE e Eduardo assim que a porta abre.
 	_dialogue_trigger(lvl, "rnd_elevator", Vector2(64, 16))
 	_player_and_ui(lvl, Vector2(64, 16))
 	return lvl
 
 
+# --- Fundo e terreno ---------------------------------------------------------
+
 func _add_background(lvl: Node) -> void:
 	var bg := ColorRect.new()
 	bg.name = "Background"
 	bg.color = Color(0.11, 0.14, 0.19)
 	bg.position = Vector2(-1200, -1800)
-	bg.size = Vector2(4400, 2400)
+	bg.size = Vector2(7800, 2400)
 	lvl.add_child(bg)
-	# Faixa de luz no teto: o andar corporativo é claro e vigiado.
-	var strip := ColorRect.new()
-	strip.name = "CeilingLight"
-	strip.color = Color(0.75, 0.95, 1.0, 0.35)
-	strip.position = Vector2(-208, -368)
-	strip.size = Vector2(56 * T + 208, 6)
-	lvl.add_child(strip)
+	# Faixa de luz no teto de A–D: o andar corporativo é claro e vigiado
+	# (interrompida na chaminé da boca do duto).
+	for span in [[-208.0, 2500.0], [2610.0, 151.0 * T]]:
+		var strip := ColorRect.new()
+		strip.name = "CeilingLight%d" % int(span[0])
+		strip.color = Color(0.75, 0.95, 1.0, 0.35)
+		strip.position = Vector2(span[0], CEILING_Y)
+		strip.size = Vector2(span[1] - span[0], 6)
+		lvl.add_child(strip)
+
+
+func _add_tiles(lvl: Node) -> void:
+	_terrain_layer(lvl, "Buildings", GROUND_TS, WALL_RECTS, WALL_TINT)
+	_terrain_layer(lvl, "Ground", GROUND_TS, GROUND_RECTS, GROUND_TINT)
+	_structures(lvl, CATWALKS)
+	_catwalk_band(lvl, CATWALKS)
+
+
+# --- Props e esconderijos ----------------------------------------------------
+
+func _add_props(lvl: Node) -> void:
+	var props := _holder(lvl, "Props")
+	var spots := _holder(lvl, "HideSpots")
+	# [textura, x, chão, esconderijo?, largura]
+	var list := [
+		["plant", -120.0, 16.0, false, 0],              # A: doca
+		["reception_counter", 700.0, 16.0, true, 120],  # A: balcão, sob a luz
+		["plant", 960.0, 16.0, false, 0],
+		["cubicle", 1450.0, 16.0, true, 80],            # B: cubículo no escuro
+		["cubicle", 1800.0, 16.0, true, 80],            # B: sob a luz
+		["cubicle", 2150.0, 16.0, true, 80],            # B: sob a luz
+		["filing_cabinet", 2000.0, -144.0, true, 40],   # B: mezanino
+		["plant", 2420.0, 16.0, false, 0],
+		["lab_bench", 3800.0, 16.0, true, 100],         # D: bancada no escuro
+		["sample_tank", 4050.0, 16.0, false, 0],
+		["lab_bench", 4420.0, 16.0, true, 100],         # D: sob a luz
+		["sample_tank", 4620.0, 16.0, false, 0],
+		["filing_cabinet", 3900.0, -144.0, true, 40],   # D: mezanino
+		["filing_cabinet", 5100.0, -240.0, true, 40],   # E: no meio do átrio
+	]
+	var n := 0
+	for p in list:
+		n += 1
+		_prop(props, PROP_DIR + p[0] + ".png", p[1], p[2], "%s_%d" % [p[0], n])
+		if p[3]:
+			_hide_spot(spots, p[1], p[2], p[4], "Hide_%s_%d" % [p[0], n])
+	# E: elevador executivo no topo do átrio (entrar nele = saída da fase)
+	_prop(props, PROP_DIR + "exec_elevator.png", EXIT_POS.x, EXIT_POS.y + 12.0, "ExecElevator")
+
+
+## Painéis de luz do teto: acesos, impedem o esconderijo embaixo deles.
+## Hackeáveis (LUZ): apagam por 25 s. [x, chão, largura da luz, teto]
+func _add_lights(lvl: Node) -> void:
+	var holder := _holder(lvl, "CeilingLights")
+	var list := [
+		[700.0, 16.0, 260.0, CEILING_Y],     # A: balcão da recepção
+		[1800.0, 16.0, 220.0, CEILING_Y],    # B: cubículos do meio
+		[2150.0, 16.0, 220.0, CEILING_Y],
+		[2000.0, -144.0, 160.0, CEILING_Y],  # B: arquivo do mezanino
+		[4420.0, 16.0, 240.0, CEILING_Y],    # D: bancada da direita
+		[3900.0, -144.0, 160.0, CEILING_Y],  # D: arquivo do mezanino (Lab 07)
+	]
+	for l in list:
+		var ground: float = l[1]
+		var ceiling: float = l[3]
+		var h := ground - ceiling - 10.0
+		var s := _neon(holder, LIGHT_TEX, Vector2(l[0], ceiling + 7.0), true,
+			Vector2(l[2], minf(h, 200.0)), ground, Color(0.8, 0.97, 1.0, 0.08))
+		s.name = "Light_%d_%d" % [int(l[0]), int(-ground)]
+		s.set("flicker", false)
+
+
+# --- Objetos interativos -----------------------------------------------------
+
+func _add_terminals(lvl: Node) -> void:
+	_data_terminals(lvl, [
+		["rnd_01_sine", Vector2(180, 16)],              # A: doca
+		["rnd_02_memo", Vector2(2300, -144)],           # B: mezanino
+		["rnd_03_trials", Vector2(3050, DUCT_Y)],       # C: só quem vai pelo duto acha
+		["rnd_04_kessler", Vector2(3700, 16)],          # D: entrada dos laboratórios
+		["rnd_05_logic_units", Vector2(5150, -752)],    # E: topo, ao lado do elevador
+	])
+
+
+func _add_kiosk_and_doors(lvl: Node) -> void:
+	# B: quiosque/monitor corporativo — distrai os agentes do chão.
+	lvl.add_child(_instance("res://scenes/objects/axioma_kiosk.tscn", "AxiomaKiosk", Vector2(1650, 16)))
+	# D -> E: porta biométrica do átrio.
+	lvl.add_child(_instance("res://scenes/objects/security_door.tscn", "SecurityDoor", Vector2(151 * T + 40, 16)))
+	# Entrada de D: aberta; só fecha no lockdown (não é hackeável).
+	var shutter := _instance("res://scenes/objects/security_door.tscn", "LockdownShutterWest", Vector2(3600, 16))
+	shutter.set("start_open", true)
+	shutter.set("hackable_enabled", false)
+	lvl.add_child(shutter)
+	_add_lockdown(lvl)
+
+
+## D: alarme com o jogador nos laboratórios fecha as portas; 20 s para hackear a saída.
+func _add_lockdown(lvl: Node) -> void:
+	var room := Rect2(3620, CEILING_Y, 151 * T + 30 - 3620, 16 - CEILING_Y)
+	var zone := Area2D.new()
+	zone.name = "LabLockdown"
+	zone.set_script(load("res://scripts/core/lockdown_zone.gd"))
+	zone.position = room.get_center()
+	zone.add_child(_rect_shape(room.size))
+	zone.set("door_paths", [NodePath("../LockdownShutterWest")] as Array[NodePath])
+	zone.set("exit_door_path", NodePath("../SecurityDoor"))
+	zone.set("countdown", 20.0)
+	zone.set("tint_rect", room)
+	zone.set("axioma_message", "Intrusão no Setor de P&D. Eduardo: sua variância já foi calculada.\nLaboratórios isolados. Unidades Lógicas a caminho.")
+	lvl.add_child(zone)
+
+
+## C: posições das barreiras a laser (a etapa 4 troca os marcadores pelos lasers).
+func _add_laser_slots(lvl: Node) -> void:
+	var holder := _holder(lvl, "LaserSlots")
+	for x in [2760.0, 3020.0, 3280.0]:
+		var m := Marker2D.new()
+		m.name = "LaserSlot%d" % int(x)
+		m.position = Vector2(x, 16)
+		holder.add_child(m)
+		if SHOW_ZONE_LABELS:
+			var r := ColorRect.new()
+			r.name = "Beam"
+			r.color = Color(1.0, 0.2, 0.3, 0.35)
+			r.position = Vector2(-2, CORRIDOR_Y - 16)
+			r.size = Vector2(4, 16 - CORRIDOR_Y)
+			m.add_child(r)
+
+
+func _add_cameras(lvl: Node) -> void:
+	var holder := _holder(lvl, "Cameras")
+	# A: na parede do fim da recepção, olhando para o balcão.
+	_camera(holder, false, "ReceptionCamera", Vector2(1080, -250),
+		{"facing_left": true, "sweep_min_deg": 20.0, "sweep_max_deg": 60.0, "vision_range": 420.0})
+	_camera(holder, true, "OfficeDome", Vector2(1900, CEILING_Y + 24),
+		{"sweep_min_deg": 55.0, "sweep_max_deg": 125.0, "vision_range": 420.0, "fov_deg": 30.0})
+	# C: no fim do corredor, olhando para trás (o duto fica fora do alcance).
+	_camera(holder, false, "CorridorCamera", Vector2(3500, CORRIDOR_Y + 30),
+		{"facing_left": true, "sweep_min_deg": 5.0, "sweep_max_deg": 30.0, "vision_range": 480.0})
+	_camera(holder, true, "LabDome", Vector2(4200, CEILING_Y + 24),
+		{"sweep_min_deg": 60.0, "sweep_max_deg": 120.0, "vision_range": 380.0, "fov_deg": 28.0})
+	_camera(holder, false, "AtriumCamera", Vector2(170 * T + 16 - 35, _y(-14)),
+		{"facing_left": true, "sweep_min_deg": 15.0, "sweep_max_deg": 65.0, "vision_range": 420.0})
+
+
+func _add_guards(lvl: Node) -> void:
+	# [variante, x inicial, chão, waypoint A, waypoint B]
+	_guards(lvl, [
+		["v2", 600.0, 16.0, 400.0, 1050.0],          # A: recepção
+		["v2", 1700.0, 16.0, 1250.0, 2450.0],        # B: chão
+		["v1", 1800.0, -144.0, 1350.0, 2350.0],      # B: mezanino
+		["v2", 4200.0, 16.0, 3700.0, 4700.0],        # D: chão (vira ciborgue abaixo)
+		["v1", 4200.0, -144.0, 3750.0, 4600.0],      # D: mezanino
+		["v2", 5200.0, -240.0, 5000.0, 5400.0],      # E: passarela do meio
+	])
+	# D: o guarda do chão dos laboratórios é uma Unidade Lógica (cena própria na etapa 5).
+	var cy := lvl.get_node("Guards/Guard4")
+	cy.set("enemy_type", Enemy.EnemyType.CYBORG)
+	cy.set("modulate", Color(0.75, 0.9, 1.15))
 
 
 func _add_exit(lvl: Node) -> void:
-	var exit := _exit(lvl, NEXT_STAGE, Vector2(1680, 16))
+	var exit := _exit(lvl, NEXT_STAGE, EXIT_POS)
 	exit.name = "LevelExit"
 	var sign := Label.new()
 	sign.name = "ElevatorSign"
 	sign.text = "ELEVADOR EXECUTIVO  ->  NÚCLEO\n(fase 4 em construção)"
-	sign.position = Vector2(1520, -120)
+	sign.position = Vector2(5150, -968)
 	sign.add_theme_font_size_override("font_size", 16)
 	sign.add_theme_color_override("font_color", Color("00F0FF"))
 	lvl.add_child(sign)
+
+
+## Placas de greybox com o nome de cada trecho (saem na troca pela arte final).
+func _add_zone_labels(lvl: Node) -> void:
+	var holder := _holder(lvl, "ZoneLabels")
+	for z in ZONES:
+		var l := Label.new()
+		l.name = "Zone_" + String(z[0]).left(1)
+		l.text = z[0]
+		l.position = z[1]
+		l.add_theme_font_size_override("font_size", 14)
+		l.add_theme_color_override("font_color", Color(0.5, 0.9, 1.0, 0.6))
+		holder.add_child(l)

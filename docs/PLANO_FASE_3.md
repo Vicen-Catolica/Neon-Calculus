@@ -84,9 +84,9 @@ Enquanto a arte não chega: greybox com os tiles industriais clareados e retâng
 
 ## 6. Etapas (ordem de execução)
 
-1. **Ligação e esqueleto** — `GameManager.LEVELS[3]`, saída da Fase 2 → Fase 3, `build_rnd_stage.gd` vazio (chão + player + saída). *Teste:* terminar a Fase 2 leva à Fase 3 com a transição "Acessando... Setor de P&D"; "Continuar" volta ao andar 3.
-2. **Caixa de diálogo** + `DialogueTrigger` + diálogo de elevador. *Teste:* texto em tempo real com o mundo pausado, avança com Enter, não reabre após recarregar o checkpoint.
-3. **Greybox da Fase 3** — layout A–E só com o que já existe (agentes, câmeras, luzes, esconderijos, quiosque, escadas, passarelas, dutos, terminais, porta, lockdown, saída). *Teste:* atravessável do início ao fim; screenshots de cada trecho.
+1. ✅ **Ligação e esqueleto** — `GameManager.LEVELS[3]`, saída da Fase 2 → Fase 3, `build_rnd_stage.gd` vazio (chão + player + saída). *Teste:* terminar a Fase 2 leva à Fase 3 com a transição "Acessando... Setor de P&D"; "Continuar" volta ao andar 3.
+2. ✅ **Caixa de diálogo** + `DialogueTrigger` + diálogo de elevador. *Teste:* texto em tempo real com o mundo pausado, avança com Enter, não reabre após recarregar o checkpoint.
+3. ✅ **Greybox da Fase 3** — layout A–E só com o que já existe (agentes, câmeras, luzes, esconderijos, quiosque, escadas, passarelas, dutos, terminais, porta, lockdown, saída). *Teste:* atravessável do início ao fim; screenshots de cada trecho.
 4. **Barreira a laser** (fixa e temporizada, hack, alarme). *Teste:* tocar no feixe dispara alarme; hackeado, passa; religa depois do tempo.
 5. **Ciborgue** (cena, ajustes de FSM, hack = ponto cego). *Teste:* não reage a quiosque/ruído; detecta mais rápido que o agente; hackeado, não vê por ~6 s.
 6. **Dr. Vance** (cela, diálogo, recompensa salva e aplicada nos hacks). *Teste:* resgatar → `vance_rescued` no save; SINE abre no 1º erro; tempo +15%; sem resgate, nada muda.
@@ -105,5 +105,5 @@ Commits pequenos por etapa no branch `feature/rnd-stage-3`, sem push.
 2. **Hack no ciborgue:** ponto cego (cone desligado) ou reescrever a rota? (Ponto cego, com a rota reiniciando junto: é o que o jogador entende na hora.)
 3. **Vance opcional ou obrigatório?** (Opcional, com recompensa clara; o WDD trata como side quest e o GDD diz "se for resgatado".)
 4. **Laser mata ou só dispara alarme?** (Só alarme + variância; a morte continua sendo pelo taser, como no GDD.)
-5. **Abortar hack com Esc** (GDD §4: chance de alerta proporcional ao tempo restante; proibido em lockdown). Conferir se o comportamento atual bate com o GDD e ajustar aqui, já que o lockdown volta nesta fase. (Sim, verificar na etapa 3.)
+5. ✅ **Abortar hack com Esc** (GDD §4). Não existia: implementado na etapa 3. Esc fecha o hack como falha; chance de alarme = 60% × fração do tempo que restava; sob lockdown o Esc só avisa (`Hackable.abortable`).
 6. **Ciclos de Processamento / upgrades do traje** (WDD §10). (Fora do escopo desta fase; anotar para depois da Fase 4.)

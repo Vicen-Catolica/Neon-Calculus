@@ -175,7 +175,38 @@ func _ready() -> void:
 	Input.parse_input_event(ev)
 	await frames(3)
 	check("Esc não abre a pausa durante o hack", not PauseMenu.is_open())
+	check("Esc durante o hack aborta", "ABORTADO" in feedback(), feedback())
+	await real(0.8)
+	check("hack abortado fecha como falha", not ui.visible and results.back() == "fail")
+
+	# Abortar (GDD §4): chance de alerta cresce com o tempo restante; lockdown não deixa.
+	var aborted: Array = []
+	ui.hacking_aborted.connect(func(alert: bool) -> void: aborted.append(alert))
+	var alarms := [0]
+	GameManager.alarm_raised.connect(func(_pp: Vector2) -> void: alarms[0] += 1)
+	ui.start_hacking(1, 0)
+	await frames(3)
+	var c_full: float = ui.abort_alert_chance()
+	ui.hack_timer.start(ui._time_total * 0.25)
+	var c_late: float = ui.abort_alert_chance()
+	check("abortar cedo arrisca mais que abortar no fim", c_full > c_late and c_full <= 0.6, "%.2f > %.2f" % [c_full, c_late])
+	ui.abort_hack(0.0)  # sorteio garantido: alerta
+	await real(0.8)
+	check("abortar com rastro soa o alarme", aborted.back() == true and alarms[0] == 1)
+	ui.start_hacking(1, 0)
+	await frames(3)
+	ui.abort_hack(0.99)  # sorteio acima da chance: sem alerta
+	await real(0.8)
+	check("abortar sem rastro não soa alarme", aborted.back() == false and alarms[0] == 1)
+	ui.can_abort = false
+	ui.start_hacking(1, 0)
+	await frames(3)
+	check("lockdown avisa que não dá para abortar", "não há como abortar" in feedback(), feedback())
+	ui.abort_hack(0.99)
+	await real(0.8)
+	check("lockdown: Esc não fecha o hack", ui.visible and "LOCKDOWN" in feedback())
 	ui._complete_hack(false)
+	ui.can_abort = true
 
 	print("TUDO OK — 0 falha(s)" if fails == 0 else "%d FALHA(S)" % fails)
 	tree.quit(1 if fails > 0 else 0)

@@ -38,6 +38,7 @@ Você é [color=#00f0ff]Eduardo[/color], ex-analista da OmniCorp. Suba a mega-to
 Na visão hacker o tempo desacelera e tudo que pode ser hackeado fica em [color=#00f0ff]ciano[/color]. Ao hackear, resolva a equação: digite o valor de [b]x[/b] e confirme com [color=#39ff14]Enter[/color]. O relógio no canto mostra quanto tempo resta.
 • Resposta certa: o hack funciona.
 • Resposta errada: aparece o aviso em vermelho e você perde 3 segundos. Depois de 2 erros, a [color=#00f0ff]SINE[/color] mostra o passo a passo ao lado.
+• [color=#39ff14]Esc[/color] aborta o hack, mas a Axioma pode rastrear a conexão e soar o alarme (mais chance quanto mais cedo você desiste). No lockdown não dá para abortar.
 • Câmera: desliga  •  Porta: abre  •  Agente: distração no implante  •  Luz neon: apaga  •  Quiosque: alarme falso que atrai guardas  •  Válvula: vapor que tapa a visão  •  Esteira: para  •  Drone: reinicia
 
 [color=#00f0ff][font_size=26]FURTIVIDADE[/font_size][/color]

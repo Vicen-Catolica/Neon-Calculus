@@ -237,7 +237,7 @@ func get_interaction_hint() -> String:
 		return "[F] SAIR DO ESCONDERIJO"
 	if not _hide_spots.is_empty():
 		if not _lights.is_empty():
-			return "LUZ DEMAIS PARA SE ESCONDER — APAGUE O NEON"
+			return "LUZ DEMAIS PARA SE ESCONDER — APAGUE A LUZ"
 		return "[F] ESCONDER"
 	return ""
 
