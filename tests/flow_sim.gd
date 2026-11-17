@@ -110,9 +110,12 @@ func _run() -> void:
 	Dialogue.skip()
 	check("diálogo visto vai para o save", "rnd_elevator" in SaveGame.load_checkpoint().get("dialogues_seen", []))
 	check("jogo volta depois do diálogo", not get_tree().paused and GameManager.state == GameManager.State.PLAYING)
+	GameManager.set_flag("vance_rescued")
+	check("resgate do Vance vai para o save na hora", "vance_rescued" in SaveGame.load_checkpoint().get("story_flags", []))
 	GameManager.reset_progress()
 	check("continuar aponta para a Fase 3", SaveGame.restore() == l3 and GameManager.current_floor == 3)
 	check("continuar lembra o diálogo visto", "rnd_elevator" in GameManager.dialogues_seen)
+	check("continuar lembra o resgate", GameManager.has_flag("vance_rescued"))
 	await get_tree().physics_frame
 	await get_tree().physics_frame
 	p = get_tree().get_first_node_in_group("Player")
@@ -125,6 +128,9 @@ func _run() -> void:
 	if not backup.is_empty():
 		GameManager.lore_read.clear()
 		GameManager.dialogues_seen.clear()
+		GameManager.story_flags.clear()
+		for id in backup.get("story_flags", []):
+			GameManager.story_flags.append(String(id))
 		for id in backup.get("dialogues_seen", []):
 			GameManager.dialogues_seen.append(String(id))
 		for id in backup.get("lore_read", []):

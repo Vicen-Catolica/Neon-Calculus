@@ -25,6 +25,7 @@ func _build_object_scenes() -> void:
 	_build_conveyor()
 	_build_drone()
 	_build_laser()
+	_build_holding_cell()
 	_build_ui()
 
 
@@ -219,6 +220,19 @@ func _build_laser() -> void:
 	beam.add_child(cs)
 	l.add_child(beam)
 	_save(l, "res://scenes/objects/laser_barrier.tscn")
+
+
+func _build_holding_cell() -> void:
+	var c := Node2D.new()
+	c.name = "HoldingCell"
+	c.set_script(load("res://scripts/objects/holding_cell.gd"))
+	c.add_child(_hackable("CELA — LAB 07", Vector2(89, -97)))
+	var spr := Sprite2D.new()
+	spr.name = "Prisoner"
+	spr.texture = load("res://assets/props/rnd/vance_placeholder.png")
+	spr.position = Vector2(0, -64 + 2)
+	c.add_child(spr)
+	_save(c, "res://scenes/objects/holding_cell.tscn")
 
 
 func _build_conveyor() -> void:

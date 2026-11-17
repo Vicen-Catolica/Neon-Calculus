@@ -108,12 +108,32 @@ def exec_elevator():
     return img
 
 
+def vance():
+    """Dr. Vance provisório: jaleco branco, cabelo grisalho, 64x128 com pés em y=126."""
+    img = Image.new("RGBA", (64, 128), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    skin = (214, 170, 140, 255)
+    d.ellipse([22, 14, 42, 36], fill=skin, outline=OUTLINE)            # cabeça
+    d.rectangle([22, 12, 42, 20], fill=(190, 190, 195, 255), outline=OUTLINE)  # cabelo
+    d.rectangle([25, 24, 39, 27], fill=(30, 40, 50, 255))               # óculos
+    d.polygon([(16, 40), (48, 40), (52, 112), (12, 112)], fill=(232, 236, 240, 255), outline=OUTLINE)  # jaleco
+    d.line([32, 42, 32, 110], fill=(170, 176, 186, 255))
+    d.rectangle([28, 40, 36, 52], fill=(60, 80, 110, 255))              # camisa
+    d.rectangle([10, 46, 16, 92], fill=(232, 236, 240, 255), outline=OUTLINE)  # braços
+    d.rectangle([48, 46, 54, 92], fill=(232, 236, 240, 255), outline=OUTLINE)
+    d.rectangle([20, 112, 30, 126], fill=(40, 44, 52, 255), outline=OUTLINE)   # pernas
+    d.rectangle([34, 112, 44, 126], fill=(40, 44, 52, 255), outline=OUTLINE)
+    d.rectangle([40, 60, 46, 66], fill=CYAN)                           # crachá
+    return img
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     for name, fn in [
         ("reception_counter", counter), ("cubicle", cubicle), ("plant", plant),
         ("filing_cabinet", cabinet), ("lab_bench", lab_bench), ("sample_tank", sample_tank),
         ("ceiling_light_flicker_2f", ceiling_light), ("exec_elevator", exec_elevator),
+        ("vance_placeholder", vance),
     ]:
         fn().save(OUT / f"{name}.png")
         print("  salvo", OUT / f"{name}.png")

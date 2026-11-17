@@ -89,7 +89,7 @@ Enquanto a arte não chega: greybox com os tiles industriais clareados e retâng
 3. ✅ **Greybox da Fase 3** — layout A–E só com o que já existe (agentes, câmeras, luzes, esconderijos, quiosque, escadas, passarelas, dutos, terminais, porta, lockdown, saída). *Teste:* atravessável do início ao fim; screenshots de cada trecho.
 4. ✅ **Barreira a laser** (fixa e temporizada, hack, alarme). *Teste:* tocar no feixe dispara alarme; hackeado, passa; religa depois do tempo.
 5. ✅ **Ciborgue** (cena, ajustes de FSM, hack = ponto cego). *Teste:* não reage a quiosque/ruído; detecta mais rápido que o agente; hackeado, não vê por ~6 s.
-6. **Dr. Vance** (cela, diálogo, recompensa salva e aplicada nos hacks). *Teste:* resgatar → `vance_rescued` no save; SINE abre no 1º erro; tempo +15%; sem resgate, nada muda.
+6. ✅ **Dr. Vance** (cela, diálogo, recompensa salva e aplicada nos hacks). *Teste:* resgatar → `vance_rescued` no save; SINE abre no 1º erro; tempo +15%; sem resgate, nada muda.
 7. **Lore** — `data/lore/rnd.json`: SINE na doca; e-mail corporativo sobre as "Atualizações Mandatórias"; relatório de testes do Projeto Determinismo (cobaias); diário da Dra. Kessler (continuação do terminal da Fase 2); registro da conversão de humanos em Unidades Lógicas; gancho para o Núcleo.
 8. **Arte** — PixelLab conforme §5 e troca dos placeholders.
 9. **Testes** — `tests/stage3_sim.gd` (um OK/FALHOU por mecânica, como `stage2_sim`) + `ui_sim` cobrindo a caixa de diálogo; entra no `run_tests.sh`.

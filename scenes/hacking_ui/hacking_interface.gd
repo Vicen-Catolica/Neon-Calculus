@@ -60,6 +60,9 @@ var _busy: bool = false
 var can_abort: bool = true
 var _time_total: float = 0.0
 ## Chance máxima de alerta ao abortar com o relógio cheio (cai com o tempo gasto).
+## Protocolo Vance (resgate do Dr. Vance na Fase 3): tempo extra e SINE mais cedo.
+const VANCE_FLAG := "vance_rescued"
+const VANCE_TIME_MULT := 1.15
 const ABORT_ALERT_MAX := 0.6
 
 func _ready() -> void:
@@ -277,6 +280,8 @@ func _calculate_dynamic_time_limit() -> float:
 			time_calculated += 5.2
 
 	time_calculated *= 2.0
+	if vance_protocol():
+		time_calculated *= VANCE_TIME_MULT
 	var mult := time_limit_mult
 	time_limit_mult = 1.0
 	if mult < 1.0:
@@ -353,13 +358,22 @@ func _trigger_error(wrong_value: int = 0) -> void:
 		hack_timer.start(max(0.1, hack_timer.time_left - ERROR_PENALTY))
 
 	var msg := "INCORRETO: x = %d não resolve a equação. -%d s. Tente de novo." % [wrong_value, int(ERROR_PENALTY)]
-	if error_count >= 2:
+	if error_count >= sine_after_errors():
 		msg += "\nA SINE abriu o passo a passo ao lado."
 	_show_feedback(msg, FEEDBACK_ERR)
 	_flash_input(FEEDBACK_ERR)
 
-	if error_count >= 2:
+	if error_count >= sine_after_errors():
 		_activate_ai_assistant()
+
+func vance_protocol() -> bool:
+	return GameManager.has_flag(VANCE_FLAG)
+
+
+## Erros até a SINE abrir o passo a passo: 2, ou 1 com o Protocolo Vance.
+func sine_after_errors() -> int:
+	return 1 if vance_protocol() else 2
+
 
 func _activate_ai_assistant() -> void:
 	if not ai_assistant_panel:
@@ -492,7 +506,8 @@ func _process(delta: float) -> void:
 	var footer_label: Label = find_child("FooterStatusLabel", true, false)
 	if footer_label:
 		var cursor = "_" if fmod(_blink_timer, 0.8) < 0.4 else " "
-		footer_label.text = "SYS_STATUS // AGUARDANDO ENTRADA" + cursor
+		footer_label.text = "SYS_STATUS // AGUARDANDO ENTRADA" + cursor \
+			+ ("   //   PROTOCOLO VANCE: +15% TEMPO, SINE NO 1º ERRO" if vance_protocol() else "")
 
 func _on_numpad_key_pressed(digit: String) -> void:
 	if _busy:

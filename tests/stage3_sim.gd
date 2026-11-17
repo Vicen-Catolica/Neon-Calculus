@@ -225,6 +225,38 @@ func _ready() -> void:
 	check("hackear a saída encerra o lockdown", not zone.active and shutter.is_open and exit_door.is_open)
 	check("fim do lockdown: hack volta a ser abortável", exit_h.abortable)
 
+	# Lab 07: resgate opcional do Dr. Vance.
+	GameManager.story_flags.clear()
+	var cell := lvl.get_node("Lab07Cell") as HoldingCell
+	var cell_h := cell.get_node("Hackable") as Hackable
+	check("Lab 07: cela fechada e hackeável", not cell.is_open and cell.can_be_hacked() and cell_h.get_label() == "CELA — LAB 07")
+	check("Lab 07: campo de força pede equação de nível 4", cell_h.get_difficulty().x == 4)
+	check("Lab 07: SINE avisa ao subir no mezanino", lvl.has_node("Dialogue_rnd_lab07") and Dialogue.lines_for("rnd_lab07").size() > 0)
+	tp(4300, -144); await step(5)
+	var hv_targets: Array = []
+	Input.action_press("hack_vision"); await step(20)
+	hv_targets = hv.candidates.map(func(t): return t.get_label())
+	Input.action_release("hack_vision"); await step(5)
+	check("Lab 07: cela aparece na visão hacker do mezanino", "CELA — LAB 07" in hv_targets, str(hv_targets))
+	hv.debug_hack(cell_h, true)
+	for i in 10:
+		await get_tree().process_frame
+	check("Lab 07: hack abre a cela e marca o resgate", cell.is_open and GameManager.has_flag("vance_rescued"))
+	check("Lab 07: Vance conversa ao sair", Dialogue.is_open() and Dialogue.current_speaker() == "VANCE")
+	Dialogue.skip()
+	await step(120)
+	check("Lab 07: Vance foge pelo duto (some)", not (cell.get_node("Prisoner") as CanvasItem).visible)
+	check("Lab 07: cela aberta não aceita novo hack", not cell.can_be_hacked() and not cell_h.enabled)
+	var reload := (load("res://scenes/objects/holding_cell.tscn") as PackedScene).instantiate() as HoldingCell
+	add_child(reload)
+	check("Lab 07: com o resgate no save, a cela já nasce aberta e vazia", reload.is_open and not (reload.get_node("Prisoner") as CanvasItem).visible)
+	reload.queue_free()
+	GameManager.story_flags.clear()
+	var fresh := (load("res://scenes/objects/holding_cell.tscn") as PackedScene).instantiate() as HoldingCell
+	add_child(fresh)
+	check("Lab 07: sem o resgate, a cela nasce fechada", not fresh.is_open)
+	fresh.queue_free()
+
 	# Unidade Lógica (ciborgue) nos laboratórios (cy = Guard4, já pego acima).
 	var agent := lvl.get_node("Guards/Guard5") as Enemy
 	var cy_h := cy.get_node("Hackable") as Hackable

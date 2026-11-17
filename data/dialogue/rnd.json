@@ -1,12 +1,88 @@
 {
 	"rnd_elevator": [
-		{"who": "SINE", "text": "Elevador parado. Andar 3: Administração e P&D. Luz ambiente em 92%. Aqui quase não existe sombra, Eduardo."},
-		{"who": "EDUARDO", "text": "Então a gente fabrica sombra. Painel de luz apagado, sombra pronta."},
-		{"who": "SINE", "text": "Cada luz apagada sobe a variância. E há Unidades Lógicas nos laboratórios: ciborgues. Não ouvem passos e não caem em distração."},
-		{"who": "EDUARDO", "text": "Ótimo. Finalmente alguém previsível."},
-		{"who": "SINE", "text": "Previsível e perfeito. Só um hack muda a rotina deles. Probabilidade de cruzar o andar sem alarme: 23%."},
-		{"who": "EDUARDO", "text": "Ontem eram 41."},
-		{"who": "SINE", "text": "Ontem não havia ciborgues. O Laboratório 07 fica neste andar. Se o Dr. Vance estiver lá, ele sabe onde a Axioma é cega."},
-		{"who": "EDUARDO", "text": "Então a gente passa no 07. Abre a porta, SINE."}
+		{
+			"who": "SINE",
+			"text": "Elevador parado. Andar 3: Administração e P&D. Luz ambiente em 92%. Aqui quase não existe sombra, Eduardo."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Então a gente fabrica sombra. Painel de luz apagado, sombra pronta."
+		},
+		{
+			"who": "SINE",
+			"text": "Cada luz apagada sobe a variância. E há Unidades Lógicas nos laboratórios: ciborgues. Não ouvem passos e não caem em distração."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Ótimo. Finalmente alguém previsível."
+		},
+		{
+			"who": "SINE",
+			"text": "Previsível e perfeito. Só um hack muda a rotina deles. Probabilidade de cruzar o andar sem alarme: 23%."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Ontem eram 41."
+		},
+		{
+			"who": "SINE",
+			"text": "Ontem não havia ciborgues. O Laboratório 07 fica neste andar. Se o Dr. Vance estiver lá, ele sabe onde a Axioma é cega."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Então a gente passa no 07. Abre a porta, SINE."
+		}
+	],
+	"rnd_lab07": [
+		{
+			"who": "SINE",
+			"text": "Sinal vital humano atrás daquele campo de força. Frequência cardíaca alta, mas estável. É ele, Eduardo: o Dr. Vance."
+		},
+		{
+			"who": "SINE",
+			"text": "O campo usa criptografia de nível superior. A equação vai ser mais difícil que a deste andar. A decisão é sua."
+		}
+	],
+	"rnd_vance": [
+		{
+			"who": "VANCE",
+			"text": "Você não é da manutenção. Ninguém da manutenção olha nos meus olhos."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Eduardo. Resistência. A Axioma acha que o senhor ainda é útil."
+		},
+		{
+			"who": "VANCE",
+			"text": "Eu escrevi a primeira linha dela. Era para prever enchentes, não pessoas."
+		},
+		{
+			"who": "SINE",
+			"text": "Dr. Vance, aqui é a SINE, geração 3. O senhor assinou meu código de treinamento."
+		},
+		{
+			"who": "VANCE",
+			"text": "SINE... disseram que tinham te apagado. Que bom estar errado em alguma coisa."
+		},
+		{
+			"who": "VANCE",
+			"text": "Escutem. A Axioma não consegue computar uma escolha sem causa. Deixei essa variável aberta no núcleo, de propósito. É a porta de vocês."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Um paradoxo. Ela trava tentando prever o imprevisível."
+		},
+		{
+			"who": "VANCE",
+			"text": "Exato. Vou passar meus atalhos para a SINE: ela vai te mostrar o passo a passo mais cedo, e cada hack ganha alguns segundos."
+		},
+		{
+			"who": "SINE",
+			"text": "Protocolo Vance recebido. Atalhos de cálculo integrados."
+		},
+		{
+			"who": "VANCE",
+			"text": "Eu saio pelo duto de serviço. Não esperem por mim. Subam."
+		}
 	]
 }

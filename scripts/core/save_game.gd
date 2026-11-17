@@ -1,5 +1,6 @@
 extends Node
-## Autoload. Checkpoint do jogador: andar atual, cena, logs de lore lidos e diálogos vistos.
+## Autoload. Checkpoint do jogador: andar atual, cena, logs de lore lidos, diálogos vistos
+## e marcos da história (resgates).
 ## TDD (integridade do save): grava num arquivo temporário e só então troca pelo
 ## definitivo, mantendo a versão anterior como backup até a troca terminar.
 ## Se o jogo fechar no meio, o load ainda encontra o save antigo inteiro.
@@ -14,6 +15,7 @@ func _ready() -> void:
 	# Lore lida no meio de um andar também persiste (não espera o próximo checkpoint).
 	GameManager.lore_unlocked.connect(func(_id: String) -> void: _update_progress())
 	GameManager.dialogue_seen.connect(func(_id: String) -> void: _update_progress())
+	GameManager.flag_set.connect(func(_id: String) -> void: _update_progress())
 
 
 func has_save() -> bool:
@@ -28,6 +30,7 @@ func save_checkpoint(floor_number: int, scene_path: String) -> void:
 		"scene": scene_path,
 		"lore_read": GameManager.lore_read.duplicate(),
 		"dialogues_seen": GameManager.dialogues_seen.duplicate(),
+		"story_flags": GameManager.story_flags.duplicate(),
 		"saved_at": Time.get_datetime_string_from_system(),
 	})
 
@@ -48,6 +51,9 @@ func restore() -> String:
 	GameManager.dialogues_seen.clear()
 	for id in data.get("dialogues_seen", []):
 		GameManager.dialogues_seen.append(String(id))
+	GameManager.story_flags.clear()
+	for id in data.get("story_flags", []):
+		GameManager.story_flags.append(String(id))
 	GameManager.current_floor = int(data.get("floor", 1))
 	return String(data.get("scene", ""))
 
@@ -64,6 +70,7 @@ func _update_progress() -> void:
 		return
 	data["lore_read"] = GameManager.lore_read.duplicate()
 	data["dialogues_seen"] = GameManager.dialogues_seen.duplicate()
+	data["story_flags"] = GameManager.story_flags.duplicate()
 	_write(data)
 
 

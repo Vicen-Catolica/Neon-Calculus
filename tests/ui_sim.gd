@@ -125,6 +125,23 @@ func _ready() -> void:
 	await frames(2)
 	check("Como jogar fecha", not is_instance_valid(how))
 
+	# Protocolo Vance (resgate na Fase 3): +15% de tempo e SINE já no 1º erro.
+	GameManager.story_flags.clear()
+	ui.start_hacking(2, 1)
+	await frames(3)
+	var t_normal: float = ui._calculate_dynamic_time_limit()
+	check("sem resgate a SINE espera 2 erros", ui.sine_after_errors() == 2)
+	GameManager.set_flag("vance_rescued")
+	var t_vance: float = ui._calculate_dynamic_time_limit()
+	check("Protocolo Vance: +15% de tempo", absf(t_vance / t_normal - 1.15) < 0.02 or t_vance == 240.0, "%.1f -> %.1f" % [t_normal, t_vance])
+	type_answer(int(ui.final_target_solution) + 1)
+	ui._on_submit_pressed()
+	await frames(2)
+	check("Protocolo Vance: SINE abre no 1º erro", ui.ai_assistant_panel.visible and "SINE abriu" in feedback())
+	ui._complete_hack(false)
+	GameManager.story_flags.clear()
+	await frames(2)
+
 	# --- Caixa de diálogo ---
 	var script_lines: Array = Dialogue.lines_for("rnd_elevator")
 	var unknown := script_lines.filter(func(l): return not Dialogue.SPEAKERS.has(String(l["who"])))

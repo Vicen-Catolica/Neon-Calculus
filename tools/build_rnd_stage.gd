@@ -5,8 +5,8 @@ extends "res://tools/stage_builder_base.gd"
 ##
 ## GREYBOX (etapa 3 do docs/PLANO_FASE_3.md): layout definitivo com as mecânicas
 ## que já existem. Arte provisória: tiles industriais clareados/azulados e props
-## de tools/gen_rnd_placeholders.py. Lasers (etapa 4) e ciborgues (etapa 5) prontos;
-## a cela do Dr. Vance (etapa 6) ainda falta.
+## de tools/gen_rnd_placeholders.py. Lasers (etapa 4), ciborgues (etapa 5) e a cela
+## do Dr. Vance (etapa 6) prontos.
 ##
 ## Percurso, da esquerda para a direita (teto em y = -368):
 ##   A  doca do elevador de carga + recepção: luz demais, apague para se esconder
@@ -101,6 +101,7 @@ func build() -> Node:
 	_add_terminals(lvl)
 	_add_kiosk_and_doors(lvl)
 	_add_lasers(lvl)
+	_add_lab07(lvl)
 	_add_cameras(lvl)
 	_add_guards(lvl)
 	_add_exit(lvl)
@@ -191,6 +192,7 @@ func _add_lights(lvl: Node) -> void:
 			Vector2(l[2], minf(h, 200.0)), ground, Color(0.8, 0.97, 1.0, 0.08))
 		s.name = "Light_%d_%d" % [int(l[0]), int(-ground)]
 		s.set("flicker", false)
+		(s.get_node("Hackable") as Hackable).display_name = "LUZ DO TETO"
 
 
 # --- Objetos interativos -----------------------------------------------------
@@ -232,6 +234,20 @@ func _add_lockdown(lvl: Node) -> void:
 	zone.set("tint_rect", room)
 	zone.set("axioma_message", "Intrusão no Setor de P&D. Eduardo: sua variância já foi calculada.\nLaboratórios isolados. Unidades Lógicas a caminho.")
 	lvl.add_child(zone)
+
+
+## D: Laboratório 07 no mezanino — a cela do Dr. Vance (resgate opcional).
+func _add_lab07(lvl: Node) -> void:
+	lvl.add_child(_instance("res://scenes/objects/holding_cell.tscn", "Lab07Cell", Vector2(4480, -144)))
+	var sign := Label.new()
+	sign.name = "Lab07Sign"
+	sign.text = "LAB 07 // ACESSO RESTRITO"
+	sign.position = Vector2(4400, -350)
+	sign.add_theme_font_size_override("font_size", 14)
+	sign.add_theme_color_override("font_color", Color("FF6A1A"))
+	lvl.add_child(sign)
+	# SINE avisa ao subir no mezanino do laboratório.
+	_dialogue_trigger(lvl, "rnd_lab07", Vector2(4150, -144), Vector2(80, 128))
 
 
 ## C: barreiras a laser do chão ao teto do corredor. A 1ª é fixa (hackear para

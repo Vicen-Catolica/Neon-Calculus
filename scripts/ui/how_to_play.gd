@@ -17,6 +17,7 @@ Você é [color=#00f0ff]Eduardo[/color], ex-analista da OmniCorp. Suba a mega-to
 
 [color=#00f0ff][font_size=26]CADA ANDAR[/font_size][/color]
 • Chegue à saída do andar (uma escada, um elevador...).
+• Opcional: há prisioneiros da OmniCorp atrás de campos de força. Resgatar o [color=#39ff14]Dr. Vance[/color] (Lab 07, P&D) ativa o Protocolo Vance: +15% de tempo nos hacks e a SINE ajuda já no 1º erro.
 • Os guardas atiram com taser: se a sua [b]Defesa Neural[/b] zerar, a infiltração falha e você volta ao início do andar (o jogo salva sozinho em cada andar).
 
 [color=#00f0ff][font_size=26]CONTROLES[/font_size][/color]
