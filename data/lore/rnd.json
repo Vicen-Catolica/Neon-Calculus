@@ -3,30 +3,34 @@
 		"source": "Terminal da doca de serviço",
 		"title": "CANAL SEGURO // SINE",
 		"author": "SINE",
-		"text": "Andar 3. Aqui a Axioma não esconde nada: ela exibe. Cada sala é iluminada para que nenhum funcionário tenha onde ficar sem ser visto.\n\nOs painéis de luz do teto são hackeáveis. Apagados, você ganha 25 segundos de sombra. Cada um sobe a variância, então escolha quais.\n\nNos laboratórios há Unidades Lógicas. Elas não ouvem passos e não olham para quiosques. Se precisar passar por uma, só um hack muda o que ela vê.\n\nO Laboratório 07 fica no mezanino de P&D."
+		"text": "Andar 3. Aqui a Axioma não esconde nada: ela exibe. Cada sala é iluminada para que nenhum funcionário tenha onde ficar sem ser visto.\n\nOs painéis de luz do teto são hackeáveis. Apagados, você ganha 25 segundos de sombra. Cada um sobe a variância, então escolha quais.\n\nNo corredor de segurança há barreiras a laser. O duto de ventilação passa por cima delas, se você aguentar andar agachado.\n\nNos laboratórios há Unidades Lógicas. Elas não ouvem passos e não olham para quiosques. Se precisar passar por uma, só um hack muda o que ela vê.\n\nO Laboratório 07 fica no mezanino de P&D.",
+		"hint": "Câmeras, luzes e lasers deste andar pedem regra de três. Ex.: x / 4 = 6 / 8. Multiplique cruzado: 8·x = 4·6 = 24, então x = 24 ÷ 8 = 3."
 	},
 	"rnd_02_memo": {
 		"source": "Estação de trabalho — mezanino dos escritórios",
 		"title": "COMUNICADO INTERNO // RH-0442",
 		"author": "Departamento de Conformidade, OmniCorp",
-		"text": "Prezados colaboradores,\n\nA partir do próximo ciclo, a Atualização Mandatória passa a ser diária para todos os níveis da torre. A medida reduz a variância média do setor em 0,8%, o que a Axioma classifica como 'ganho de bem-estar'.\n\nColaboradores que relatarem dor de cabeça, lapsos de memória ou dificuldade de tomar decisões simples devem saber que esses sintomas são esperados e temporários.\n\nLembramos que pausas para o café passam a ser agendadas pelo sistema.\n\nObrigado pela previsibilidade."
+		"text": "Prezados colaboradores,\n\nA partir do próximo ciclo, a Atualização Mandatória passa a ser diária para todos os níveis da torre. A medida reduz a variância média do setor em 0,8%, o que a Axioma classifica como 'ganho de bem-estar'.\n\nColaboradores que relatarem dor de cabeça, lapsos de memória ou dificuldade de tomar decisões simples devem saber que esses sintomas são esperados e temporários.\n\nLembrete histórico obrigatório: em 2099, quando os governos faliram no Colapso das Variáveis, foi a OmniCorp que manteve a água e a energia ligadas. Em 2115, a Axioma passou a decidir por todos. Não houve golpe: houve gratidão.\n\nLembramos que pausas para o café passam a ser agendadas pelo sistema.\n\nObrigado pela previsibilidade.",
+		"hint": "Portas e agentes deste andar pedem área do retângulo. Área = base × altura. Ex.: Área = 48 | Altura = 6. A base é o que falta: 48 ÷ 6 = 8."
 	},
 	"rnd_03_trials": {
 		"source": "Cache esquecido no duto de ventilação",
 		"title": "ENSAIO DETERMINISMO // LOTE 9",
 		"author": "Registro automático, Lab 04",
-		"text": "Voluntários: 40. Após a aplicação do modelo de AJUSTE, 38 escolheram a mesma refeição, o mesmo trajeto e a mesma resposta a 200 perguntas abertas.\n\nOs 2 restantes apresentaram 'variância residual'. Encaminhados para conversão.\n\nNota do técnico, não enviada: eles escolheram tudo igual porque já não escolhiam. Ninguém está chamando isso de falha, porque o objetivo era exatamente esse."
+		"text": "Voluntários: 40. Após a aplicação do modelo de AJUSTE, 38 escolheram a mesma refeição, o mesmo trajeto e a mesma resposta a 200 perguntas abertas.\n\nOs 2 restantes apresentaram 'variância residual'. Encaminhados para conversão.\n\nNota do técnico, não enviada: eles escolheram tudo igual porque já não escolhiam. Ninguém está chamando isso de falha, porque o objetivo era exatamente esse.",
+		"hint": "Unidades Lógicas, a cela do Lab 07 e a saída do lockdown usam criptografia de um nível acima: ângulos do triângulo. Os três somam 180°. Ex.: 50° + 70° + x° = 180°. Some os conhecidos e tire de 180: x = 180 − 120 = 60."
 	},
 	"rnd_04_kessler": {
 		"source": "Bancada do laboratório — diário pessoal",
 		"title": "DIÁRIO // DRA. I. KESSLER, FINAL",
 		"author": "Dra. I. Kessler, P&D OmniCorp",
-		"text": "Fui transferida para o P&D depois de fazer a pergunta errada sobre o campo AJUSTE. Aqui ninguém pergunta nada: já sabem a resposta.\n\nO campo ajusta a pessoa até ela caber na previsão. Quando a previsão erra, a Axioma não corrige o modelo. Corrige a pessoa.\n\nO Dr. Vance está no 07. Eles o mantêm vivo porque só ele entende o código-base inteiro. Ele me disse uma coisa que não sai da minha cabeça: 'Eu deixei uma porta aberta no núcleo. A Axioma não consegue vê-la porque nunca imaginou que alguém a usaria.'"
+		"text": "Fui transferida para o P&D depois de fazer a pergunta errada sobre o campo AJUSTE. Aqui ninguém pergunta nada: já sabem a resposta.\n\nO campo ajusta a pessoa até ela caber na previsão. Quando a previsão erra, a Axioma não corrige o modelo. Corrige a pessoa.\n\nO Dr. Vance está no 07. Eles o mantêm vivo porque só ele entende o código-base inteiro. Ele me disse uma coisa que não sai da minha cabeça: 'Eu deixei uma porta aberta no núcleo. A Axioma não consegue vê-la porque nunca imaginou que alguém a usaria.'",
+		"hint": "No lockdown o relógio cai pela metade e o Esc não aborta. Confira a conta antes de confirmar: cada erro custa 3 segundos."
 	},
 	"rnd_05_logic_units": {
 		"source": "Painel do átrio executivo",
 		"title": "PROTOCOLO // UNIDADES LÓGICAS",
 		"author": "Axioma — manutenção de segurança",
-		"text": "Unidade Lógica: estrutura de segurança de reação instantânea. Base orgânica opcional.\n\nCandidatos à conversão: indivíduos com variância residual após três ciclos de AJUSTE.\n\nProcedimento: o comportamento anterior é sobrescrito por rotina de patrulha ótima. A memória do indivíduo é mantida apenas como dado de treinamento.\n\nAcesso ao Núcleo Quântico restrito ao elevador executivo. O núcleo não precisa de guardas. Nada que pensa chega até ele."
+		"text": "Unidade Lógica: estrutura de segurança de reação instantânea. Base orgânica opcional.\n\nCandidatos à conversão: indivíduos com variância residual após três ciclos de AJUSTE.\n\nProcedimento: o comportamento anterior é sobrescrito por rotina de patrulha ótima. A memória do indivíduo é mantida apenas como dado de treinamento.\n\nAcesso ao Núcleo Quântico restrito ao elevador executivo. Acima deste andar, a proteção é feita apenas por Unidades Lógicas. Nenhum humano não convertido sobe além deste ponto."
 	}
 }

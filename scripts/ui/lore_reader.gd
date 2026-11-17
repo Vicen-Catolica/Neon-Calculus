@@ -2,6 +2,8 @@ class_name LoreReader
 extends CanvasLayer
 ## Leitor de logs de lore: painel holográfico com efeito de digitação.
 ## Pausa o jogo enquanto aberto. Fecha com F/Esc/E (ou clique).
+## Entrada com "hint": dica matemática da SINE num quadro à parte (WDD: os terminais
+## "fornecem dicas matemáticas que facilitam puzzles futuros"). Aparece depois do texto.
 
 signal closed
 
@@ -14,6 +16,8 @@ var _title: Label
 var _author: Label
 var _body: Label
 var _hint: Label
+var _tip_box: PanelContainer
+var _tip: Label
 var _full_text: String = ""
 var _shown: float = 0.0
 var _open: bool = false
@@ -62,6 +66,19 @@ func _build() -> void:
 	_body = _label(box, null, 24, Color(0.85, 0.95, 0.97))
 	_body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_body.custom_minimum_size = Vector2(1020, 360)
+	_tip_box = PanelContainer.new()
+	var tip_style := StyleBoxFlat.new()
+	tip_style.bg_color = Color(0.0, 0.12, 0.15, 0.9)
+	tip_style.border_color = CYAN
+	tip_style.set_border_width_all(1)
+	tip_style.set_content_margin_all(14)
+	_tip_box.add_theme_stylebox_override("panel", tip_style)
+	box.add_child(_tip_box)
+	_tip = _label(_tip_box, font, 20, CYAN)
+	_tip.name = "Tip"
+	_tip.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_tip.custom_minimum_size = Vector2(1000, 0)
+	_tip_box.visible = false
 	_hint = _label(box, font, 16, Color(0.6, 0.8, 0.85))
 	_hint.text = "[F] FECHAR"
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -82,6 +99,9 @@ func show_entry(entry: Dictionary) -> void:
 	_title.text = String(entry.get("title", ""))
 	_author.text = "— " + String(entry.get("author", ""))
 	_full_text = String(entry.get("text", ""))
+	var tip := String(entry.get("hint", ""))
+	_tip.text = ("DICA DA SINE // " + tip) if tip != "" else ""
+	_tip_box.visible = false
 	_body.text = ""
 	_body.visible_characters = -1
 	_shown = 0.0
@@ -102,6 +122,8 @@ func _process(delta: float) -> void:
 	if _shown < _full_text.length():
 		_shown = minf(_shown + CHARS_PER_SEC * delta, _full_text.length())
 		_body.text = _full_text.substr(0, int(_shown))
+	elif _tip.text != "" and not _tip_box.visible:
+		_tip_box.visible = true
 
 
 func _unhandled_input(event: InputEvent) -> void:

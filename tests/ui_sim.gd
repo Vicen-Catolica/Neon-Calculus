@@ -28,6 +28,13 @@ func feedback() -> String:
 	return (ui.find_child("FeedbackLabel", true, false) as Label).text
 
 
+func _key_event(action: String) -> InputEventAction:
+	var e := InputEventAction.new()
+	e.action = action
+	e.pressed = true
+	return e
+
+
 func type_answer(v: int) -> void:
 	ui.current_input_text = str(v)
 	ui._update_input_display()
@@ -140,6 +147,28 @@ func _ready() -> void:
 	check("Protocolo Vance: SINE abre no 1º erro", ui.ai_assistant_panel.visible and "SINE abriu" in feedback())
 	ui._complete_hack(false)
 	GameManager.story_flags.clear()
+	await frames(2)
+
+	# --- Leitor de lore: dica matemática da SINE (WDD) ---
+	var reader := tree.get_first_node_in_group("lore_reader") as LoreReader
+	reader.show_entry(LoreDatabase.get_entry("rnd_01_sine"))
+	await frames(2)
+	var tip_box := reader.find_child("Tip", true, false).get_parent() as Control
+	check("dica só aparece depois do texto", not tip_box.visible)
+	reader._unhandled_input(_key_event("interact_world"))  # F completa o texto
+	await frames(2)
+	check("dica da SINE aparece com o texto completo", tip_box.visible and "DICA DA SINE" in (reader.find_child("Tip", true, false) as Label).text)
+	reader._close()
+	reader.show_entry(LoreDatabase.get_entry("slums_01_sine"))
+	reader._unhandled_input(_key_event("interact_world"))
+	await frames(2)
+	check("entrada sem dica não mostra o quadro", not tip_box.visible)
+	reader._close()
+	var tips := []
+	for id in ["rnd_01_sine", "rnd_02_memo", "rnd_03_trials", "rnd_04_kessler"]:
+		if String(LoreDatabase.get_entry(id).get("hint", "")) == "":
+			tips.append(id)
+	check("terminais do P&D trazem dica", tips.is_empty(), str(tips))
 	await frames(2)
 
 	# --- Caixa de diálogo ---

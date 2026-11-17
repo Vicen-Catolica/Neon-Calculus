@@ -11,7 +11,7 @@ Plano da terceira fase, no mesmo formato por etapas das fases 1 e 2. Cada etapa 
 - **Builder compartilhado:** `tools/stage_builder_base.gd`; a Fase 3 vira `tools/build_rnd_stage.gd` (mesmo padrão de `build_industrial_stage.gd`).
 - **Já existe e só falta usar:**
   - `Enemy.EnemyType.CYBORG` e `Hackable.Kind.CYBORG`: sem ouvido, não se distrai com quiosque, espera menor na patrulha, hack reinicia a rota. Nunca foi testado numa fase nem tem arte.
-  - Equações do andar 3 no gerador: **regra de três** (subtópico 0: câmera, luz, quiosque) e **área de retângulo** (subtópico 1: porta, agente, drone). O ciborgue soma +1 andar, então usa **distributiva** (nível 4). O tempo do andar 3 já está na tabela de `_calculate_dynamic_time_limit`.
+  - Equações do andar 3 no gerador: **regra de três** (subtópico 0: câmera, luz, quiosque) e **área de retângulo** (subtópico 1: porta, agente, drone). O ciborgue soma +1 andar com subtópico 1, então usa **ângulos do triângulo** (nível 4); a cela do Vance e a saída do lockdown também (porta +1). O tempo do andar 3 já está na tabela de `_calculate_dynamic_time_limit`.
   - Gancho de lore: `industrial_04_vance` diz que o Dr. Vance foi levado ao **Laboratório 07, P&D**.
 - **Não existe ainda:** caixa de diálogo (falas de SINE/Eduardo/Axioma/Vance), barreira a laser, NPC resgatável, habilidades do traje (Variável Oculta e Ping Sonar).
 
@@ -90,7 +90,7 @@ Enquanto a arte não chega: greybox com os tiles industriais clareados e retâng
 4. ✅ **Barreira a laser** (fixa e temporizada, hack, alarme). *Teste:* tocar no feixe dispara alarme; hackeado, passa; religa depois do tempo.
 5. ✅ **Ciborgue** (cena, ajustes de FSM, hack = ponto cego). *Teste:* não reage a quiosque/ruído; detecta mais rápido que o agente; hackeado, não vê por ~6 s.
 6. ✅ **Dr. Vance** (cela, diálogo, recompensa salva e aplicada nos hacks). *Teste:* resgatar → `vance_rescued` no save; SINE abre no 1º erro; tempo +15%; sem resgate, nada muda.
-7. **Lore** — `data/lore/rnd.json`: SINE na doca; e-mail corporativo sobre as "Atualizações Mandatórias"; relatório de testes do Projeto Determinismo (cobaias); diário da Dra. Kessler (continuação do terminal da Fase 2); registro da conversão de humanos em Unidades Lógicas; gancho para o Núcleo.
+7. ✅ **Lore** (revisada; cada terminal do P&D traz uma "DICA DA SINE" com a matemática do andar, como pede o WDD) — `data/lore/rnd.json`: SINE na doca; e-mail corporativo sobre as "Atualizações Mandatórias"; relatório de testes do Projeto Determinismo (cobaias); diário da Dra. Kessler (continuação do terminal da Fase 2); registro da conversão de humanos em Unidades Lógicas; gancho para o Núcleo.
 8. **Arte** — PixelLab conforme §5 e troca dos placeholders.
 9. **Testes** — `tests/stage3_sim.gd` (um OK/FALHOU por mecânica, como `stage2_sim`) + `ui_sim` cobrindo a caixa de diálogo; entra no `run_tests.sh`.
 10. **Playtest e ajuste** — tempos de laser/ciborgue, quantidade de luz, dificuldade do andar 3 (regra de três e área), bônus do Vance.
