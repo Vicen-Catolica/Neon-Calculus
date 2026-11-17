@@ -31,7 +31,7 @@ func _build_object_scenes() -> void:
 
 ## `cyborg`: Unidade Lógica (Fase 3) — sem ouvido, não cai em distração, barra
 ## de detecção bem mais rápida, hack = ponto cego. Arte provisória: guarda v2
-## tingido de branco-azulado (troca na etapa de arte).
+## recolorido (tools/gen_rnd_art.py): armadura branca, visor vermelho da Axioma.
 func _build_guard(variant: String, path: String, cyborg: bool = false) -> void:
 	var g := CharacterBody2D.new()
 	g.name = "Guard"
@@ -70,12 +70,11 @@ func _build_guard(variant: String, path: String, cyborg: bool = false) -> void:
 
 	var spr := AnimatedSprite2D.new()
 	spr.name = "AnimatedSprite2D"
-	spr.sprite_frames = load("res://scenes/enemies/guard_%s_frames.tres" % variant)
+	spr.sprite_frames = load("res://scenes/enemies/cyborg_frames.tres" if cyborg \
+		else "res://scenes/enemies/guard_%s_frames.tres" % variant)
 	spr.position = Vector2(-2, -62)
 	spr.animation = &"idle"
 	spr.autoplay = "idle"
-	if cyborg:
-		spr.modulate = Color(0.78, 0.92, 1.2)
 	g.add_child(spr)
 
 	var body := CollisionShape2D.new()
@@ -229,8 +228,8 @@ func _build_holding_cell() -> void:
 	c.add_child(_hackable("CELA — LAB 07", Vector2(89, -97)))
 	var spr := Sprite2D.new()
 	spr.name = "Prisoner"
-	spr.texture = load("res://assets/props/rnd/vance_placeholder.png")
-	spr.position = Vector2(0, -64 + 2)
+	spr.texture = load("res://assets/props/rnd/vance.png")
+	spr.position = Vector2(0, -62 - 4)
 	c.add_child(spr)
 	_save(c, "res://scenes/objects/holding_cell.tscn")
 

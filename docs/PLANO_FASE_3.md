@@ -91,7 +91,7 @@ Enquanto a arte não chega: greybox com os tiles industriais clareados e retâng
 5. ✅ **Ciborgue** (cena, ajustes de FSM, hack = ponto cego). *Teste:* não reage a quiosque/ruído; detecta mais rápido que o agente; hackeado, não vê por ~6 s.
 6. ✅ **Dr. Vance** (cela, diálogo, recompensa salva e aplicada nos hacks). *Teste:* resgatar → `vance_rescued` no save; SINE abre no 1º erro; tempo +15%; sem resgate, nada muda.
 7. ✅ **Lore** (revisada; cada terminal do P&D traz uma "DICA DA SINE" com a matemática do andar, como pede o WDD) — `data/lore/rnd.json`: SINE na doca; e-mail corporativo sobre as "Atualizações Mandatórias"; relatório de testes do Projeto Determinismo (cobaias); diário da Dra. Kessler (continuação do terminal da Fase 2); registro da conversão de humanos em Unidades Lógicas; gancho para o Núcleo.
-8. **Arte** — PixelLab conforme §5 e troca dos placeholders.
+8. ✅ **Arte** (5 gerações: fundo, folha de 9 props, Dr. Vance, elevador executivo e 1 textura descartada; tileset desenhado por `tools/gen_rnd_tiles.py` porque a textura de IA saiu suja; ciborgue = recolor dos frames do guarda v2 em `tools/gen_rnd_art.py`) — PixelLab conforme §5 e troca dos placeholders.
 9. **Testes** — `tests/stage3_sim.gd` (um OK/FALHOU por mecânica, como `stage2_sim`) + `ui_sim` cobrindo a caixa de diálogo; entra no `run_tests.sh`.
 10. **Playtest e ajuste** — tempos de laser/ciborgue, quantidade de luz, dificuldade do andar 3 (regra de três e área), bônus do Vance.
 

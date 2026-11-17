@@ -3,9 +3,9 @@ extends "res://tools/stage_builder_base.gd"
 ##   godot --headless --path . res://tools/build_rnd_stage.tscn
 ## Reexecutar sobrescreve a cena gerada (não edite-a à mão; edite este script).
 ##
-## GREYBOX (etapa 3 do docs/PLANO_FASE_3.md): layout definitivo com as mecânicas
-## que já existem. Arte provisória: tiles industriais clareados/azulados e props
-## de tools/gen_rnd_placeholders.py. Lasers (etapa 4), ciborgues (etapa 5) e a cela
+## Layout da etapa 3 do docs/PLANO_FASE_3.md, com a arte da etapa 8: tileset de
+## tools/gen_rnd_tiles.py, fundo/props/Vance/elevador do PixelLab via
+## tools/gen_rnd_art.py; a luz do teto vem de tools/gen_rnd_placeholders.py. Lasers (etapa 4), ciborgues (etapa 5) e a cela
 ## do Dr. Vance (etapa 6) prontos.
 ##
 ## Percurso, da esquerda para a direita (teto em y = -368):
@@ -15,13 +15,14 @@ extends "res://tools/stage_builder_base.gd"
 ##   D  laboratórios de P&D: ciborgue no chão, mezanino com o Lab 07; lockdown
 ##   E  átrio do elevador executivo: 6 andares de passarela até a saída
 
-const GROUND_TS := "res://assets/tilesets/industrial/industrial_ground.tres"
+const GROUND_TS := "res://assets/tilesets/rnd/rnd_ground.tres"
 const OUT_LEVEL := "res://scenes/levels/rnd/rnd_stage3.tscn"
 ## Fase 4 (Núcleo Quântico) ainda não existe: a saída fica desligada até lá.
 const NEXT_STAGE := ""
 
-const GROUND_TINT := Color(0.78, 0.84, 0.92)
-const WALL_TINT := Color(0.55, 0.6, 0.68)
+const GROUND_TINT := Color.WHITE
+## Paredes/teto um pouco mais escuros que o chão, para não lerem como piso.
+const WALL_TINT := Color(0.72, 0.76, 0.82)
 const CEILING_Y := -368.0     # face de baixo do teto principal
 const CORRIDOR_Y := -176.0    # face de baixo do teto do corredor C
 const DUCT_Y := -272.0        # piso do duto sobre o corredor (vão de 96 px)
@@ -74,7 +75,7 @@ const LADDERS := [
 ]
 
 ## Placas com o nome de cada trecho (playtest do greybox; desligar com a arte final).
-const SHOW_ZONE_LABELS := true
+const SHOW_ZONE_LABELS := false
 const ZONES := [
 	["A // DOCA + RECEPÇÃO", Vector2(-180, -330)],
 	["B // ESCRITÓRIOS", Vector2(1140, -330)],
@@ -118,10 +119,30 @@ func build() -> Node:
 func _add_background(lvl: Node) -> void:
 	var bg := ColorRect.new()
 	bg.name = "Background"
-	bg.color = Color(0.11, 0.14, 0.19)
+	bg.color = Color(0.07, 0.09, 0.12)
 	bg.position = Vector2(-1200, -1800)
 	bg.size = Vector2(7800, 2400)
 	lvl.add_child(bg)
+	# Corredor de vidro com a cidade lá fora (PixelLab), em parallax; empilhado
+	# até o topo do átrio e cada vez mais escuro para cima.
+	var par := Parallax2D.new()
+	par.name = "BackgroundFar"
+	par.scroll_scale = Vector2(0.4, 1.0)
+	par.repeat_size = Vector2(1536, 0)
+	par.repeat_times = 8
+	lvl.add_child(par)
+	var tex: Texture2D = load("res://assets/backgrounds/rnd/bg_rnd_seamless.png")
+	var h := tex.get_height()
+	var tints := [Color(1, 1, 1), Color(0.7, 0.72, 0.76), Color(0.5, 0.52, 0.56)]
+	for k in range(tints.size() - 1, -1, -1):
+		var hall := Sprite2D.new()
+		hall.name = "Hall%d" % k
+		hall.texture = tex
+		hall.centered = false
+		hall.modulate = tints[k]
+		hall.flip_h = k % 2 == 1
+		hall.position = Vector2(-768, 40 - h * (k + 1))
+		par.add_child(hall)
 	# Faixa de luz no teto de A–D: o andar corporativo é claro e vigiado
 	# (interrompida na chaminé da boca do duto).
 	for span in [[-208.0, 2500.0], [2610.0, 151.0 * T]]:
@@ -148,19 +169,24 @@ func _add_props(lvl: Node) -> void:
 	# [textura, x, chão, esconderijo?, largura]
 	var list := [
 		["plant", -120.0, 16.0, false, 0],              # A: doca
-		["reception_counter", 700.0, 16.0, true, 120],  # A: balcão, sob a luz
+		["water_cooler", 250.0, 16.0, false, 0],
+		["reception_counter", 700.0, 16.0, true, 72],   # A: balcão, sob a luz
 		["plant", 960.0, 16.0, false, 0],
-		["cubicle", 1450.0, 16.0, true, 80],            # B: cubículo no escuro
-		["cubicle", 1800.0, 16.0, true, 80],            # B: sob a luz
-		["cubicle", 2150.0, 16.0, true, 80],            # B: sob a luz
-		["filing_cabinet", 2000.0, -144.0, true, 40],   # B: mezanino
+		["cubicle", 1450.0, 16.0, true, 72],            # B: cubículo no escuro
+		["cubicle", 1800.0, 16.0, true, 72],            # B: sob a luz
+		["cubicle", 2150.0, 16.0, true, 72],            # B: sob a luz
+		["monitor_stand", 1560.0, -144.0, false, 0],    # B: mezanino
+		["filing_cabinet", 2000.0, -144.0, true, 44],   # B: mezanino
 		["plant", 2420.0, 16.0, false, 0],
-		["lab_bench", 3800.0, 16.0, true, 100],         # D: bancada no escuro
+		["server_white", 3680.0, -144.0, false, 0],     # D: mezanino
+		["lab_bench", 3800.0, 16.0, true, 72],          # D: bancada no escuro
 		["sample_tank", 4050.0, 16.0, false, 0],
-		["lab_bench", 4420.0, 16.0, true, 100],         # D: sob a luz
+		["lab_bench", 4420.0, 16.0, true, 72],          # D: sob a luz
 		["sample_tank", 4620.0, 16.0, false, 0],
-		["filing_cabinet", 3900.0, -144.0, true, 40],   # D: mezanino
-		["filing_cabinet", 5100.0, -240.0, true, 40],   # E: no meio do átrio
+		["filing_cabinet", 3900.0, -144.0, true, 44],   # D: mezanino
+		["server_white", 4720.0, -144.0, false, 0],
+		["filing_cabinet", 5100.0, -240.0, true, 44],   # E: no meio do átrio
+		["water_cooler", 5360.0, -496.0, false, 0],
 	]
 	var n := 0
 	for p in list:

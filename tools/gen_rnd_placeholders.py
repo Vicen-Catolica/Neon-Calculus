@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Greybox da Fase 3 (P&D): sprites provisórios de props, em tons claros e
-com contorno escuro, para o layout ser legível antes da arte final (etapa 8).
+"""Fase 3 (P&D): painel de luz do teto (2 quadros, aceso/apagado), desenhado
+aqui. Os outros props do greybox foram trocados pela arte do PixelLab
+(tools/gen_rnd_art.py), que usa os mesmos nomes de arquivo.
 
 Uso, na raiz do projeto:  python3 tools/gen_rnd_placeholders.py
 Saída: assets/props/rnd/*.png  (sobrescreve)
@@ -18,71 +19,6 @@ CYAN = (0, 240, 255, 255)
 GLASS = (90, 150, 180, 200)
 
 
-def box(w, h, fill=PANEL):
-    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    d.rectangle([0, 0, w - 1, h - 1], fill=fill, outline=OUTLINE)
-    return img, d
-
-
-def counter():
-    img, d = box(192, 72)
-    d.rectangle([1, 1, 190, 10], fill=PANEL_LIGHT)
-    d.line([4, 12, 187, 12], fill=CYAN)
-    d.rectangle([70, 24, 122, 54], fill=PANEL_DARK, outline=OUTLINE)  # logotipo
-    d.text((79, 32), "OMNI", fill=CYAN)
-    return img
-
-
-def cubicle():
-    img, d = box(128, 88, PANEL_DARK)
-    d.rectangle([1, 1, 126, 8], fill=PANEL_LIGHT)
-    for x in (32, 64, 96):
-        d.line([x, 10, x, 86], fill=PANEL)
-    d.rectangle([40, 30, 88, 56], fill=(20, 30, 40, 255), outline=OUTLINE)  # monitor
-    d.line([44, 34, 84, 34], fill=CYAN)
-    return img
-
-
-def plant():
-    img = Image.new("RGBA", (40, 88), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    d.rectangle([8, 60, 31, 87], fill=PANEL_LIGHT, outline=OUTLINE)
-    d.ellipse([2, 6, 37, 66], fill=(40, 120, 90, 255), outline=OUTLINE)
-    d.line([20, 20, 20, 60], fill=(20, 80, 60, 255))
-    return img
-
-
-def cabinet():
-    img, d = box(48, 80)
-    for y in (4, 30, 56):
-        d.rectangle([4, y, 43, y + 20], fill=PANEL_LIGHT, outline=OUTLINE)
-        d.line([18, y + 10, 29, y + 10], fill=OUTLINE)
-    return img
-
-
-def lab_bench():
-    img = Image.new("RGBA", (144, 64), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    d.rectangle([0, 16, 143, 26], fill=PANEL_LIGHT, outline=OUTLINE)
-    d.rectangle([6, 26, 137, 63], fill=PANEL, outline=OUTLINE)
-    d.line([10, 44, 133, 44], fill=PANEL_DARK)
-    for x in (20, 44, 100):  # vidraria
-        d.rectangle([x, 2, x + 10, 16], fill=GLASS, outline=OUTLINE)
-    d.line([60, 20, 90, 20], fill=CYAN)
-    return img
-
-
-def sample_tank():
-    img = Image.new("RGBA", (48, 112), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    d.rectangle([4, 0, 43, 10], fill=PANEL_DARK, outline=OUTLINE)
-    d.rectangle([6, 10, 41, 98], fill=(60, 190, 200, 140), outline=OUTLINE)
-    d.rectangle([4, 98, 43, 111], fill=PANEL_DARK, outline=OUTLINE)
-    d.line([12, 20, 12, 90], fill=(200, 255, 255, 160))
-    return img
-
-
 def ceiling_light():
     """2 quadros lado a lado (aceso / apagado), como os neons de 2 frames."""
     w, h = 96, 14
@@ -98,43 +34,9 @@ def ceiling_light():
     return img
 
 
-def exec_elevator():
-    img, d = box(160, 176, PANEL_DARK)
-    d.rectangle([12, 20, 147, 175], fill=PANEL, outline=OUTLINE)
-    d.line([80, 20, 80, 175], fill=OUTLINE)
-    d.rectangle([60, 4, 100, 14], fill=(20, 30, 40, 255), outline=OUTLINE)
-    d.text((66, 4), "N", fill=CYAN)
-    d.line([12, 22, 147, 22], fill=CYAN)
-    return img
-
-
-def vance():
-    """Dr. Vance provisório: jaleco branco, cabelo grisalho, 64x128 com pés em y=126."""
-    img = Image.new("RGBA", (64, 128), (0, 0, 0, 0))
-    d = ImageDraw.Draw(img)
-    skin = (214, 170, 140, 255)
-    d.ellipse([22, 14, 42, 36], fill=skin, outline=OUTLINE)            # cabeça
-    d.rectangle([22, 12, 42, 20], fill=(190, 190, 195, 255), outline=OUTLINE)  # cabelo
-    d.rectangle([25, 24, 39, 27], fill=(30, 40, 50, 255))               # óculos
-    d.polygon([(16, 40), (48, 40), (52, 112), (12, 112)], fill=(232, 236, 240, 255), outline=OUTLINE)  # jaleco
-    d.line([32, 42, 32, 110], fill=(170, 176, 186, 255))
-    d.rectangle([28, 40, 36, 52], fill=(60, 80, 110, 255))              # camisa
-    d.rectangle([10, 46, 16, 92], fill=(232, 236, 240, 255), outline=OUTLINE)  # braços
-    d.rectangle([48, 46, 54, 92], fill=(232, 236, 240, 255), outline=OUTLINE)
-    d.rectangle([20, 112, 30, 126], fill=(40, 44, 52, 255), outline=OUTLINE)   # pernas
-    d.rectangle([34, 112, 44, 126], fill=(40, 44, 52, 255), outline=OUTLINE)
-    d.rectangle([40, 60, 46, 66], fill=CYAN)                           # crachá
-    return img
-
-
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
-    for name, fn in [
-        ("reception_counter", counter), ("cubicle", cubicle), ("plant", plant),
-        ("filing_cabinet", cabinet), ("lab_bench", lab_bench), ("sample_tank", sample_tank),
-        ("ceiling_light_flicker_2f", ceiling_light), ("exec_elevator", exec_elevator),
-        ("vance_placeholder", vance),
-    ]:
+    for name, fn in [("ceiling_light_flicker_2f", ceiling_light)]:
         fn().save(OUT / f"{name}.png")
         print("  salvo", OUT / f"{name}.png")
 

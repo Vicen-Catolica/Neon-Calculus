@@ -2,16 +2,16 @@
 
 [ext_resource type="Script" path="res://scripts/objects/holding_cell.gd" id="1_2bgos"]
 [ext_resource type="Script" path="res://scripts/hacking/hackable.gd" id="2_fvgbw"]
-[ext_resource type="Texture2D" path="res://assets/props/rnd/vance_placeholder.png" id="3_dk6ox"]
+[ext_resource type="Texture2D" path="res://assets/props/rnd/vance.png" id="3_dk6ox"]
 
-[node name="HoldingCell" type="Node2D" unique_id=1977803922]
+[node name="HoldingCell" type="Node2D" unique_id=776101001]
 script = ExtResource("1_2bgos")
 
-[node name="Hackable" type="Node2D" parent="." unique_id=1248323682]
+[node name="Hackable" type="Node2D" parent="." unique_id=355220886]
 position = Vector2(89, -97)
 script = ExtResource("2_fvgbw")
 display_name = "CELA — LAB 07"
 
-[node name="Prisoner" type="Sprite2D" parent="." unique_id=409444366]
-position = Vector2(0, -62)
+[node name="Prisoner" type="Sprite2D" parent="." unique_id=848980239]
+position = Vector2(0, -66)
 texture = ExtResource("3_dk6ox")
