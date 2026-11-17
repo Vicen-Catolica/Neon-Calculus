@@ -5,8 +5,8 @@ extends "res://tools/stage_builder_base.gd"
 ##
 ## GREYBOX (etapa 3 do docs/PLANO_FASE_3.md): layout definitivo com as mecânicas
 ## que já existem. Arte provisória: tiles industriais clareados/azulados e props
-## de tools/gen_rnd_placeholders.py. Lasers prontos (etapa 4). Ciborgue com cena própria
-## (etapa 5) e cela do Dr. Vance (etapa 6) ainda são marcadores.
+## de tools/gen_rnd_placeholders.py. Lasers (etapa 4) e ciborgues (etapa 5) prontos;
+## a cela do Dr. Vance (etapa 6) ainda falta.
 ##
 ## Percurso, da esquerda para a direita (teto em y = -368):
 ##   A  doca do elevador de carga + recepção: luz demais, apague para se esconder
@@ -275,14 +275,10 @@ func _add_guards(lvl: Node) -> void:
 		["v2", 600.0, 16.0, 400.0, 1050.0],          # A: recepção
 		["v2", 1700.0, 16.0, 1250.0, 2450.0],        # B: chão
 		["v1", 1800.0, -144.0, 1350.0, 2350.0],      # B: mezanino
-		["v2", 4200.0, 16.0, 3700.0, 4700.0],        # D: chão (vira ciborgue abaixo)
+		["cyborg", 4200.0, 16.0, 3700.0, 4700.0],    # D: Unidade Lógica no chão dos laboratórios
 		["v1", 4200.0, -144.0, 3750.0, 4600.0],      # D: mezanino
-		["v2", 5200.0, -240.0, 5000.0, 5400.0],      # E: passarela do meio
+		["cyborg", 5200.0, -240.0, 5000.0, 5400.0],  # E: Unidade Lógica na passarela do meio
 	])
-	# D: o guarda do chão dos laboratórios é uma Unidade Lógica (cena própria na etapa 5).
-	var cy := lvl.get_node("Guards/Guard4")
-	cy.set("enemy_type", Enemy.EnemyType.CYBORG)
-	cy.set("modulate", Color(0.75, 0.9, 1.15))
 
 
 func _add_exit(lvl: Node) -> void:

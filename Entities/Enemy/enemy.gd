@@ -31,6 +31,8 @@ signal alarm_triggered(last_position: Vector2)
 @export var detect_time_near: float = 0.7
 ## Quanto a barra esvazia por segundo sem ver o jogador.
 @export var detect_decay: float = 0.4
+## Unidade Lógica (ciborgue): segundos sem visão depois de hackeada (ponto cego).
+@export var blind_time: float = 6.0
 
 @export_category("Debug Visual")
 @export var show_debug_vision: bool = true
@@ -54,6 +56,8 @@ var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 
 ## Barra de detecção (0..1). Cheia = MaxAlert; acima de SUSPECT_AT o guarda estranha.
 var awareness: float = 0.0
+## > 0: sistema visual hackeado (só ciborgue). Não vê nada até zerar.
+var blind_left: float = 0.0
 const SUSPECT_AT: float = 0.35
 ## Nó filho que desenha a barra por cima do sprite (o _draw do próprio guarda
 ## fica atrás dos filhos e o sprite cobria a barra).
@@ -136,7 +140,9 @@ func _ready() -> void:
 	state_machine.init(self)
 	get_player.call_deferred()
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if blind_left > 0.0:
+		blind_left = maxf(blind_left - delta, 0.0)
 	queue_redraw()
 	if _awareness_bar:
 		_awareness_bar.queue_redraw()
@@ -200,6 +206,10 @@ func check_sensors(delta: float = 0.0) -> void:
 	if target_player.has_method("is_detectable") and not target_player.is_detectable():
 		_decay_awareness(delta)
 		return
+	# Ciborgue com o sistema visual hackeado: ponto cego total.
+	if is_blind():
+		_decay_awareness(delta)
+		return
 
 	var ray_origin = global_position + eye_offset
 	var player_center = _aim_point(target_player)
@@ -226,7 +236,8 @@ func check_sensors(delta: float = 0.0) -> void:
 			awareness = 1.0 if is_touching else minf(awareness + delta / fill_time, 1.0)
 			if awareness >= 1.0:
 				state_machine.transition_to("MaxAlert")
-			elif awareness >= SUSPECT_AT and st == "patrol":
+			elif awareness >= SUSPECT_AT and st == "patrol" and enemy_type != EnemyType.CYBORG:
+				# (a Unidade Lógica não hesita: a barra só enche até o alerta)
 				target_noise_pos = target_player.global_position
 				state_machine.transition_to("Suspicious")
 			return
@@ -294,6 +305,8 @@ func is_player_in_los() -> bool:
 		return false
 		
 	if target_player.has_method("is_detectable") and not target_player.is_detectable():
+		return false
+	if is_blind():
 		return false
 	var ray_origin = global_position + eye_offset
 	var player_center = _aim_point(target_player)
@@ -450,13 +463,20 @@ func _current_state_name() -> String:
 ## Hack no agente: o implante "toca" e ele fica distraído (cego e surdo) por alguns segundos.
 func _on_hacked() -> void:
 	if enemy_type == EnemyType.CYBORG:
-		# Unidades lógicas: o hack reinicia a rota (volta ao primeiro waypoint).
+		# Unidade Lógica (GDD §7): o hack apaga o sistema visual por `blind_time`
+		# (ponto cego) e reescreve a rotina: volta à patrulha do primeiro waypoint.
+		blind_left = blind_time
+		awareness = 0.0
 		var patrol: Node = state_machine.states.get("patrol")
 		if patrol:
 			patrol.current_waypoint_idx = 0
 		state_machine.transition_to("Patrol")
 		return
 	state_machine.transition_to("Distracted")
+
+
+func is_blind() -> bool:
+	return blind_left > 0.0
 
 
 ## Chamado por distrações (quiosque, etc.): vai até o ponto e olha em volta.
@@ -536,7 +556,12 @@ func _draw_vision_cone() -> void:
 		end = VisionBlocker.clip(get_tree(), g_origin, end)
 		pts.append(end - global_position)
 	var col := Color(1.0, 0.55, 0.15, 0.10)
-	if st == "maxalert":
+	if is_blind():
+		# Sistema visual hackeado: cone ciano apagado, piscando no fim.
+		if blind_left < 1.2 and int(Time.get_ticks_msec() / 120) % 2 == 0:
+			return
+		col = Color(0.0, 0.94, 1.0, 0.05)
+	elif st == "maxalert":
 		col = Color(1.0, 0.1, 0.12, 0.22)
 	elif st in ["suspicious", "search", "investigate"]:
 		col = Color(1.0, 0.75, 0.1, 0.16)

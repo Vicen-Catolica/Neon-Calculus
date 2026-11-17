@@ -15,6 +15,7 @@ func _ready() -> void:
 func _build_object_scenes() -> void:
 	_build_guard("v1", "res://scenes/enemies/guard_v1.tscn")
 	_build_guard("v2", "res://scenes/enemies/guard_v2.tscn")
+	_build_guard("v2", "res://scenes/enemies/cyborg.tscn", true)
 	_build_camera(SecurityCamera.Model.WALL, "res://scenes/objects/security_camera_wall.tscn")
 	_build_camera(SecurityCamera.Model.DOME, "res://scenes/objects/security_camera_dome.tscn")
 	_build_door()
@@ -27,7 +28,10 @@ func _build_object_scenes() -> void:
 	_build_ui()
 
 
-func _build_guard(variant: String, path: String) -> void:
+## `cyborg`: Unidade Lógica (Fase 3) — sem ouvido, não cai em distração, barra
+## de detecção bem mais rápida, hack = ponto cego. Arte provisória: guarda v2
+## tingido de branco-azulado (troca na etapa de arte).
+func _build_guard(variant: String, path: String, cyborg: bool = false) -> void:
 	var g := CharacterBody2D.new()
 	g.name = "Guard"
 	g.set_script(load("res://Entities/Enemy/enemy.gd"))
@@ -40,6 +44,13 @@ func _build_guard(variant: String, path: String) -> void:
 	g.set("eye_offset", Vector2(0, -102))
 	g.set("show_debug_vision", false)
 	g.set("show_vision_cone", true)
+	if cyborg:
+		g.name = "Cyborg"
+		g.set("enemy_type", Enemy.EnemyType.CYBORG)
+		g.set("move_speed", 80.0)
+		g.set("vision_range", 340.0)
+		g.set("detect_time_far", 0.9)
+		g.set("detect_time_near", 0.3)
 
 	var sensors := Node2D.new()
 	sensors.name = "Sensors"
@@ -62,6 +73,8 @@ func _build_guard(variant: String, path: String) -> void:
 	spr.position = Vector2(-2, -62)
 	spr.animation = &"idle"
 	spr.autoplay = "idle"
+	if cyborg:
+		spr.modulate = Color(0.78, 0.92, 1.2)
 	g.add_child(spr)
 
 	var body := CollisionShape2D.new()
@@ -119,7 +132,7 @@ func _build_guard(variant: String, path: String) -> void:
 	line.default_color = Color(0, 0.94, 1, 1)
 	g.add_child(line)
 
-	g.add_child(_hackable("AGENTE", Vector2(0, -90)))
+	g.add_child(_hackable("UNIDADE LÓGICA" if cyborg else "AGENTE", Vector2(0, -90)))
 	_save(g, path)
 
 

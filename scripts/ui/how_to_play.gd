@@ -39,12 +39,13 @@ Na visão hacker o tempo desacelera e tudo que pode ser hackeado fica em [color=
 • Resposta certa: o hack funciona.
 • Resposta errada: aparece o aviso em vermelho e você perde 3 segundos. Depois de 2 erros, a [color=#00f0ff]SINE[/color] mostra o passo a passo ao lado.
 • [color=#39ff14]Esc[/color] aborta o hack, mas a Axioma pode rastrear a conexão e soar o alarme (mais chance quanto mais cedo você desiste). No lockdown não dá para abortar.
-• Câmera: desliga  •  Porta: abre  •  Agente: distração no implante  •  Luz neon: apaga  •  Quiosque: alarme falso que atrai guardas  •  Válvula: vapor que tapa a visão  •  Esteira: para  •  Drone: reinicia  •  Laser: desliga por alguns segundos
+• Câmera: desliga  •  Porta: abre  •  Agente: distração no implante  •  Unidade Lógica: fica cega por 6 s  •  Luz neon: apaga  •  Quiosque: alarme falso que atrai guardas  •  Válvula: vapor que tapa a visão  •  Esteira: para  •  Drone: reinicia  •  Laser: desliga por alguns segundos
 
 [color=#00f0ff][font_size=26]FURTIVIDADE[/font_size][/color]
 • A barra sobre um guarda mostra o quanto ele já te viu; cheia, ele te persegue.
 • Esconda-se atrás de caixotes, armários e racks ([color=#39ff14]F[/color]). Sob luz neon não dá: apague a luz antes.
 • [color=#ff6a1a]Variância[/color] (barra no canto superior direito): cada hack e cada alarme aumentam. Se encher, a Axioma manda a [b]Varredura de Rotina[/b], um laser que percorre a área.
+• [color=#ff2d55]Unidades Lógicas[/color] (ciborgues): não ouvem passos, não caem em distração e disparam o alerta quase na hora em que te veem. Só o hack as engana: o sistema visual apaga por alguns segundos.
 • [color=#ff2d55]Barreiras a laser[/color]: cruzar o feixe aceso dispara o alarme. Hackeie o emissor ou passe quando ele apagar (alguns ligam e desligam no ritmo; o feixe pisca antes de religar).
 • [color=#ff2d55]Lockdown[/color]: um alarme em certas salas fecha as portas. Hackeie a porta de saída antes de o tempo acabar.
 • Terminais de dados ([color=#39ff14]F[/color]) contam a história de Nova Gödel."""

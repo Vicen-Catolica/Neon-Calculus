@@ -398,14 +398,15 @@ func _camera(parent: Node, dome: bool, node_name: String, pos: Vector2, props: D
 
 
 ## Guardas patrulhando entre dois pontos:
-## list = [[variante "v1"/"v2", x inicial, chão, waypoint A, waypoint B], ...]
+## list = [[variante "v1"/"v2"/"cyborg", x inicial, chão, waypoint A, waypoint B], ...]
 func _guards(lvl: Node, list: Array) -> void:
 	var holder := _holder(lvl, "Guards")
 	var wps := _holder(lvl, "Waypoints")
 	var i := 0
 	for g in list:
 		i += 1
-		var guard := _instance("res://scenes/enemies/guard_%s.tscn" % g[0], "Guard%d" % i, Vector2(g[1], g[2]))
+		var scene := "res://scenes/enemies/cyborg.tscn" if g[0] == "cyborg" else "res://scenes/enemies/guard_%s.tscn" % g[0]
+		var guard := _instance(scene, "Guard%d" % i, Vector2(g[1], g[2]))
 		holder.add_child(guard)
 		var arr: Array[Node2D] = []
 		for k in 2:

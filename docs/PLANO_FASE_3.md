@@ -88,7 +88,7 @@ Enquanto a arte não chega: greybox com os tiles industriais clareados e retâng
 2. ✅ **Caixa de diálogo** + `DialogueTrigger` + diálogo de elevador. *Teste:* texto em tempo real com o mundo pausado, avança com Enter, não reabre após recarregar o checkpoint.
 3. ✅ **Greybox da Fase 3** — layout A–E só com o que já existe (agentes, câmeras, luzes, esconderijos, quiosque, escadas, passarelas, dutos, terminais, porta, lockdown, saída). *Teste:* atravessável do início ao fim; screenshots de cada trecho.
 4. ✅ **Barreira a laser** (fixa e temporizada, hack, alarme). *Teste:* tocar no feixe dispara alarme; hackeado, passa; religa depois do tempo.
-5. **Ciborgue** (cena, ajustes de FSM, hack = ponto cego). *Teste:* não reage a quiosque/ruído; detecta mais rápido que o agente; hackeado, não vê por ~6 s.
+5. ✅ **Ciborgue** (cena, ajustes de FSM, hack = ponto cego). *Teste:* não reage a quiosque/ruído; detecta mais rápido que o agente; hackeado, não vê por ~6 s.
 6. **Dr. Vance** (cela, diálogo, recompensa salva e aplicada nos hacks). *Teste:* resgatar → `vance_rescued` no save; SINE abre no 1º erro; tempo +15%; sem resgate, nada muda.
 7. **Lore** — `data/lore/rnd.json`: SINE na doca; e-mail corporativo sobre as "Atualizações Mandatórias"; relatório de testes do Projeto Determinismo (cobaias); diário da Dra. Kessler (continuação do terminal da Fase 2); registro da conversão de humanos em Unidades Lógicas; gancho para o Núcleo.
 8. **Arte** — PixelLab conforme §5 e troca dos placeholders.
@@ -102,7 +102,7 @@ Commits pequenos por etapa no branch `feature/rnd-stage-3`, sem push.
 ## 7. Decisões em aberto (recomendação entre parênteses)
 
 1. **Habilidades do traje (GDD: Variável Oculta Q, Ping Sonar V).** O Q hoje é a visão hacker. (Fazer **só o Ping Sonar (V)** nesta fase: o andar é aberto e cheio de ciborgues, revelar cones através de paredes ajuda muito e não conflita com nenhuma tecla. A camuflagem fica para a Fase 4, na tecla C, se houver tempo.)
-2. **Hack no ciborgue:** ponto cego (cone desligado) ou reescrever a rota? (Ponto cego, com a rota reiniciando junto: é o que o jogador entende na hora.)
+2. ✅ **Hack no ciborgue:** ponto cego de 6 s (cone apagado, piscando no fim) + rota reiniciada. A barra enche ~2× mais rápido que a do agente e pula a suspeita.
 3. **Vance opcional ou obrigatório?** (Opcional, com recompensa clara; o WDD trata como side quest e o GDD diz "se for resgatado".)
 4. **Laser mata ou só dispara alarme?** (Só alarme + variância; a morte continua sendo pelo taser, como no GDD.)
 5. ✅ **Abortar hack com Esc** (GDD §4). Não existia: implementado na etapa 3. Esc fecha o hack como falha; chance de alarme = 60% × fração do tempo que restava; sob lockdown o Esc só avisa (`Hackable.abortable`).

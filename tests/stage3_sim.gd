@@ -225,5 +225,50 @@ func _ready() -> void:
 	check("hackear a saída encerra o lockdown", not zone.active and shutter.is_open and exit_door.is_open)
 	check("fim do lockdown: hack volta a ser abortável", exit_h.abortable)
 
+	# Unidade Lógica (ciborgue) nos laboratórios (cy = Guard4, já pego acima).
+	var agent := lvl.get_node("Guards/Guard5") as Enemy
+	var cy_h := cy.get_node("Hackable") as Hackable
+	check("ciborgue: cena própria, alvo 'UNIDADE LÓGICA'", cy.enemy_type == Enemy.EnemyType.CYBORG and cy_h.get_label() == "UNIDADE LÓGICA")
+	check("ciborgue: detecta mais rápido que o agente", cy.detect_time_far < agent.detect_time_far and cy.detect_time_near < agent.detect_time_near)
+	check("ciborgue: E também tem Unidade Lógica", (lvl.get_node("Guards/Guard6") as Enemy).enemy_type == Enemy.EnemyType.CYBORG)
+	var no_wp: Array[Node2D] = []
+	cy.waypoints = no_wp
+	cy.global_position = Vector2(4100, 16)
+	cy.update_facing(1.0)
+	cy.process_mode = Node.PROCESS_MODE_INHERIT
+	cy.state_machine.transition_to("Patrol")
+	cy.awareness = 0.0
+	await step(5)
+	# Não cai em distração (quiosque) nem ouve passos.
+	cy.investigate(Vector2(3900, 16)); await step(5)
+	check("ciborgue: ignora distração", cy._current_state_name() == "patrol")
+	tp(3960, 16); await step(3)  # atrás dele, a 140 px
+	Input.action_press("run"); Input.action_press("move_left")
+	await step(20)
+	release_all()
+	await step(5)
+	check("ciborgue: não ouve corrida atrás dele", cy._current_state_name() == "patrol" and cy.awareness == 0.0,
+		"%s %.2f" % [cy._current_state_name(), cy.awareness])
+	# Na frente: vai direto ao alerta, sem a fase de suspeita.
+	var states := {}
+	tp(4330, 16); await step(1)
+	for i in 70:
+		await step(1)
+		states[cy._current_state_name()] = true
+		if cy._current_state_name() == "maxalert":
+			break
+	check("ciborgue: vê e dispara em menos de 1,2 s", cy._current_state_name() == "maxalert", str(states.keys()))
+	check("ciborgue: não passa pela suspeita", not states.has("suspicious"))
+	# Hack: ponto cego (sistema visual offline) e rotina reescrita.
+	hv.debug_hack(cy_h, true); await step(3)
+	check("ciborgue: hack apaga a visão (ponto cego)", cy.is_blind() and cy._current_state_name() == "patrol" and cy.awareness == 0.0)
+	cy.update_facing(1.0)
+	await step(int((cy.blind_time - 0.5) * 60.0))
+	check("ciborgue: cego não vê o jogador na frente", cy._current_state_name() == "patrol" and cy.awareness == 0.0,
+		"%s %.2f" % [cy._current_state_name(), cy.awareness])
+	await step(90)
+	check("ciborgue: visão volta sozinha", not cy.is_blind() and cy.awareness > 0.0)
+	cy.process_mode = Node.PROCESS_MODE_DISABLED
+
 	print("TUDO OK — 0 falha(s)" if fails == 0 else "%d FALHA(S)" % fails)
 	get_tree().quit(1 if fails > 0 else 0)
