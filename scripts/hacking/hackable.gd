@@ -55,6 +55,28 @@ func get_difficulty() -> Vector2i:
 	return Vector2i(clampi(floor_level + difficulty_bonus, 1, 4), sub_topic)
 
 
+## Multiplicador final do tempo do hack: o do alvo (ex.: lockdown) vezes o da
+## área de segurança máxima da fase, se o alvo estiver dentro dela.
+func get_time_mult() -> float:
+	var m := time_limit_mult
+	var lvl := _level()
+	if lvl and lvl.max_security_rect.has_area() and lvl.max_security_rect.has_point(global_position):
+		m *= lvl.max_security_time_mult
+	return m
+
+
+func in_max_security() -> bool:
+	var lvl := _level()
+	return lvl != null and lvl.max_security_rect.has_area() and lvl.max_security_rect.has_point(global_position)
+
+
+func _level() -> Level:
+	var n := get_parent()
+	while n and not (n is Level):
+		n = n.get_parent()
+	return n as Level
+
+
 func can_be_hacked() -> bool:
 	if not enabled:
 		return false

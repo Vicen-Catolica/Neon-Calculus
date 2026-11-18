@@ -48,6 +48,7 @@ Na visão hacker o tempo desacelera e tudo que pode ser hackeado fica em [color=
 • [color=#ff6a1a]Variância[/color] (barra no canto superior direito): cada hack e cada alarme aumentam. Se encher, a Axioma manda a [b]Varredura de Rotina[/b], um laser que percorre a área.
 • [color=#ff2d55]Unidades Lógicas[/color] (ciborgues): não ouvem passos, não caem em distração e disparam o alerta quase na hora em que te veem. Só o hack as engana: o sistema visual apaga por alguns segundos.
 • [color=#ff2d55]Barreiras a laser[/color]: cruzar o feixe aceso dispara o alarme. Hackeie o emissor ou passe quando ele apagar (alguns ligam e desligam no ritmo; o feixe pisca antes de religar).
+• [color=#ff2d55]Segurança máxima[/color]: nos laboratórios e áreas restritas os hacks têm menos tempo (o rodapé da tela de hack avisa).
 • [color=#ff2d55]Lockdown[/color]: um alarme em certas salas fecha as portas. Hackeie a porta de saída antes de o tempo acabar.
 • Terminais de dados ([color=#39ff14]F[/color]) contam a história de Nova Gödel."""
 

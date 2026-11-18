@@ -171,6 +171,8 @@ func _ready() -> void:
 	var cy := lvl.get_node("Guards/Guard4") as Enemy
 	check("D: guarda do chão é Unidade Lógica", cy.enemy_type == Enemy.EnemyType.CYBORG)
 	check("D: Unidade Lógica pede hack mais difícil", cy.get_node("Hackable").get_difficulty() == Vector2i(4, 1))
+	check("D: laboratórios são segurança máxima (80% do tempo)", absf((cy.get_node("Hackable") as Hackable).get_time_mult() - 0.8) < 0.001)
+	check("C: corredor fica fora da segurança máxima", (lvl.get_node("Lasers/Laser2760/Hackable") as Hackable).get_time_mult() == 1.0)
 
 	# D -> E: porta biométrica.
 	tp(4700, 16); await step(10)
@@ -221,6 +223,7 @@ func _ready() -> void:
 	var exit_h := exit_door.get_node("Hackable") as Hackable
 	check("lockdown: saída vira equação de nível 4", exit_h.get_difficulty().x == 4)
 	check("lockdown: hack da saída não pode ser abortado", not exit_h.abortable)
+	check("lockdown: tempo da saída = metade × segurança máxima", absf(exit_h.get_time_mult() - 0.4) < 0.001, "x%.2f" % exit_h.get_time_mult())
 	hv.debug_hack(exit_h, true); await step(60)
 	check("hackear a saída encerra o lockdown", not zone.active and shutter.is_open and exit_door.is_open)
 	check("fim do lockdown: hack volta a ser abortável", exit_h.abortable)

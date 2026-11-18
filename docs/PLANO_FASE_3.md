@@ -92,8 +92,8 @@ Enquanto a arte não chega: greybox com os tiles industriais clareados e retâng
 6. ✅ **Dr. Vance** (cela, diálogo, recompensa salva e aplicada nos hacks). *Teste:* resgatar → `vance_rescued` no save; SINE abre no 1º erro; tempo +15%; sem resgate, nada muda.
 7. ✅ **Lore** (revisada; cada terminal do P&D traz uma "DICA DA SINE" com a matemática do andar, como pede o WDD) — `data/lore/rnd.json`: SINE na doca; e-mail corporativo sobre as "Atualizações Mandatórias"; relatório de testes do Projeto Determinismo (cobaias); diário da Dra. Kessler (continuação do terminal da Fase 2); registro da conversão de humanos em Unidades Lógicas; gancho para o Núcleo.
 8. ✅ **Arte** (5 gerações: fundo, folha de 9 props, Dr. Vance, elevador executivo e 1 textura descartada; tileset desenhado por `tools/gen_rnd_tiles.py` porque a textura de IA saiu suja; ciborgue = recolor dos frames do guarda v2 em `tools/gen_rnd_art.py`) — PixelLab conforme §5 e troca dos placeholders.
-9. **Testes** — `tests/stage3_sim.gd` (um OK/FALHOU por mecânica, como `stage2_sim`) + `ui_sim` cobrindo a caixa de diálogo; entra no `run_tests.sh`.
-10. **Playtest e ajuste** — tempos de laser/ciborgue, quantidade de luz, dificuldade do andar 3 (regra de três e área), bônus do Vance.
+9. ✅ **Testes** — `tests/stage3_sim.gd` (um OK/FALHOU por mecânica, como `stage2_sim`) + `ui_sim` cobrindo a caixa de diálogo; entra no `run_tests.sh`.
+10. ✅ (automatizado) **Playtest e ajuste** — `tests/stage3_live_sim.gd` (esconderijos com tudo ligado) e `tests/balance_sim.gd` (tabela de tempos); entrou a segurança máxima (−20% de tempo em D/E, `Level.max_security_rect`). Falta o playtest à mão com teclado. — tempos de laser/ciborgue, quantidade de luz, dificuldade do andar 3 (regra de três e área), bônus do Vance.
 
 Commits pequenos por etapa no branch `feature/rnd-stage-3`, sem push.
 
@@ -101,7 +101,7 @@ Commits pequenos por etapa no branch `feature/rnd-stage-3`, sem push.
 
 ## 7. Decisões em aberto (recomendação entre parênteses)
 
-1. **Habilidades do traje (GDD: Variável Oculta Q, Ping Sonar V).** O Q hoje é a visão hacker. (Fazer **só o Ping Sonar (V)** nesta fase: o andar é aberto e cheio de ciborgues, revelar cones através de paredes ajuda muito e não conflita com nenhuma tecla. A camuflagem fica para a Fase 4, na tecla C, se houver tempo.)
+1. ⏳ **Habilidades do traje (GDD: Variável Oculta Q, Ping Sonar V).** Não feito na Fase 3; fica como opcional antes da Fase 4. O Q hoje é a visão hacker. (Fazer **só o Ping Sonar (V)** nesta fase: o andar é aberto e cheio de ciborgues, revelar cones através de paredes ajuda muito e não conflita com nenhuma tecla. A camuflagem fica para a Fase 4, na tecla C, se houver tempo.)
 2. ✅ **Hack no ciborgue:** ponto cego de 6 s (cone apagado, piscando no fim) + rota reiniciada. A barra enche ~2× mais rápido que a do agente e pula a suspeita.
 3. **Vance opcional ou obrigatório?** (Opcional, com recompensa clara; o WDD trata como side quest e o GDD diz "se for resgatado".)
 4. **Laser mata ou só dispara alarme?** (Só alarme + variância; a morte continua sendo pelo taser, como no GDD.)

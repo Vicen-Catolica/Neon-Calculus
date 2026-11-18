@@ -43,6 +43,8 @@ var _blink_timer: float = 0.0
 ## Multiplicador do tempo limite do próximo hack (definido por quem abre a
 ## interface; volta a 1 depois de usado). < 1 = desafio rápido (lockdown).
 var time_limit_mult: float = 1.0
+## Alvo numa área de segurança máxima (tempo reduzido): aviso no rodapé.
+var max_security: bool = false
 
 ## Penalidade de tempo por resposta errada (segundos).
 const ERROR_PENALTY := 3.0
@@ -507,6 +509,7 @@ func _process(delta: float) -> void:
 	if footer_label:
 		var cursor = "_" if fmod(_blink_timer, 0.8) < 0.4 else " "
 		footer_label.text = "SYS_STATUS // AGUARDANDO ENTRADA" + cursor \
+			+ ("   //   SEGURANÇA MÁXIMA: TEMPO REDUZIDO" if max_security else "") \
 			+ ("   //   PROTOCOLO VANCE: +15% TEMPO, SINE NO 1º ERRO" if vance_protocol() else "")
 
 func _on_numpad_key_pressed(digit: String) -> void:
@@ -589,6 +592,7 @@ func _on_hack_timer_timeout() -> void:
 
 func _complete_hack(success: bool) -> void:
 	_busy = false
+	max_security = false
 	if hack_timer:
 		hack_timer.stop()
 		hack_timer.paused = false

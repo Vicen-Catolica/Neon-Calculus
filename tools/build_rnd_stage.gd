@@ -94,6 +94,8 @@ func out_path() -> String:
 
 func build() -> Node:
 	var lvl := _new_level("RndStage3", 3, -208, 170 * T + 16, -1100, 300)
+	# Laboratórios (D) e átrio (E): segurança máxima, hacks com 80% do tempo.
+	lvl.set("max_security_rect", Rect2(3600, -1100, 170 * T + 16 - 3600, 1400))
 	_add_background(lvl)
 	_add_tiles(lvl)
 	_ladders(lvl, LADDERS)
