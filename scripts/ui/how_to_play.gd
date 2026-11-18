@@ -32,6 +32,7 @@ Você é [color=#00f0ff]Eduardo[/color], ex-analista da OmniCorp. Suba a mega-to
 [cell][color=#39ff14]Mouse ou Tab[/color]   [/cell][cell]escolher o alvo (na visão hacker)[/cell]
 [cell][color=#39ff14]E ou clique[/color]   [/cell][cell]hackear o alvo escolhido[/cell]
 [cell][color=#39ff14]V[/color]   [/cell][cell]Ping Sonar: revela inimigos, cones de visão e alvos através das paredes (recarrega em 12 s)[/cell]
+[cell][color=#39ff14]C[/color]   [/cell][cell]Variável Oculta: camuflagem de até 5 s; câmeras, drones e guardas não te veem (os passos ainda fazem barulho e os lasers ainda disparam)[/cell]
 [cell][color=#39ff14]E, F ou clique[/color]   [/cell][cell]avançar diálogo (Esc pula)[/cell]
 [cell][color=#39ff14]Esc[/color]   [/cell][cell]pausa[/cell]
 [/table]

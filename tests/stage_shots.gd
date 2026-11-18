@@ -2,7 +2,7 @@ extends Node
 ## Uso: godot --path . --windowed --resolution 1920x1080 res://tests/stage_shots.tscn -- <cena> <x:y;x:y;...> <pasta>
 ## Teleporta o Eduardo para cada ponto e salva um PNG da viewport.
 ## 4º argumento opcional: "vision" (visão hacker), "aware" (barra de detecção
-## dos guardas em 60%), "hack" (abre a tela de hacking) ou "sonar" (dispara o Ping Sonar).
+## dos guardas em 60%), "hack" (abre a tela de hacking), "sonar" (dispara o Ping Sonar) ou "camo" (liga a camuflagem).
 
 func _ready() -> void:
 	var a := OS.get_cmdline_user_args()
@@ -40,6 +40,10 @@ func _ready() -> void:
 			var s := p.get_node("SonarPing") as SonarPing
 			s.cooldown_left = 0.0
 			s.ping()
+			for f in 20:
+				await get_tree().process_frame
+		if mode == "camo":
+			(p.get_node("OpticalCamo") as OpticalCamo).start()
 			for f in 20:
 				await get_tree().process_frame
 		if mode == "hack":

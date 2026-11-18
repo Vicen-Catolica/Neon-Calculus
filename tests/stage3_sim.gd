@@ -332,5 +332,64 @@ func _ready() -> void:
 	await step(int((SonarPing.COOLDOWN - SonarPing.REVEAL_TIME) * 60.0) + 10)
 	check("sonar: recarrega em 12 s", sonar.ready_to_ping())
 
+	# Variável Oculta (C): camuflagem de 5 s com bateria.
+	var camo := p.get_node("OpticalCamo") as OpticalCamo
+	# O mezanino do Lab 07 tem o gatilho do aviso da SINE (pausaria o jogo).
+	GameManager.mark_dialogue_seen("rnd_lab07")
+	if Dialogue.is_open():
+		Dialogue.skip()
+	check("camuflagem: começa com a bateria cheia", camo.battery == OpticalCamo.CAPACITY and not camo.active)
+	GameManager.set_state(GameManager.State.HACKING)
+	check("camuflagem: não liga durante o hack", not camo.start())
+	GameManager.set_state(GameManager.State.PLAYING)
+	# Unidade Lógica de frente, a 230 px.
+	cy.waypoints = no_wp
+	cy.global_position = Vector2(4100, 16)
+	cy.update_facing(1.0)
+	cy.blind_left = 0.0
+	cy.awareness = 0.0
+	cy.state_machine.transition_to("Patrol")
+	cy.process_mode = Node.PROCESS_MODE_INHERIT
+	tp(4330, 16)
+	Input.action_press("camo"); await step(2); Input.action_release("camo"); await step(2)
+	check("camuflagem: C liga e o Eduardo fica indetectável", camo.active and p.camouflaged and not p.is_detectable())
+	await step(60)
+	check("camuflagem: a Unidade Lógica de frente não vê", cy.awareness == 0.0 and cy._current_state_name() == "patrol",
+		"%s %.2f" % [cy._current_state_name(), cy.awareness])
+	var dome := lvl.get_node("Cameras/LabDome") as SecurityCamera
+	tp(4200, 16); await step(2)
+	check("camuflagem: câmera não vê embaixo dela", not dome._sees_player())
+	cy.process_mode = Node.PROCESS_MODE_DISABLED
+	# Audição: correr camuflado atrás de um agente humano ainda chama atenção.
+	var ag := lvl.get_node("Guards/Guard5") as Enemy
+	ag.waypoints = no_wp
+	ag.global_position = Vector2(4300, -144)
+	ag.update_facing(1.0)
+	ag.awareness = 0.0
+	ag.state_machine.transition_to("Patrol")
+	ag.process_mode = Node.PROCESS_MODE_INHERIT
+	tp(4200, -144); await step(3)
+	Input.action_press("run"); Input.action_press("move_left")
+	await step(20)
+	release_all()
+	await step(5)
+	check("camuflagem: os passos ainda são ouvidos (agente reage à corrida)", ag._current_state_name() != "patrol", ag._current_state_name())
+	ag.process_mode = Node.PROCESS_MODE_DISABLED
+	# A bateria acaba sozinha em 5 s.
+	await step(int(OpticalCamo.CAPACITY * 60.0) + 20)
+	check("camuflagem: desliga sozinha quando a bateria acaba", not camo.active and not p.camouflaged and camo.battery < OpticalCamo.MIN_TO_START)
+	check("camuflagem: sem carga não liga", not camo.start())
+	await step(int((OpticalCamo.RECHARGE_DELAY + OpticalCamo.MIN_TO_START / OpticalCamo.RECHARGE_RATE) * 60.0) + 20)
+	check("camuflagem: recarrega aos poucos e volta a ligar", camo.battery >= OpticalCamo.MIN_TO_START and camo.start())
+	# Laser é físico: dispara mesmo com o Eduardo camuflado.
+	var laser_c := lvl.get_node("Lasers/Laser2760") as LaserBarrier
+	var laser_trips := [0]
+	laser_c.tripped.connect(func(_b: Node2D) -> void: laser_trips[0] += 1)
+	tp(2700, 16); await step(5)
+	await walk("move_right", 60)
+	check("camuflagem: laser ainda dispara", laser_trips[0] == 1)
+	camo.stop()
+	check("camuflagem: C de novo desliga antes", not camo.active and p.is_detectable())
+
 	print("TUDO OK — 0 falha(s)" if fails == 0 else "%d FALHA(S)" % fails)
 	get_tree().quit(1 if fails > 0 else 0)

@@ -202,9 +202,12 @@ func check_sensors(delta: float = 0.0) -> void:
 	if st in ["distracted", "stunned"]:
 		_decay_awareness(delta)
 		return
-	# Escondido: invisível e silencioso.
+	# Escondido: invisível e silencioso. Camuflado (Variável Oculta): invisível,
+	# mas os passos ainda podem ser ouvidos.
 	if target_player.has_method("is_detectable") and not target_player.is_detectable():
 		_decay_awareness(delta)
+		if target_player.get("camouflaged") and not target_player.is_hidden():
+			_check_hearing(target_player, global_position.distance_to(_aim_point(target_player)))
 		return
 	# Ciborgue com o sistema visual hackeado: ponto cego total.
 	if is_blind():
@@ -244,6 +247,11 @@ func check_sensors(delta: float = 0.0) -> void:
 	_decay_awareness(delta)
 
 	# 2. TESTE DE AUDIÇÃO (Prioridade 2 -> Search / Suspicious)
+	_check_hearing(target_player, dist_to_player)
+
+## Audição (Prioridade 2 -> Search / Suspicious). Também vale para o Eduardo
+## camuflado: a camuflagem engana os olhos, não os ouvidos.
+func _check_hearing(target_player, dist_to_player: float) -> void:
 	if is_player_in_hearing_area and enemy_type != EnemyType.CYBORG:
 		var current_state_name: String = ""
 		if state_machine and state_machine.current_state:

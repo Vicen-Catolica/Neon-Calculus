@@ -31,6 +31,8 @@ const CAUGHT_DELAY := 0.9
 
 var current_defense: float
 var is_dead: bool = false
+## Variável Oculta ligada (OpticalCamo): invisível para os sensores visuais.
+var camouflaged: bool = false
 var state: State = State.IDLE
 var facing: int = 1
 
@@ -217,9 +219,10 @@ func is_hidden() -> bool:
 	return _hidden
 
 
-## Guardas e câmeras só enxergam o jogador se ele não estiver escondido no escuro.
+## Guardas, câmeras e drones só enxergam o jogador se ele não estiver escondido
+## no escuro nem camuflado (Variável Oculta).
 func is_detectable() -> bool:
-	return not (_hidden and _lights.is_empty())
+	return not camouflaged and not (_hidden and _lights.is_empty())
 
 
 ## Agachado ou escondido: passos silenciosos.

@@ -101,7 +101,7 @@ Commits pequenos por etapa no branch `feature/rnd-stage-3`, sem push.
 
 ## 7. Decisões em aberto (recomendação entre parênteses)
 
-1. ✅/⏳ **Habilidades do traje (GDD: Variável Oculta Q, Ping Sonar V).** Ping Sonar (V) feito (`scripts/player/sonar_ping.gd`: raio 900 px, revela por 5 s, recarga 12 s, setas para ameaças fora da tela). A camuflagem (Variável Oculta) continua para depois, na tecla C. O Q hoje é a visão hacker. (Fazer **só o Ping Sonar (V)** nesta fase: o andar é aberto e cheio de ciborgues, revelar cones através de paredes ajuda muito e não conflita com nenhuma tecla. A camuflagem fica para a Fase 4, na tecla C, se houver tempo.)
+1. ✅ **Habilidades do traje (GDD: Variável Oculta, Ping Sonar).** Ping Sonar na tecla V (`scripts/player/sonar_ping.gd`: raio 900 px, revela por 5 s, recarga 12 s, setas para ameaças fora da tela). Variável Oculta na tecla C, porque o Q é a visão hacker (`scripts/player/optical_camo.gd`: até 5 s, bateria recarrega em ~20 s; invisível para guardas, ciborgues, câmeras e drones; passos ainda são ouvidos e lasers ainda disparam). O Q hoje é a visão hacker. (Fazer **só o Ping Sonar (V)** nesta fase: o andar é aberto e cheio de ciborgues, revelar cones através de paredes ajuda muito e não conflita com nenhuma tecla. A camuflagem fica para a Fase 4, na tecla C, se houver tempo.)
 2. ✅ **Hack no ciborgue:** ponto cego de 6 s (cone apagado, piscando no fim) + rota reiniciada. A barra enche ~2× mais rápido que a do agente e pula a suspeita.
 3. **Vance opcional ou obrigatório?** (Opcional, com recompensa clara; o WDD trata como side quest e o GDD diz "se for resgatado".)
 4. **Laser mata ou só dispara alarme?** (Só alarme + variância; a morte continua sendo pelo taser, como no GDD.)
