@@ -63,6 +63,9 @@ func pos() -> String:
 
 func _ready() -> void:
 	lvl = load(LEVEL).instantiate()
+	# A saída leva à Fase 4 de verdade: guardada e desligada para a simulação seguir aqui.
+	var exit_target: String = lvl.get_node("LevelExit").get("next_stage")
+	lvl.get_node("LevelExit").set("next_stage", "")
 	add_child(lvl)
 	p = lvl.get_node("Eduardo")
 	await step(30)
@@ -196,7 +199,7 @@ func _ready() -> void:
 	tp(5300, -752); await step(10)
 	var exit := lvl.get_node("LevelExit") as LevelExit
 	check("E: elevador (saída) alcançável no topo", exit.overlaps_body(p))
-	check("E: saída desligada até existir a Fase 4", exit.next_stage == "")
+	check("E: elevador executivo leva à Fase 4", exit_target == GameManager.LEVELS[4]["scene"], exit_target)
 
 	# Lore: todo terminal aponta para uma entrada existente.
 	var missing := []

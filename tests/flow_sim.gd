@@ -120,8 +120,24 @@ func _run() -> void:
 	await get_tree().physics_frame
 	p = get_tree().get_first_node_in_group("Player")
 	check("Eduardo nasce no chão da Fase 3", p != null and p.is_on_floor(), str(p.global_position) if p else "")
+	# Elevador executivo (Fase 3) -> Fase 4.
+	var l4: String = GameManager.LEVELS[4]["scene"]
 	var exit3 := lvl.get_node("LevelExit") as LevelExit
-	check("saída da Fase 3 desligada até existir a Fase 4", exit3.next_stage == "")
+	check("saída da Fase 3 aponta para a Fase 4", exit3.next_stage == l4, exit3.next_stage)
+	check("título da Fase 4 na transição", GameManager.level_title(l4) == "Núcleo Quântico")
+	exit3._on_body_entered(p)
+	dt = await wait_transition()
+	lvl = get_tree().current_scene as Level
+	check("elevador executivo leva à Fase 4", lvl != null and lvl.floor_number == 4)
+	check("transição para a Fase 4 em menos de 2 s", dt < 2.0, "%.2f s" % dt)
+	check("andar 4 no GameManager e no save", GameManager.current_floor == 4 and int(SaveGame.load_checkpoint()["floor"]) == 4)
+	check("save da Fase 4 mantém o resgate do Vance", "vance_rescued" in SaveGame.load_checkpoint().get("story_flags", []))
+	GameManager.reset_progress()
+	check("continuar aponta para a Fase 4", SaveGame.restore() == l4 and GameManager.current_floor == 4)
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	p = get_tree().get_first_node_in_group("Player")
+	check("Eduardo nasce no chão da Fase 4", p != null and p.is_on_floor(), str(p.global_position) if p else "")
 
 	# Restaura o save do jogador.
 	SaveGame.clear()

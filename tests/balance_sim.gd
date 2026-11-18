@@ -38,6 +38,7 @@ func limits(level: int, sub: int, mult: float = 1.0) -> Array:
 
 func _ready() -> void:
 	var lvl: Node = load(LEVEL).instantiate()
+	lvl.get_node("LevelExit").set("next_stage", "")  # não troca de fase no meio
 	add_child(lvl)
 	for i in 10:
 		await get_tree().process_frame

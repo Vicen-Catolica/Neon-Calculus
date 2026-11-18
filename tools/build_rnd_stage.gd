@@ -17,8 +17,7 @@ extends "res://tools/stage_builder_base.gd"
 
 const GROUND_TS := "res://assets/tilesets/rnd/rnd_ground.tres"
 const OUT_LEVEL := "res://scenes/levels/rnd/rnd_stage3.tscn"
-## Fase 4 (Núcleo Quântico) ainda não existe: a saída fica desligada até lá.
-const NEXT_STAGE := ""
+const NEXT_STAGE := "res://scenes/levels/core/core_stage4.tscn"
 
 const GROUND_TINT := Color.WHITE
 ## Paredes/teto um pouco mais escuros que o chão, para não lerem como piso.
@@ -330,7 +329,7 @@ func _add_exit(lvl: Node) -> void:
 	exit.name = "LevelExit"
 	var sign := Label.new()
 	sign.name = "ElevatorSign"
-	sign.text = "ELEVADOR EXECUTIVO  ->  NÚCLEO\n(fase 4 em construção)"
+	sign.text = "ELEVADOR EXECUTIVO  ->  NÚCLEO"
 	sign.position = Vector2(5150, -968)
 	sign.add_theme_font_size_override("font_size", 16)
 	sign.add_theme_color_override("font_color", Color("00F0FF"))
