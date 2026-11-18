@@ -262,6 +262,9 @@ func _calculate_dynamic_time_limit() -> float:
 			time_calculated += 12.25 if current_sub_topic == 0 else 8.75
 		4:
 			time_calculated += 14.0 if current_sub_topic == 0 else 10.5
+		5:
+			# x dos dois lados (Núcleo): 3 passos; com parênteses, 4.
+			time_calculated += 10.5 if current_sub_topic == 0 else 14.0
 			
 	var param_total = abs(int(eq_data.get("ParamTotal", eq_data.get("ParamRes", 0))))
 	var param_b = int(eq_data.get("ParamB", eq_data.get("ParamA", 0)))
@@ -297,7 +300,7 @@ func _setup_equation_steps(stage: int, subtopic: int) -> void:
 		step1_target_solution = final_target_solution
 		return
 		
-	max_steps = 2
+	max_steps = 3 if stage == 5 else 2
 	current_step = 0
 	
 	match stage:
@@ -319,6 +322,12 @@ func _setup_equation_steps(stage: int, subtopic: int) -> void:
 				var offset_val = int(eq_data.get("ParamOffset", 0))
 				var total = int(eq_data.get("ParamTotal", 0))
 				step1_target_solution = total - (k * offset_val)
+		5:
+			# 1º passo: juntar os x num lado só (coeficiente que sobra).
+			if subtopic == 1:
+				step1_target_solution = int(eq_data.get("ParamK", 1)) - int(eq_data.get("ParamC", 0))
+			else:
+				step1_target_solution = int(eq_data.get("ParamA", 1)) - int(eq_data.get("ParamC", 0))
 
 func _get_current_user_value() -> String:
 	if current_input_text != "":
@@ -367,6 +376,48 @@ func _trigger_error(wrong_value: int = 0) -> void:
 
 	if error_count >= sine_after_errors():
 		_activate_ai_assistant()
+
+## Passo a passo do nível 5 (x dos dois lados): juntar os x num lado, os
+## números no outro, dividir. Com parênteses, distribuir antes.
+func _hint_both_sides() -> String:
+	var c := int(eq_data.get("ParamC", 1))
+	var cx := "x" if c == 1 else str(c) + "x"
+	var text := ""
+	var coef := 0
+	var num := 0
+	var rhs := 0
+	var n := 1
+	if current_sub_topic == 1:
+		var k := int(eq_data.get("ParamK", 2))
+		var m := int(eq_data.get("ParamM", 1))
+		rhs = int(eq_data.get("ParamN", 0))
+		coef = k - c
+		num = k * m
+		text += "[!] x DOS DOIS LADOS (PARÊNTESES):\n"
+		text += " %d. Distribua o %d:\n" % [n, k]
+		text += "    %dx + %d = %s + %d\n" % [k, num, cx, rhs]
+		n += 1
+	else:
+		coef = int(eq_data.get("ParamA", 2)) - c
+		num = int(eq_data.get("ParamB", 0))
+		rhs = int(eq_data.get("ParamD", 0))
+		text += "[!] x DOS DOIS LADOS:\n"
+	var coef_x := "x" if coef == 1 else str(coef) + "x"
+	text += " %d. Tire %s dos dois lados (os x ficam juntos):\n" % [n, cx]
+	text += "    %s %s %d = %d\n" % [coef_x, "+" if num >= 0 else "-", absi(num), rhs]
+	n += 1
+	var diff := rhs - num
+	if num >= 0:
+		text += " %d. Tire %d dos dois lados:\n" % [n, num]
+	else:
+		text += " %d. Some %d aos dois lados:\n" % [n, -num]
+	text += "    %s = %d\n" % [coef_x, diff]
+	n += 1
+	if coef != 1:
+		text += " %d. Divida por %d:\n" % [n, coef]
+		text += "    x = %d / %d" % [diff, coef]
+	return text.trim_suffix("\n")
+
 
 func vance_protocol() -> bool:
 	return GameManager.has_flag(VANCE_FLAG)
@@ -489,6 +540,8 @@ func _generate_step_by_step_hint() -> String:
 				text += " > Os três ângulos somam 180°.\n"
 				text += " > " + str(a) + "° + " + str(b) + "° = " + str(soma) + "°\n"
 				text += " > x = 180° - " + str(soma) + "°"
+		5:
+			text += _hint_both_sides()
 
 	return text
 

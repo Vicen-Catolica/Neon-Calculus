@@ -56,6 +56,8 @@ func _draw() -> void:
 				_draw_clean_distributive_blocks(center, font)
 			else:
 				_draw_clean_triangle(center, font)
+		5:
+			_draw_two_pan_scale(center, font)
 
 # --- ELEMENTOS VISUAIS DE HUD CYBERPUNK ---
 func _draw_cyberpunk_hud_frame(draw_size: Vector2) -> void:
@@ -282,3 +284,39 @@ func _draw_clean_triangle(center: Vector2, font: Font) -> void:
 	draw_string(font, tri_left + Vector2(-38, 4), str(int(ang_a)) + "°", HORIZONTAL_ALIGNMENT_RIGHT, 32, 12, COLOR_YELLOW)
 	draw_string(font, tri_right + Vector2(6, 4), str(int(ang_b)) + "°", HORIZONTAL_ALIGNMENT_LEFT, 32, 12, COLOR_YELLOW)
 	draw_string(font, tri_top + Vector2(-20, -8), "x°", HORIZONTAL_ALIGNMENT_CENTER, 40, 13, COLOR_GREEN)
+
+
+# --- STAGE 5 (NÚCLEO): x DOS DOIS LADOS ---
+# Balança de dois pratos em equilíbrio: cada prato é um lado da equação. Tirar
+# o mesmo dos dois pratos mantém o equilíbrio (é o passo a passo da SINE).
+func _draw_two_pan_scale(center: Vector2, font: Font) -> void:
+	var c: int = int(eq_data.get("ParamC", 1))
+	var left := ""
+	var right := ""
+	if current_subtopic == 1:
+		left = "%d(x+%d)" % [int(eq_data.get("ParamK", 2)), int(eq_data.get("ParamM", 1))]
+		right = _side_text(c, int(eq_data.get("ParamN", 0)))
+	else:
+		left = _side_text(int(eq_data.get("ParamA", 2)), int(eq_data.get("ParamB", 0)))
+		right = _side_text(c, int(eq_data.get("ParamD", 0)))
+	var beam_y := center.y - 14.0
+	var half := 92.0
+	# fulcro e braço
+	draw_colored_polygon(PackedVector2Array([center + Vector2(0, -14), center + Vector2(-14, 26), center + Vector2(14, 26)]),
+		Color(COLOR_MUTED, 0.6))
+	draw_line(Vector2(center.x - half, beam_y), Vector2(center.x + half, beam_y), COLOR_CYAN, 2.0)
+	draw_circle(Vector2(center.x, beam_y), 3.0, COLOR_YELLOW)
+	for side in [-1.0, 1.0]:
+		var px: float = center.x + half * side
+		draw_line(Vector2(px, beam_y), Vector2(px, beam_y + 16.0), COLOR_MUTED, 1.0)
+		draw_arc(Vector2(px, beam_y + 16.0), 34.0, 0.0, PI, 16, COLOR_CYAN, 2.0)
+	draw_string(font, Vector2(center.x - half - 50, beam_y + 40), left, HORIZONTAL_ALIGNMENT_CENTER, 100, 13, COLOR_GREEN)
+	draw_string(font, Vector2(center.x + half - 50, beam_y + 40), right, HORIZONTAL_ALIGNMENT_CENTER, 100, 13, COLOR_YELLOW)
+
+
+func _side_text(coef: int, num: int) -> String:
+	var x := "x" if coef == 1 else str(coef) + "x"
+	if num == 0:
+		return x
+	return "%s%s%d" % [x, "+" if num > 0 else "-", absi(num)]
+

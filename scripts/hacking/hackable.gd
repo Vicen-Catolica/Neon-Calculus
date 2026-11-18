@@ -41,7 +41,7 @@ func get_label() -> String:
 	return display_name if display_name != "ALVO" else KIND_LABEL[kind]
 
 
-## Nível (1–4) e subtópico (0/1) passados à HackingInterface.
+## Nível (1–5) e subtópico (0/1) passados à HackingInterface.
 ## Andar atual + dificuldade do tipo: câmera/luz/quiosque < porta/agente < ciborgue.
 func get_difficulty() -> Vector2i:
 	var floor_level: int = GameManager.current_floor
@@ -52,7 +52,7 @@ func get_difficulty() -> Vector2i:
 		Kind.CYBORG:
 			floor_level += 1
 			sub_topic = 1
-	return Vector2i(clampi(floor_level + difficulty_bonus, 1, 4), sub_topic)
+	return Vector2i(clampi(floor_level + difficulty_bonus, 1, 5), sub_topic)
 
 
 ## Multiplicador final do tempo do hack: o do alvo (ex.: lockdown) vezes o da

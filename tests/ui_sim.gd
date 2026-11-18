@@ -112,7 +112,7 @@ func _ready() -> void:
 
 	# Dicas de cada tipo de equação usam o x minúsculo da equação.
 	var bad := []
-	for d in [Vector2i(1, 0), Vector2i(1, 1), Vector2i(2, 0), Vector2i(2, 1), Vector2i(3, 0), Vector2i(3, 1), Vector2i(4, 0), Vector2i(4, 1)]:
+	for d in [Vector2i(1, 0), Vector2i(1, 1), Vector2i(2, 0), Vector2i(2, 1), Vector2i(3, 0), Vector2i(3, 1), Vector2i(4, 0), Vector2i(4, 1), Vector2i(5, 0), Vector2i(5, 1)]:
 		ui.current_floor_level = d.x
 		ui.current_sub_topic = d.y
 		ui.eq_data = ui.math_generator.GenerateValidEquation(d.x, d.y)
@@ -120,6 +120,35 @@ func _ready() -> void:
 		if "X" in h.replace("SINE", "").replace("PASSO", ""):
 			bad.append(d)
 	check("passo a passo sem X maiúsculo em todos os tipos", bad.is_empty(), str(bad))
+
+	# Nível 5 (Núcleo): x dos dois lados; o passo a passo termina na resposta.
+	var wrong5 := []
+	for i in 40:
+		var sub5 := i % 2
+		ui.current_floor_level = 5
+		ui.current_sub_topic = sub5
+		ui.eq_data = ui.math_generator.GenerateValidEquation(5, sub5)
+		var sol5 := int(ui.eq_data["Solution"])
+		var h5: String = ui._generate_step_by_step_hint()
+		var last: String = h5.strip_edges().split("\n")[-1]
+		var ok5 := false
+		if "/" in last:
+			var parts := last.split("=")[-1].split("/")
+			ok5 = int(parts[1].strip_edges()) != 0 and int(parts[0].strip_edges()) == sol5 * int(parts[1].strip_edges())
+		else:
+			ok5 = last.ends_with("x = %d" % sol5)
+		if not ok5 or not ("dos dois lados" in h5):
+			wrong5.append(str(ui.eq_data["Expression"]) + " -> " + last)
+	check("nível 5: passo a passo chega na resposta (40 equações)", wrong5.is_empty(), str(wrong5.slice(0, 3)))
+	ui.start_hacking(5, 0)
+	await frames(3)
+	check("nível 5: equação com x dos dois lados na tela", (ui.equation_label.text as String).count("x") >= 2, ui.equation_label.text)
+	check("nível 5: mais passos que o nível 4 no cálculo de tempo", ui.max_steps == 3)
+	var suit := tree.get_first_node_in_group("Player").get_node("SonarPing") as SonarPing
+	check("módulos do traje somem durante o hack", not suit._ui.visible)
+	ui._complete_hack(false)
+	await frames(2)
+	check("módulos do traje voltam depois do hack", suit._ui.visible)
 
 	# --- Como jogar ---
 	var how := HowToPlay.new()

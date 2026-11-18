@@ -25,9 +25,11 @@ var battery: float = CAPACITY
 var _idle: float = 99.0
 var _bar: ColorRect
 var _label: Label
+var _ui: CanvasLayer
 
 
 func _ready() -> void:
+	add_to_group("hud")  # some com o resto do HUD durante o hack
 	_build_ui()
 
 
@@ -106,6 +108,7 @@ func _build_ui() -> void:
 	var ui := CanvasLayer.new()
 	ui.layer = 6
 	add_child(ui)
+	_ui = ui
 	var font: Font = load("res://assets/fonts/ui_font.tres")
 	var bg := ColorRect.new()
 	bg.color = Color(0.0, 0.05, 0.08, 0.8)
@@ -122,3 +125,12 @@ func _build_ui() -> void:
 	_label.add_theme_font_size_override("font_size", 18)
 	_label.add_theme_color_override("font_color", CYAN)
 	ui.add_child(_label)
+
+
+## Grupo "hud": a tela de hack esconde e mostra o HUD inteiro.
+func hide_hud() -> void:
+	_ui.visible = false
+
+
+func show_hud() -> void:
+	_ui.visible = true

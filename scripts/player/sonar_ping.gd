@@ -33,6 +33,7 @@ var _label: Label
 
 
 func _ready() -> void:
+	add_to_group("hud")  # some com o resto do HUD durante o hack
 	top_level = true
 	z_index = 60
 	global_position = Vector2.ZERO
@@ -216,3 +217,12 @@ func _draw_arrows() -> void:
 		var side := dir.orthogonal() * 10.0
 		_arrows.draw_colored_polygon(PackedVector2Array([p + dir * 16.0, p - dir * 8.0 + side, p - dir * 8.0 - side]),
 			Color(RED, 0.9 * a))
+
+
+## Grupo "hud": a tela de hack esconde e mostra o HUD inteiro.
+func hide_hud() -> void:
+	_ui.visible = false
+
+
+func show_hud() -> void:
+	_ui.visible = true
