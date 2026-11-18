@@ -305,5 +305,32 @@ func _ready() -> void:
 	check("ciborgue: visão volta sozinha", not cy.is_blind() and cy.awareness > 0.0)
 	cy.process_mode = Node.PROCESS_MODE_DISABLED
 
+	# Ping Sonar (V): revela inimigos e alvos num raio, através das paredes.
+	var sonar := p.get_node("SonarPing") as SonarPing
+	GameManager.set_state(GameManager.State.PLAYING)
+	tp(3700, 16); await step(20)
+	check("sonar: pronto no começo", sonar.ready_to_ping())
+	GameManager.set_state(GameManager.State.HACKING)
+	check("sonar: não funciona durante o hack", not sonar.ping())
+	GameManager.set_state(GameManager.State.PLAYING)
+	await step(2)
+	Input.action_press("sonar_ping"); await step(2); Input.action_release("sonar_ping"); await step(2)
+	var names_rev := sonar.revealed.map(func(n): return String(n.name))
+	check("sonar: V revela a Unidade Lógica, o agente do mezanino e o domo", "Guard4" in names_rev and "Guard5" in names_rev and "LabDome" in names_rev, str(names_rev))
+	check("sonar: não revela quem está fora do raio", not ("Guard1" in names_rev), str(names_rev))
+	check("sonar: marca alvos hackeáveis por perto", sonar.nodes.size() > 0, "%d nós" % sonar.nodes.size())
+	var screen := Rect2(Vector2.ZERO, get_viewport().get_visible_rect().size)
+	var off := sonar.offscreen_in(screen)
+	var off_ok := true
+	for n in off:
+		if absf(n.global_position.x - p.global_position.x) < 200.0:
+			off_ok = false
+	check("sonar: só ameaças longe viram seta de fora da tela", off_ok and off.size() <= sonar.revealed.size(), "%d fora da tela" % off.size())
+	check("sonar: recarregando, V não pinga de novo", not sonar.ping() and not sonar.ready_to_ping())
+	await step(int(SonarPing.REVEAL_TIME * 60.0) + 10)
+	check("sonar: revelação some depois de 5 s", sonar.revealed.is_empty())
+	await step(int((SonarPing.COOLDOWN - SonarPing.REVEAL_TIME) * 60.0) + 10)
+	check("sonar: recarrega em 12 s", sonar.ready_to_ping())
+
 	print("TUDO OK — 0 falha(s)" if fails == 0 else "%d FALHA(S)" % fails)
 	get_tree().quit(1 if fails > 0 else 0)

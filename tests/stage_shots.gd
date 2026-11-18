@@ -2,7 +2,7 @@ extends Node
 ## Uso: godot --path . --windowed --resolution 1920x1080 res://tests/stage_shots.tscn -- <cena> <x:y;x:y;...> <pasta>
 ## Teleporta o Eduardo para cada ponto e salva um PNG da viewport.
 ## 4º argumento opcional: "vision" (visão hacker), "aware" (barra de detecção
-## dos guardas em 60%) ou "hack" (abre a tela de hacking).
+## dos guardas em 60%), "hack" (abre a tela de hacking) ou "sonar" (dispara o Ping Sonar).
 
 func _ready() -> void:
 	var a := OS.get_cmdline_user_args()
@@ -36,6 +36,12 @@ func _ready() -> void:
 			for g in get_tree().get_nodes_in_group("guards"):
 				g.awareness = 0.6
 				g.get_node("AwarenessBar").queue_redraw()
+		if mode == "sonar":
+			var s := p.get_node("SonarPing") as SonarPing
+			s.cooldown_left = 0.0
+			s.ping()
+			for f in 20:
+				await get_tree().process_frame
 		if mode == "hack":
 			get_tree().get_first_node_in_group("hacking_ui").start_hacking(1, 0)
 			for f in 20:
