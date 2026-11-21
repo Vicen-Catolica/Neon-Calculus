@@ -1,0 +1,28 @@
+{
+	"core_elevator": [
+		{
+			"who": "SINE",
+			"text": "Núcleo Quântico. Não há andares acima deste, Eduardo. Só ela."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Sem luz de teto, sem quiosque, sem agente reclamando de cota. Só geometria."
+		},
+		{
+			"who": "SINE",
+			"text": "As plataformas flutuam sobre o vazio. As pontes são de luz: existem só quando o sistema permite. Ou quando você hackeia o emissor."
+		},
+		{
+			"who": "AXIOMA",
+			"text": "VARIÂNCIA DETECTADA NO NÚCLEO. INTRUSO: EDUARDO. PROBABILIDADE DE SUCESSO: 0,0003%."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Ela arredondou para baixo."
+		},
+		{
+			"who": "SINE",
+			"text": "Aqui as equações têm x dos dois lados. Junte os x de um lado e os números do outro. Eu estou com você até o fim."
+		}
+	]
+}
