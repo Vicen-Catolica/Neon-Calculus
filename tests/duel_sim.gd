@@ -190,7 +190,7 @@ func full_duel() -> void:
 	# Parado no meio do chão por 10 s: o núcleo ataca e acerta.
 	p.global_position = Vector2(960, 16)
 	await step(600)
-	check("Duelo: o núcleo ataca sem parar", duel.attacks_spawned >= 3, "%d ataques" % duel.attacks_spawned)
+	check("Duelo: o núcleo ataca sem parar", duel.attacks_spawned >= 2, "%d ataques" % duel.attacks_spawned)
 	check("Duelo: quem fica parado leva dano", p.current_defense < p.max_defense and not p.is_dead, "defesa %.0f" % p.current_defense)
 	# Daqui em diante, invulnerável: o teste é da lógica das camadas.
 	p.current_defense = p.max_defense

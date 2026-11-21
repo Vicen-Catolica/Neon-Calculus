@@ -15,7 +15,7 @@ set -u
 GODOT="${GODOT:-godot}"
 SIM_TIMEOUT="${SIM_TIMEOUT:-300}"
 # SIMS="a b" roda só essas simulações (útil para depurar uma fase).
-read -r -a SIMS <<< "${SIMS:-stage_sim route_sim flow_sim stage2_sim stage3_sim stage3_live_sim stage4_sim duel_sim balance_sim ui_sim}"
+read -r -a SIMS <<< "${SIMS:-stage_sim route_sim flow_sim stage2_sim stage3_sim stage3_live_sim stage4_sim stage4_live_sim duel_sim duel_bot_sim balance_sim ui_sim}"
 LOG_DIR="$(mktemp -d)"
 fail=0
 

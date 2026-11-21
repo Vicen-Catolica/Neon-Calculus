@@ -28,8 +28,10 @@ enum State { WAITING, LAYER, BETWEEN, PARADOX, WON }
 ## Tempo das equações dos nós (vezes o 0,8 da segurança máxima): pressão do Duelo.
 @export var node_time_mult: float = 0.6
 @export var recover_time: float = 4.0
-## Segundos entre ataques em cada camada (a última vale também no Paradoxo).
-@export var intervals: Array[float] = [3.4, 2.8, 2.2]
+## Pausa (s) entre um padrão de ataque e o próximo em cada camada (a última vale
+## também no Paradoxo). Um padrão por vez: o próximo só começa quando o anterior
+## acaba, para as saídas nunca se contradizerem (balanceamento, etapa 11).
+@export var intervals: Array[float] = [1.6, 1.2, 0.8]
 @export var rng_seed: int = 0
 ## Depois das falas da vitória: branco, silêncio e a tela de encerramento.
 ## (As simulações desligam para não trocar de cena.)
@@ -45,6 +47,13 @@ const WIN_FLAG := "axioma_defeated"
 const PULSE_GAP := 50.0
 const VANCE_PULSE_GAP := 80.0
 const GRID_SLOTS := [240.0, 480.0, 720.0, 960.0, 1200.0, 1440.0, 1680.0]
+## Brechas sorteadas perto do jogador (balanceamento, etapa 11): a varredura
+## chega à altura dele em ~2,6 s e correr cobre ~520 px nesse tempo.
+const GAP_NEAR_MIN := 120.0
+const GAP_NEAR_MAX := 420.0
+## Distância (graus) da borda da brecha até o jogador: sempre fora dela, perto.
+const PULSE_OFF_MIN := 4.0
+const PULSE_OFF_MAX := 12.0
 const CYAN := Color(0.0, 0.94, 1.0)
 const RED := Color(1.0, 0.2, 0.25)
 
@@ -105,6 +114,8 @@ func _process(delta: float) -> void:
 			if _timer <= 0.0:
 				_begin_layer(1)
 		State.LAYER, State.PARADOX:
+			if attack_running():
+				return
 			_timer -= delta
 			if _timer <= 0.0:
 				spawn_pattern()
@@ -199,6 +210,13 @@ func _say(dialogue_id: String) -> bool:
 	return Dialogue.play_id(dialogue_id)
 
 
+func attack_running() -> bool:
+	for a in get_tree().get_nodes_in_group("duel_attack"):
+		if (a as DuelAttack).phase != DuelAttack.Phase.DONE:
+			return true
+	return false
+
+
 func clear_attacks() -> void:
 	for a in get_tree().get_nodes_in_group("duel_attack"):
 		a.queue_free()
@@ -215,7 +233,7 @@ func spawn_pattern() -> void:
 		options += ["combo", "combo"]
 	match options[_rng.randi() % options.size()]:
 		"sweep_down":
-			_add(_sweep_down(_rng.randf_range(200.0, 1720.0)))
+			_add(_sweep_down(_near_x(GAP_NEAR_MIN, GAP_NEAR_MAX)))
 		"pulse":
 			_add(_pulse())
 		"sweep_side":
@@ -229,8 +247,10 @@ func spawn_pattern() -> void:
 			# Grade + varredura descendo com a brecha num vão da grade: sempre há saída.
 			var cols := _grid_columns()
 			var free: Array = GRID_SLOTS.filter(func(x): return not (x in cols))
+			var px := _player_pos().x
+			free.sort_custom(func(a, b): return absf(a - px) < absf(b - px))
 			_add(_grid(cols))
-			_add(_sweep_down(free[_rng.randi() % free.size()]))
+			_add(_sweep_down(free[0]))  # o vão livre mais perto do jogador
 
 
 func _add(a: DuelAttack) -> void:
@@ -252,8 +272,17 @@ func _sweep_down(gap_x: float) -> SweepAttack:
 func _pulse() -> PulseAttack:
 	var p := PulseAttack.new()
 	p.center = core.global_position
-	p.gap_angle_deg = _rng.randf_range(35.0, 145.0)  # brecha sempre para baixo
+	# Brecha perto do ângulo do jogador (mas não em cima dele): exige se mexer,
+	# sem pedir uma travessia impossível da arena.
+	var to_player := _player_pos() + Vector2(0, -50) - core.global_position
+	# A brecha gira para dentro da arena (rumo a "para baixo", 90°): nunca para
+	# cima de quem está no chão.
+	var pang := rad_to_deg(to_player.angle())
+	var side := -1.0 if pang > 90.0 or pang < -90.0 else 1.0
+	if absf(pang - 90.0) < 20.0:
+		side = 1.0 if _rng.randi() % 2 == 0 else -1.0
 	p.gap_width_deg = VANCE_PULSE_GAP if vance() else PULSE_GAP
+	p.gap_angle_deg = rad_to_deg(to_player.angle()) + side * (p.gap_width_deg / 2.0 + _rng.randf_range(PULSE_OFF_MIN, PULSE_OFF_MAX))
 	return p
 
 
@@ -274,6 +303,21 @@ func _grid_columns() -> Array:
 		slots[i] = slots[j]
 		slots[j] = tmp
 	return slots.slice(0, 4)
+
+
+func _player_pos() -> Vector2:
+	var p := get_tree().get_first_node_in_group("Player") as Node2D
+	return p.global_position if p else Vector2(960, 16)
+
+
+## x perto do jogador (de `lo` a `hi` px para um lado), dentro da arena.
+func _near_x(lo: float, hi: float) -> float:
+	var px := _player_pos().x
+	var side := 1.0 if _rng.randi() % 2 == 0 else -1.0
+	var x := px + side * _rng.randf_range(lo, hi)
+	if x < 150.0 or x > 1770.0:
+		x = px - side * _rng.randf_range(lo, hi)
+	return clampf(x, 150.0, 1770.0)
 
 
 func _flash(text: String, color: Color) -> void:

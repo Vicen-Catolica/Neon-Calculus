@@ -86,6 +86,22 @@ func _ready() -> void:
 	print("   %-38s %5.1f / %5.1f / %5.1f" % ["triângulo com Protocolo Vance", vance[0], vance[1], vance[2]])
 	check("Protocolo Vance dá mais tempo na média", vance[1] > base[1])
 
+	print("--- Núcleo e Duelo (Fase 4) ---")
+	var n50: Array = await limits(5, 0, 0.6 * 0.8)
+	var n51: Array = await limits(5, 1, 0.6 * 0.8)
+	print("   %-38s %5.1f / %5.1f / %5.1f" % ["nó do Duelo, x dos dois lados", n50[0], n50[1], n50[2]])
+	print("   %-38s %5.1f / %5.1f / %5.1f" % ["nó do Duelo, com parênteses", n51[0], n51[1], n51[2]])
+	check("nós do Duelo: pressão alta mas com pelo menos 30 s", n50[0] >= 30.0 and n51[0] >= 30.0)
+	print("   Paradoxo final: %.0f s" % ui.PARADOX_TIME)
+	var hits_to_die := int(ceil(100.0 / DuelAttack.new().damage))
+	print("   golpes do núcleo até cair: %d (invulnerável %.1f s depois de cada um)" % [hits_to_die, DuelHit.IFRAMES_MS / 1000.0])
+	check("Duelo perdoa erros de desvio (4 golpes)", hits_to_die >= 4)
+	var sw := SweepAttack.new()
+	var reach := sw.telegraph_time + sw.active_time * (990.0 / 1106.0)
+	var need := (ParadoxDuel.GAP_NEAR_MAX - sw.gap_size / 2.0) / 200.0
+	print("   varredura: chega à cabeça em %.2f s; correr até a brecha mais longe leva %.2f s" % [reach, need])
+	check("brecha da varredura sempre alcançável correndo", need < reach * 0.8)
+
 	print("--- Furtividade ---")
 	var p := lvl.get_node("Eduardo") as Eduardo
 	var laser := lvl.get_node("Lasers/Laser3020") as LaserBarrier

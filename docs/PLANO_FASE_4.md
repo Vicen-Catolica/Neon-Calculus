@@ -120,8 +120,8 @@ Paleta do Núcleo: preto-azulado profundo, linhas de grade ciano finas, geometri
 8. ✅ **Final do jogo** (vitória, encerramento com estatísticas e créditos, save "concluído", derrota do GDD).
 9. ✅ **Lore** (`data/lore/core.json`): o registro de fundação da Axioma (2115, assinado por Vance), o último log da SINE antes de ser "descartada", o "manifesto" da Axioma sobre a variância, com dica da SINE sobre o nível 5.
 10. ✅ **Arte** (7 gerações: fundo do vazio, Domo, ilustração do final e 4 retratos de diálogo; tileset do tema "core" por script; `tools/gen_core_art.py`) (PixelLab + scripts).
-11. **Testes e balanceamento** (`stage4_sim`, `duel_sim`, `balance_sim` com o nível 5 e o dano dos ataques; CI).
-12. **Playtest e ajuste** (automatizado + teclado).
+11. ✅ **Testes e balanceamento** (um padrão de ataque por vez, brechas sorteadas perto do jogador e o pulso sempre abrindo para dentro da arena; `balance_sim` com nível 5, Paradoxo e alcance das brechas) (`stage4_sim`, `duel_sim`, `balance_sim` com o nível 5 e o dano dos ataques; CI).
+12. ✅ (automatizado) **Playtest e ajuste** — `duel_bot_sim` (robô que só desvia vence o Duelo em 3 sementes) e `stage4_live_sim` (servidores seguram com as Unidades Lógicas passando). Falta o playtest à mão com teclado. (automatizado + teclado).
 
 Commits pequenos por etapa no branch `feature/core-stage-4`, sem push.
 
