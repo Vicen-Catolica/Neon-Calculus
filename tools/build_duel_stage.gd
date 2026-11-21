@@ -5,9 +5,9 @@ extends "res://tools/stage_builder_base.gd"
 ## volta ao começo do Duelo, não ao elevador). Câmera com zoom 1: a arena cabe
 ## inteira na tela (~1920×1080).
 ##
-## ETAPA 5 do docs/PLANO_FASE_4.md: arena, núcleo e os 3 Nodos de Vigilância.
-## Os ataques (scripts/duel/*_attack.gd) são criados pelo controlador do Duelo
-## (etapa 6); aqui só a geometria e as peças.
+## Etapas 5–6 do docs/PLANO_FASE_4.md: arena, núcleo (hackeável no fim: o
+## Paradoxo), 3 Nodos de Vigilância e o controlador (scripts/duel/paradox_duel.gd),
+## que cria os ataques.
 ##
 ## Arena: chão inteiro; plataforma esquerda e direita (y = -272) com um nó cada;
 ## plataforma do meio (y = -464) leva à plataforma de cima (y = -624), sobre o
@@ -69,12 +69,21 @@ func build() -> Node:
 	core.name = "AxiomaCore"
 	core.set_script(load("res://scripts/duel/axioma_core.gd"))
 	core.position = CORE_POS
+	var ch := _hackable("NÚCLEO DA AXIOMA", Vector2.ZERO)
+	ch.kind = Hackable.Kind.NODE
+	ch.paradox = true
+	ch.abortable = false
+	core.add_child(ch)
 	lvl.add_child(core)
 	var nodes := _holder(lvl, "SurveillanceNodes")
 	for n in NODES:
 		var node := _instance("res://scenes/objects/surveillance_node.tscn", n[0], n[1])
 		node.set("sub_topic", n[2])
 		nodes.add_child(node)
+	var duel := Node.new()
+	duel.name = "ParadoxDuel"
+	duel.set_script(load("res://scripts/duel/paradox_duel.gd"))
+	lvl.add_child(duel)
 	_player_and_ui(lvl, Vector2(120, 16))
 	return lvl
 

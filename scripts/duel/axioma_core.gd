@@ -14,6 +14,8 @@ const PHI := 1.618034
 
 var damage_level: int = 0
 var collapsed: bool = false
+## Aberto depois dos 3 nós: hackear o núcleo é o Paradoxo final.
+var paradox_open: bool = false
 var _angle: float = 0.0
 var _charge: float = 0.0
 var _collapse_t: float = -1.0
@@ -33,6 +35,10 @@ func _ready() -> void:
 		for j in range(i + 1, _verts.size()):
 			if absf(_verts[i].distance_to(_verts[j]) - 2.0) < 0.01:
 				_edges.append(Vector2i(i, j))
+
+
+func can_be_hacked() -> bool:
+	return paradox_open and not collapsed
 
 
 ## Acende antes de um ataque (telegrafia).
@@ -85,3 +91,6 @@ func _draw() -> void:
 		draw_line(pts[e.x], pts[e.y], Color(ORANGE, fade), 3.0)
 	for p in pts:
 		draw_rect(Rect2(p - Vector2(3, 3), Vector2(6, 6)), Color(1, 0.85, 0.6, fade))
+	if paradox_open and not collapsed:
+		# Núcleo exposto: anel ciano pulsando (o alvo do Paradoxo).
+		draw_arc(Vector2.ZERO, radius * 1.1, 0.0, TAU, 48, Color(CYAN, 0.4 + 0.4 * pulse), 3.0)

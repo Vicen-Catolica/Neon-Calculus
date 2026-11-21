@@ -20,6 +20,8 @@ const LEVELS := {
 	2: {"scene": "res://scenes/levels/industrial/industrial_stage2.tscn", "title": "Setor Industrial"},
 	3: {"scene": "res://scenes/levels/rnd/rnd_stage3.tscn", "title": "Setor de P&D"},
 	4: {"scene": "res://scenes/levels/core/core_stage4.tscn", "title": "Núcleo Quântico"},
+	# Ainda andar 4: a arena do Duelo é cena própria para o checkpoint ficar antes do chefe.
+	5: {"scene": "res://scenes/levels/core/core_duel.tscn", "title": "Domo de Controle Neural"},
 }
 const MAIN_MENU_SCENE := "res://scenes/main_menu/main_menu.tscn"
 

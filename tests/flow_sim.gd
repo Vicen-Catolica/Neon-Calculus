@@ -139,6 +139,29 @@ func _run() -> void:
 	p = get_tree().get_first_node_in_group("Player")
 	check("Eduardo nasce no chão da Fase 4", p != null and p.is_on_floor(), str(p.global_position) if p else "")
 
+	# Porta do Domo (antecâmara) -> arena do Duelo, com checkpoint próprio.
+	var ld: String = GameManager.LEVELS[5]["scene"]
+	if Dialogue.is_open():
+		Dialogue.skip()
+	var exit4 := lvl.get_node("LevelExit") as LevelExit
+	check("porta do Domo leva à arena do Duelo", exit4.next_stage == ld, exit4.next_stage)
+	exit4._on_body_entered(p)
+	dt = await wait_transition()
+	lvl = get_tree().current_scene as Level
+	check("arena do Duelo carrega (ainda andar 4)", lvl != null and lvl.scene_file_path == ld and lvl.floor_number == 4)
+	check("título do Domo na transição", GameManager.level_title(ld) == "Domo de Controle Neural")
+	check("checkpoint fica antes do chefe", SaveGame.load_checkpoint()["scene"] == ld)
+	await get_tree().physics_frame
+	p = get_tree().get_first_node_in_group("Player")
+	p.take_damage(1000.0)
+	await wait_real(1.3)
+	var go4 := get_tree().root.find_children("*", "GameOver", false, false)
+	if go4.size() == 1:
+		(go4[0] as GameOver)._on_restart_pressed()
+		await wait_transition()
+	lvl = get_tree().current_scene as Level
+	check("game over no Duelo volta ao começo do Duelo", go4.size() == 1 and lvl != null and lvl.scene_file_path == ld)
+
 	# Restaura o save do jogador.
 	SaveGame.clear()
 	if not backup.is_empty():

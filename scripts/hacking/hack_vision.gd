@@ -182,7 +182,11 @@ func _start_hack(h: Hackable) -> void:
 	_hacking_ui.set("time_limit_mult", h.get_time_mult())
 	_hacking_ui.set("max_security", h.in_max_security())
 	_hacking_ui.set("can_abort", h.abortable)
-	_hacking_ui.start_hacking(d.x, d.y)
+	_hacking_ui.set("sine_at_start", h.sine_at_start)
+	if h.paradox and _hacking_ui.has_method("start_paradox"):
+		_hacking_ui.start_paradox()
+	else:
+		_hacking_ui.start_hacking(d.x, d.y)
 
 
 func _find_hacking_ui() -> Node:

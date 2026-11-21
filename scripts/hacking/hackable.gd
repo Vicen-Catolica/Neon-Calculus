@@ -24,6 +24,10 @@ enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK, VALVE, CONVEYOR, DRONE, L
 @export var abortable: bool = true
 ## >= 0: força o subtópico da equação (nós do Duelo escolhem o tipo do nível 5).
 @export var sub_topic_override: int = -1
+## Alvo do Paradoxo final (abre a "equação" x = x + 1 em vez do gerador).
+@export var paradox: bool = false
+## Abre o passo a passo da SINE já no começo do hack.
+@export var sine_at_start: bool = false
 ## Colisor do próprio alvo, ignorado no teste de linha de visão (ex.: porta).
 @export var ignore_body: CollisionObject2D
 

@@ -45,6 +45,13 @@ var _blink_timer: float = 0.0
 var time_limit_mult: float = 1.0
 ## Alvo numa área de segurança máxima (tempo reduzido): aviso no rodapé.
 var max_security: bool = false
+## Abre o passo a passo da SINE já no começo (Protocolo Vance na última camada do Duelo).
+var sine_at_start: bool = false
+## Paradoxo final do Duelo (GDD §1/§9: a "Variável Infinita"): x = x + 1 não tem
+## solução; a resposta é o botão "Ø SEM SOLUÇÃO" (ou a tecla N).
+var paradox_mode: bool = false
+var _paradox_btn: Button
+const PARADOX_TIME := 60.0
 
 ## Penalidade de tempo por resposta errada (segundos).
 const ERROR_PENALTY := 3.0
@@ -241,6 +248,10 @@ func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 	if hack_timer:
 		hack_timer.start(time_limit)
 
+	if sine_at_start:
+		sine_at_start = false
+		_activate_ai_assistant()
+
 	if equation_label:
 		equation_label.text = str(eq_data.get("Expression", ""))
 	
@@ -360,6 +371,68 @@ func _on_submit_pressed() -> void:
 	else:
 		_trigger_error(user_val)
 
+## Paradoxo final: a "equação" x = x + 1, sem gerador. Nenhum número serve.
+func start_paradox() -> void:
+	paradox_mode = true
+	get_tree().paused = true
+	get_tree().call_group("hud", "hide_hud")
+	current_floor_level = 5
+	current_sub_topic = 0
+	error_count = 0
+	_busy = false
+	max_steps = 1
+	eq_data = {"Expression": "x = x + 1", "Topic": "PARADOXO // VARIÁVEL INFINITA"}
+	final_target_solution = -999999  # nenhum número digitável
+	if equation_label:
+		equation_label.text = "x = x + 1"
+	if subtitle_label:
+		subtitle_label.text = "PARADOXO // VARIÁVEL INFINITA"
+	if ai_assistant_panel:
+		ai_assistant_panel.hide()
+	if math_visualizer:
+		math_visualizer.visible = false
+	_ensure_paradox_button()
+	_paradox_btn.visible = true
+	current_input_text = ""
+	_update_input_display()
+	_show_feedback("Encontre x... ou prove que ele não existe. Número + Enter, ou [Ø SEM SOLUÇÃO] (tecla N).", Color(0.6, 0.8, 0.85))
+	show()
+	_time_total = PARADOX_TIME
+	if hack_timer:
+		hack_timer.start(PARADOX_TIME)
+
+
+func _ensure_paradox_button() -> void:
+	if _paradox_btn or submit_button == null:
+		return
+	_paradox_btn = Button.new()
+	_paradox_btn.name = "ParadoxButton"
+	_paradox_btn.text = "Ø SEM SOLUÇÃO  [N]"
+	_paradox_btn.custom_minimum_size = Vector2(submit_button.custom_minimum_size.x, 44)
+	_paradox_btn.size_flags_horizontal = submit_button.size_flags_horizontal
+	_paradox_btn.add_theme_font_override("font", load("res://assets/fonts/ui_font.tres"))
+	_paradox_btn.add_theme_font_size_override("font_size", 20)
+	_paradox_btn.add_theme_color_override("font_color", FEEDBACK_WARN)
+	_paradox_btn.pressed.connect(_on_paradox_answer)
+	submit_button.get_parent().add_child(_paradox_btn)
+	submit_button.get_parent().move_child(_paradox_btn, submit_button.get_index() + 1)
+
+
+## Resposta certa do Paradoxo: nenhum número satisfaz a equação.
+func _on_paradox_answer() -> void:
+	if not paradox_mode or _busy or not visible:
+		return
+	_busy = true
+	if hack_timer:
+		hack_timer.paused = true
+	if input_line:
+		input_line.text = "x = Ø"
+	_show_feedback("PARADOXO ACEITO: nenhum x satisfaz x = x + 1.\nA AXIOMA NÃO CONSEGUE COMPUTAR A VARIÁVEL INFINITA.", FEEDBACK_OK)
+	_flash_input(FEEDBACK_OK)
+	await _wait_real(RESULT_HOLD * 2.0)
+	_complete_hack(true)
+
+
 func _trigger_error(wrong_value: int = 0) -> void:
 	error_count += 1
 	current_input_text = ""
@@ -369,6 +442,8 @@ func _trigger_error(wrong_value: int = 0) -> void:
 		hack_timer.start(max(0.1, hack_timer.time_left - ERROR_PENALTY))
 
 	var msg := "INCORRETO: x = %d não resolve a equação. -%d s. Tente de novo." % [wrong_value, int(ERROR_PENALTY)]
+	if paradox_mode:
+		msg = "x = %d? Então %d = %d. Falso: nenhum número funciona aqui. -%d s." % [wrong_value, wrong_value, wrong_value + 1, int(ERROR_PENALTY)]
 	if error_count >= sine_after_errors():
 		msg += "\nA SINE abriu o passo a passo ao lado."
 	_show_feedback(msg, FEEDBACK_ERR)
@@ -462,6 +537,15 @@ func _flash_ai_assistant() -> void:
 func _generate_step_by_step_hint() -> String:
 	var text = ">>> SINE // PASSO A PASSO\n"
 	text += "---------------------------\n"
+	if paradox_mode:
+		text += "[!] PARADOXO:\n"
+		text += " 1. Tire x dos dois lados:\n"
+		text += "    0 = 1\n"
+		text += " 2. Isso é sempre falso.\n"
+		text += " > Nenhum número satisfaz a equação.\n"
+		text += " > Responda: Ø SEM SOLUÇÃO (tecla N).\n"
+		text += " > A Axioma vai tentar calcular para sempre."
+		return text
 
 	match current_floor_level:
 		1:
@@ -580,6 +664,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 		abort_hack()
 		return
+	if paradox_mode and event is InputEventKey and event.pressed and event.keycode == KEY_N:
+		get_viewport().set_input_as_handled()
+		_on_paradox_answer()
+		return
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_BACKSPACE:
 			_delete_last_digit()
@@ -646,6 +734,12 @@ func _on_hack_timer_timeout() -> void:
 func _complete_hack(success: bool) -> void:
 	_busy = false
 	max_security = false
+	if paradox_mode:
+		paradox_mode = false
+		if _paradox_btn:
+			_paradox_btn.visible = false
+		if math_visualizer:
+			math_visualizer.visible = true
 	if hack_timer:
 		hack_timer.stop()
 		hack_timer.paused = false

@@ -16,8 +16,8 @@ extends "res://tools/stage_builder_base.gd"
 
 const GROUND_TS := "res://assets/tilesets/rnd/rnd_ground.tres"
 const OUT_LEVEL := "res://scenes/levels/core/core_stage4.tscn"
-## A porta do Domo leva ao Duelo de Paradoxo (etapas 5–6).
-const NEXT_STAGE := ""
+## A porta do Domo leva à arena do Duelo de Paradoxo.
+const NEXT_STAGE := "res://scenes/levels/core/core_duel.tscn"
 
 const GROUND_TINT := Color(0.42, 0.46, 0.56)
 const WALL_TINT := Color(0.3, 0.33, 0.42)
@@ -217,7 +217,7 @@ func _add_exit(lvl: Node) -> void:
 	lvl.add_child(door)
 	var sign := Label.new()
 	sign.name = "DomeSign"
-	sign.text = "DOMO DE CONTROLE NEURAL\n(Duelo de Paradoxo em construção)"
+	sign.text = "DOMO DE CONTROLE NEURAL"
 	sign.position = Vector2(DOOR_X - 160, -260)
 	sign.add_theme_font_size_override("font_size", 16)
 	sign.add_theme_color_override("font_color", Color("FF6A1A"))

@@ -1,0 +1,224 @@
+class_name ParadoxDuel
+extends Node
+## Duelo de Paradoxo (GDD §1, §2, §9): o clímax no Domo de Controle Neural.
+##
+##   ESPERA -> CAMADA 1 -> 2 -> 3 -> PARADOXO -> VITÓRIA
+##
+## Em cada camada um Nodo de Vigilância acende (esquerda, direita, topo) e o
+## núcleo ataca em padrões que aceleram e se combinam. Hackear o nó (nível 5)
+## derruba a camada; errar ou estourar o tempo não mata: o núcleo "recupera a
+## camada" (o nó apaga por alguns segundos) e a variância sobe. Quem derruba o
+## Eduardo é a Defesa Neural zerar com os ataques (game over volta ao começo do
+## Duelo, o checkpoint do andar). Com os 3 nós no chão, o núcleo abre: hackeá-lo
+## é o Paradoxo final (x = x + 1, "Ø SEM SOLUÇÃO").
+##
+## Protocolo Vance (resgate na Fase 3): brecha maior nos pulsos (a "porta" que
+## ele deixou) e o passo a passo da SINE já aberto na última camada.
+
+signal layer_started(n: int)
+signal layer_cleared(n: int)
+signal paradox_ready
+signal won
+
+enum State { WAITING, LAYER, BETWEEN, PARADOX, WON }
+
+@export var start_delay: float = 2.0
+## Tempo das equações dos nós (vezes o 0,8 da segurança máxima): pressão do Duelo.
+@export var node_time_mult: float = 0.6
+@export var recover_time: float = 4.0
+## Segundos entre ataques em cada camada (a última vale também no Paradoxo).
+@export var intervals: Array[float] = [3.4, 2.8, 2.2]
+@export var rng_seed: int = 0
+
+const VANCE_FLAG := "vance_rescued"
+const WIN_FLAG := "axioma_defeated"
+const PULSE_GAP := 50.0
+const VANCE_PULSE_GAP := 80.0
+const GRID_SLOTS := [240.0, 480.0, 720.0, 960.0, 1200.0, 1440.0, 1680.0]
+const CYAN := Color(0.0, 0.94, 1.0)
+const RED := Color(1.0, 0.2, 0.25)
+
+var state: State = State.WAITING
+var layer: int = 0
+var attacks_spawned: int = 0
+var core: AxiomaCore
+var nodes: Array[SurveillanceNode] = []
+var _timer: float = 0.0
+var _recover_left: float = 0.0
+var _rng := RandomNumberGenerator.new()
+
+
+func _ready() -> void:
+	add_to_group("paradox_duel")
+	if rng_seed != 0:
+		_rng.seed = rng_seed
+	var lvl := get_parent()
+	core = lvl.get_node("AxiomaCore") as AxiomaCore
+	for name in ["NodeLeft", "NodeRight", "NodeTop"]:
+		nodes.append(lvl.get_node("SurveillanceNodes/" + name) as SurveillanceNode)
+	for i in nodes.size():
+		var n := nodes[i]
+		n.broken.connect(_on_node_broken.bind(i))
+		var h := n.get_node("Hackable") as Hackable
+		h.time_limit_mult = node_time_mult
+		h.hack_failed.connect(_on_node_failed.bind(i))
+	# Protocolo Vance: a SINE abre o passo a passo já no começo da última camada.
+	(nodes[2].get_node("Hackable") as Hackable).sine_at_start = GameManager.has_flag(VANCE_FLAG)
+	(core.get_node("Hackable") as Hackable).hacked.connect(_on_paradox_inserted)
+	_timer = start_delay
+
+
+func vance() -> bool:
+	return GameManager.has_flag(VANCE_FLAG)
+
+
+func _process(delta: float) -> void:
+	if _recover_left > 0.0:
+		_recover_left -= delta
+		if _recover_left <= 0.0 and state == State.LAYER:
+			nodes[layer - 1].activate()
+	match state:
+		State.WAITING:
+			_timer -= delta
+			if _timer <= 0.0:
+				_begin_layer(1)
+		State.LAYER, State.PARADOX:
+			_timer -= delta
+			if _timer <= 0.0:
+				spawn_pattern()
+				_timer = intervals[clampi(layer, 1, 3) - 1]
+		State.BETWEEN:
+			_timer -= delta
+			if _timer <= 0.0:
+				if layer < 3:
+					_begin_layer(layer + 1)
+				else:
+					_open_paradox()
+
+
+func _begin_layer(n: int) -> void:
+	layer = n
+	state = State.LAYER
+	nodes[n - 1].activate()
+	_timer = 1.5
+	_flash("CAMADA %d/3 — HACKEIE O NODO DE VIGILÂNCIA" % n, CYAN)
+	layer_started.emit(n)
+
+
+func _on_node_broken(i: int) -> void:
+	if state != State.LAYER or i != layer - 1:
+		return
+	core.set_damage(layer)
+	clear_attacks()
+	_recover_left = 0.0
+	state = State.BETWEEN
+	_timer = 2.5
+	_flash("CAMADA %d DERRUBADA" % layer, Color(0.22, 1.0, 0.08))
+	layer_cleared.emit(layer)
+
+
+func _on_node_failed(i: int) -> void:
+	if state != State.LAYER or i != layer - 1:
+		return
+	nodes[i].deactivate()
+	_recover_left = recover_time
+	_flash("O NÚCLEO RECUPEROU A CAMADA — O NÓ VOLTA EM %d s" % int(recover_time), RED)
+
+
+func _open_paradox() -> void:
+	state = State.PARADOX
+	core.paradox_open = true
+	_timer = 2.0
+	_flash("O NÚCLEO ABRIU: HACKEIE-O E INSIRA O PARADOXO", CYAN)
+	paradox_ready.emit()
+
+
+func _on_paradox_inserted() -> void:
+	if state != State.PARADOX:
+		return
+	state = State.WON
+	clear_attacks()
+	core.collapse()
+	GameManager.set_flag(WIN_FLAG)
+	won.emit()
+
+
+func clear_attacks() -> void:
+	for a in get_tree().get_nodes_in_group("duel_attack"):
+		a.queue_free()
+
+
+# --- Padrões de ataque ---------------------------------------------------------
+
+## Escolhe e dispara o padrão da camada atual (a camada 3 vale no Paradoxo).
+func spawn_pattern() -> void:
+	var options := ["sweep_down", "pulse"]
+	if layer >= 2:
+		options += ["sweep_side", "grid"]
+	if layer >= 3:
+		options += ["combo", "combo"]
+	match options[_rng.randi() % options.size()]:
+		"sweep_down":
+			_add(_sweep_down(_rng.randf_range(200.0, 1720.0)))
+		"pulse":
+			_add(_pulse())
+		"sweep_side":
+			var s := SweepAttack.new()
+			s.dir = SweepAttack.Dir.RIGHT if _rng.randi() % 2 == 0 else SweepAttack.Dir.LEFT
+			s.gap_center = SweepAttack.CROUCH_GAP
+			_add(s)
+		"grid":
+			_add(_grid(_grid_columns()))
+		"combo":
+			# Grade + varredura descendo com a brecha num vão da grade: sempre há saída.
+			var cols := _grid_columns()
+			var free: Array = GRID_SLOTS.filter(func(x): return not (x in cols))
+			_add(_grid(cols))
+			_add(_sweep_down(free[_rng.randi() % free.size()]))
+
+
+func _add(a: DuelAttack) -> void:
+	a.add_to_group("duel_attack")
+	get_parent().add_child(a)
+	a.finished.connect(a.queue_free)
+	core.charge(a.telegraph_time)
+	a.start()
+	attacks_spawned += 1
+
+
+func _sweep_down(gap_x: float) -> SweepAttack:
+	var s := SweepAttack.new()
+	s.dir = SweepAttack.Dir.DOWN
+	s.gap_center = gap_x
+	return s
+
+
+func _pulse() -> PulseAttack:
+	var p := PulseAttack.new()
+	p.center = core.global_position
+	p.gap_angle_deg = _rng.randf_range(35.0, 145.0)  # brecha sempre para baixo
+	p.gap_width_deg = VANCE_PULSE_GAP if vance() else PULSE_GAP
+	return p
+
+
+func _grid(cols: Array) -> LaserGridAttack:
+	var g := LaserGridAttack.new()
+	var typed: Array[float] = []
+	for c in cols:
+		typed.append(float(c))
+	g.columns = typed
+	return g
+
+
+func _grid_columns() -> Array:
+	var slots: Array = GRID_SLOTS.duplicate()
+	for i in range(slots.size() - 1, 0, -1):
+		var j := _rng.randi() % (i + 1)
+		var tmp = slots[i]
+		slots[i] = slots[j]
+		slots[j] = tmp
+	return slots.slice(0, 4)
+
+
+func _flash(text: String, color: Color) -> void:
+	get_tree().call_group("stealth_hud", "_flash", text, color)

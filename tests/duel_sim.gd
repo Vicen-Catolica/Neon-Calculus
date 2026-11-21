@@ -1,7 +1,9 @@
 extends Node
-## Simulação das peças do Duelo de Paradoxo (arena do Domo): núcleo, Nodos de
-## Vigilância e cada ataque isolado (aviso sem dano, dano com brecha, brecha que
-## salva, invulnerabilidade curta). O Duelo inteiro entra na etapa 6. Uso:
+## Simulação do Duelo de Paradoxo (arena do Domo). Parte 1: as peças isoladas
+## (núcleo, Nodos de Vigilância, cada ataque: aviso sem dano, dano fora da brecha,
+## brecha que salva, invulnerabilidade curta), com o controlador desligado.
+## Parte 2: o Duelo inteiro por código (camadas, falha que recupera a camada,
+## Protocolo Vance, Paradoxo pela tela de hack, vitória). Uso:
 ##   godot --headless --path . res://tests/duel_sim.tscn
 
 const LEVEL := "res://scenes/levels/core/core_duel.tscn"
@@ -47,6 +49,7 @@ func run(a: DuelAttack) -> Array:
 
 func _ready() -> void:
 	lvl = load(LEVEL).instantiate()
+	lvl.get_node("ParadoxDuel").process_mode = Node.PROCESS_MODE_DISABLED  # parte 1: peças isoladas
 	add_child(lvl)
 	p = lvl.get_node("Eduardo")
 	await step(20)
@@ -66,7 +69,7 @@ func _ready() -> void:
 	top.activate()
 	check("nó ativo aceita hack", top.can_be_hacked() and th.get_label() == "NODO DE VIGILÂNCIA")
 	check("nó pede nível 5 (o de cima, com parênteses)", th.get_difficulty() == Vector2i(5, 1), str(th.get_difficulty()))
-	check("nó: sem Esc e com tempo de segurança máxima", not th.abortable and absf(th.get_time_mult() - 0.8) < 0.001)
+	check("nó: sem Esc e com tempo curto do Duelo × segurança máxima", not th.abortable and absf(th.get_time_mult() - 0.6 * 0.8) < 0.001)
 	var broke := [0]
 	top.broken.connect(func() -> void: broke[0] += 1)
 	(p.get_node("HackVision") as HackVision).debug_hack(th, true)
@@ -143,5 +146,81 @@ func _ready() -> void:
 	await step(int((a1.telegraph_time + 0.6) * 60.0) + 10)
 	check("dois ataques ao mesmo tempo tiram um golpe só", d0 - p.current_defense == 25.0, "dano %.0f" % (d0 - p.current_defense))
 
+	await full_duel()
 	print("TUDO OK — 0 falha(s)" if fails == 0 else "%d FALHA(S)" % fails)
 	get_tree().quit(1 if fails > 0 else 0)
+
+
+# --- Parte 2: o Duelo inteiro ------------------------------------------------------
+
+func full_duel() -> void:
+	lvl.queue_free()
+	await step(5)
+	GameManager.story_flags.clear()
+	GameManager.set_flag("vance_rescued")  # Protocolo Vance ligado nesta rodada
+	lvl = load(LEVEL).instantiate()
+	lvl.get_node("ParadoxDuel").set("rng_seed", 7)
+	add_child(lvl)
+	p = lvl.get_node("Eduardo")
+	var duel := lvl.get_node("ParadoxDuel") as ParadoxDuel
+	var hv := p.get_node("HackVision") as HackVision
+	var ui = get_tree().get_first_node_in_group("hacking_ui")
+	await step(5)
+	check("Duelo: começa esperando", duel.state == ParadoxDuel.State.WAITING)
+	await step(int(duel.start_delay * 60.0) + 10)
+	check("Duelo: camada 1 acende o nó da esquerda", duel.state == ParadoxDuel.State.LAYER and duel.layer == 1
+		and duel.nodes[0].state == SurveillanceNode.State.ACTIVE and duel.nodes[1].state == SurveillanceNode.State.IDLE)
+	var nh := duel.nodes[0].get_node("Hackable") as Hackable
+	check("Duelo: nó com tempo curto (0,6 × 0,8 da segurança máxima)", absf(nh.get_time_mult() - 0.48) < 0.001, "x%.2f" % nh.get_time_mult())
+	# Parado no meio do chão por 10 s: o núcleo ataca e acerta.
+	p.global_position = Vector2(960, 16)
+	await step(600)
+	check("Duelo: o núcleo ataca sem parar", duel.attacks_spawned >= 3, "%d ataques" % duel.attacks_spawned)
+	check("Duelo: quem fica parado leva dano", p.current_defense < p.max_defense and not p.is_dead, "defesa %.0f" % p.current_defense)
+	# Daqui em diante, invulnerável: o teste é da lógica das camadas.
+	p.current_defense = p.max_defense
+	p.set_meta("duel_iframe_until", Time.get_ticks_msec() + 3600 * 1000)
+	# Errar o hack: o núcleo recupera a camada por alguns segundos.
+	hv.debug_hack(nh, false); await step(3)
+	check("Duelo: errar apaga o nó (o núcleo recupera a camada)", duel.nodes[0].state == SurveillanceNode.State.IDLE and duel.layer == 1)
+	await step(int(duel.recover_time * 60.0) + 10)
+	check("Duelo: o nó volta depois de alguns segundos", duel.nodes[0].state == SurveillanceNode.State.ACTIVE)
+	# Acertar: camada derrubada, núcleo danificado, ataques somem, próxima camada.
+	hv.debug_hack(nh, true); await step(3)
+	check("Duelo: camada 1 derrubada danifica o núcleo", duel.state == ParadoxDuel.State.BETWEEN and duel.core.damage_level == 1)
+	check("Duelo: ataques somem entre as camadas", get_tree().get_nodes_in_group("duel_attack").is_empty())
+	await step(160)
+	check("Duelo: camada 2 acende o nó da direita", duel.layer == 2 and duel.nodes[1].state == SurveillanceNode.State.ACTIVE)
+	check("Duelo: camada 2 ataca mais rápido", duel.intervals[1] < duel.intervals[0])
+	hv.debug_hack(duel.nodes[1].get_node("Hackable"), true)
+	await step(160)
+	var top_h := duel.nodes[2].get_node("Hackable") as Hackable
+	check("Duelo: camada 3 é o nó de cima, com parênteses", duel.layer == 3 and top_h.get_difficulty() == Vector2i(5, 1))
+	check("Vance: SINE abre o passo a passo na última camada", top_h.sine_at_start)
+	check("Vance: brecha maior nos pulsos", duel._pulse().gap_width_deg == ParadoxDuel.VANCE_PULSE_GAP)
+	await step(300)
+	hv.debug_hack(top_h, true)
+	await step(160)
+	check("Duelo: 3 nós no chão abrem o núcleo", duel.state == ParadoxDuel.State.PARADOX and duel.core.paradox_open and duel.core.can_be_hacked())
+	# Paradoxo pela tela de hack, como o jogador.
+	var core_h := duel.core.get_node("Hackable") as Hackable
+	hv._start_hack(core_h)
+	await get_tree().process_frame
+	check("Paradoxo: a tela mostra x = x + 1 e o botão Ø", ui.paradox_mode and ui.equation_label.text == "x = x + 1" and ui._paradox_btn.visible)
+	check("Paradoxo: não dá para abortar", not ui.can_abort)
+	ui.current_input_text = "5"
+	ui._on_submit_pressed()
+	await get_tree().process_frame
+	check("Paradoxo: número é erro, e o aviso explica", "nenhum número" in (ui.find_child("FeedbackLabel", true, false) as Label).text)
+	ui.current_input_text = "7"
+	ui._on_submit_pressed()
+	await get_tree().process_frame
+	check("Paradoxo: SINE mostra que vira 0 = 1", ui.ai_assistant_panel.visible and "0 = 1" in ui.ai_hint_label.text)
+	ui._on_paradox_answer()
+	await get_tree().create_timer(2.4, true, false, true).timeout
+	await step(5)
+	check("Paradoxo aceito: a Axioma colapsa", duel.state == ParadoxDuel.State.WON and duel.core.collapsed)
+	check("vitória marcada no save do jogo", GameManager.has_flag("axioma_defeated"))
+	check("depois da vitória o jogo volta a andar", not get_tree().paused and GameManager.state == GameManager.State.PLAYING)
+	GameManager.story_flags.clear()
+

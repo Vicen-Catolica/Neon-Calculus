@@ -72,6 +72,9 @@ func walk_until(dir: String, x_goal: float, max_frames: int = 1500) -> void:
 
 func _ready() -> void:
 	lvl = load(LEVEL).instantiate()
+	# A porta leva à arena do Duelo de verdade: guardada e desligada para seguir aqui.
+	var exit_target: String = lvl.get_node("LevelExit").get("next_stage")
+	lvl.get_node("LevelExit").set("next_stage", "")
 	add_child(lvl)
 	p = lvl.get_node("Eduardo")
 	await step(30)
@@ -159,7 +162,7 @@ func _ready() -> void:
 	await walk_until("move_right", 4000.0, 600)
 	var exit := lvl.get_node("LevelExit") as LevelExit
 	check("D: porta do Domo (saída) alcançável", exit.overlaps_body(p), pos())
-	check("D: porta desligada até existir o Duelo", exit.next_stage == "")
+	check("D: porta leva à arena do Duelo", exit_target == GameManager.LEVELS[5]["scene"], exit_target)
 
 	# Por último (abre o game over): cair com pouca defesa desconecta.
 	p.current_defense = 15.0

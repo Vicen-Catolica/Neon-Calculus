@@ -74,7 +74,7 @@ O x aparece **dos dois lados** (`5x − 7 = 2x + 8`): a incógnita "se refere a 
 3. **Núcleo e Duelo** — `scripts/core/paradox_duel.gd` (máquina de estados: INTRO → CAMADA 1..3 → PARADOXO → VITÓRIA/DERROTA), `scripts/objects/axioma_core.gd` (desenho do icosaedro em código, reaproveitando o da transição, com pulso e glitch) e `scripts/objects/surveillance_node.gd` (nó hackeável que só aceita hack quando é a vez dele).
    - Ataques como cenas pequenas, reutilizando o que existe: a Varredura de Rotina (vertical) ganha a versão horizontal; o pulso em anel é um `Area2D` com raio crescente e uma brecha; o laser giratório reaproveita o desenho do `LaserBarrier`. Cada ataque avisa antes (0,6 s de telegrafia) para ser justo.
    - A Defesa Neural já existe (`take_damage`).
-4. **Paradoxo final:** a "equação" `x = x + 1` com o teclado e um botão extra **"∅ SEM SOLUÇÃO"**. A SINE explica: "nenhum número satisfaz; a Axioma vai tentar para sempre". Responder um número conta como erro, com dica.
+4. **Paradoxo final:** a "equação" `x = x + 1` com o teclado e um botão extra **"Ø SEM SOLUÇÃO"**. A SINE explica: "nenhum número satisfaz; a Axioma vai tentar para sempre". Responder um número conta como erro, com dica.
 5. **Cutscenes** (GDD §9, no motor): caixa de diálogo + `AnimationPlayer`/tweens (câmera, luzes, glitch do núcleo). Momentos:
    - elevador (A);
    - a Axioma pelos alto-falantes ao ver o Eduardo pela 1ª vez;
@@ -115,7 +115,7 @@ Paleta do Núcleo: preto-azulado profundo, linhas de grade ciano finas, geometri
 3. ✅ **Greybox A–D** com o que já existe + diálogo de elevador. *Teste:* atravessável; capturas.
 4. ✅ **Ponte de luz** (hack, mão única, queda no abismo). *Teste:* `stage4_sim`.
 5. ✅ **Núcleo, nós e ataques** (arena em cena própria `core_duel.tscn`, checkpoint antes do chefe; ataques: varredura com brecha — lateral só agachado —, pulso em anel com brecha e **grade de lasers** no lugar do laser giratório, que não teria como ser desviado no chão) (cada ataque isolado, com telegrafia e dano). *Teste:* um OK/FALHOU por ataque.
-6. **Duelo de Paradoxo** (camadas 1–3, erros, game over no checkpoint, Paradoxo final). *Teste:* `duel_sim` jogando o Duelo inteiro por código.
+6. ✅ **Duelo de Paradoxo** (camadas 1–3, erros, game over no checkpoint, Paradoxo final). *Teste:* `duel_sim` jogando o Duelo inteiro por código.
 7. **Cutscenes e diálogos** (elevador, alto-falantes, confronto, falas por camada, colapso).
 8. **Final do jogo** (vitória, encerramento com estatísticas e créditos, save "concluído", derrota do GDD).
 9. **Lore** (`data/lore/core.json`): o registro de fundação da Axioma (2115, assinado por Vance), o último log da SINE antes de ser "descartada", o "manifesto" da Axioma sobre a variância, com dica da SINE sobre o nível 5.
