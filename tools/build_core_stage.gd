@@ -91,6 +91,12 @@ func build() -> Node:
 	_add_lasers(lvl)
 	_add_cameras(lvl)
 	_add_guards(lvl)
+	_data_terminals(lvl, [
+		["core_01_foundation", Vector2(200, 16)],      # A: chegada
+		["core_02_sine_log", Vector2(1230, 16)],       # B: plataforma flutuante 2
+		["core_03_manifesto", Vector2(2700, -144)],    # C: mezanino dos servidores
+		["core_04_paradox", Vector2(3700, 16)],        # D: antecâmara
+	])
 	_add_exit(lvl)
 	if SHOW_ZONE_LABELS:
 		_add_zone_labels(lvl)

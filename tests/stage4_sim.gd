@@ -164,6 +164,12 @@ func _ready() -> void:
 	check("D: porta do Domo (saída) alcançável", exit.overlaps_body(p), pos())
 	check("D: porta leva à arena do Duelo", exit_target == GameManager.LEVELS[5]["scene"], exit_target)
 
+	# Lore: 4 terminais, todos com entrada e dica da SINE.
+	var terms := lvl.get_node("DataTerminals").get_children()
+	var bad := terms.filter(func(t): return String(LoreDatabase.get_entry(String(t.get("entry_id"))).get("hint", "")) == "")
+	check("lore: 4 terminais no Núcleo, todos com dica da SINE", terms.size() == 4 and bad.is_empty(), str(bad.map(func(t): return t.get("entry_id"))))
+	check("lore: a antecâmara antecipa o Paradoxo (equação sem solução)", "sem solução" in String(LoreDatabase.get_entry("core_04_paradox")["hint"]))
+
 	# Primeiro alarme do Núcleo: a Axioma fala pelos alto-falantes (uma vez).
 	GameManager.raise_alarm(p.global_position)
 	for i in 10:
