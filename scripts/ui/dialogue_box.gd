@@ -9,6 +9,9 @@ extends CanvasLayer
 ## relógio real, então não depende de Engine.time_scale.
 ## E / clique / F / Enter: completa a fala ou passa para a próxima. Esc: pula tudo.
 ## Ao terminar, marca o id como visto (vai para o save) e emite `finished`.
+## Falas podem ter "if_flag"/"unless_flag" (marcos da história, ex.: Vance).
+## Quando a Axioma fala, a tela ganha uma interferência vermelha (GDD §9: ela
+## se manifesta pelos monitores e alto-falantes).
 
 signal finished(dialogue_id: String)
 
@@ -24,6 +27,7 @@ const SPEAKERS := {
 }
 
 var _root: Control
+var _glitch: ColorRect
 var _portrait: Label
 var _portrait_box: PanelContainer
 var _portrait_style: StyleBoxFlat
@@ -52,11 +56,20 @@ func is_open() -> bool:
 	return _open
 
 
-## Roteiro pelo id, procurado em todos os JSON de data/dialogue/.
+## Roteiro pelo id, procurado em todos os JSON de data/dialogue/, já filtrado
+## pelos marcos da história do save.
 func lines_for(dialogue_id: String) -> Array:
 	if _cache.is_empty():
 		_load_all()
-	return _cache.get(dialogue_id, [])
+	return (_cache.get(dialogue_id, []) as Array).filter(_line_allowed)
+
+
+func _line_allowed(line: Dictionary) -> bool:
+	if line.has("if_flag") and not GameManager.has_flag(String(line["if_flag"])):
+		return false
+	if line.has("unless_flag") and GameManager.has_flag(String(line["unless_flag"])):
+		return false
+	return true
 
 
 func play_id(dialogue_id: String) -> bool:
@@ -131,12 +144,16 @@ func _show_line() -> void:
 	_shown = 0.0
 	_last_ticks = Time.get_ticks_msec()
 	_hint.text = "[E] CONTINUAR    [ESC] PULAR" if _index < _lines.size() - 1 else "[E] FECHAR"
+	_glitch.visible = who == "AXIOMA"
 
 
 func _process(_delta: float) -> void:
 	if not _open:
 		return
 	var now := Time.get_ticks_msec()
+	if _glitch.visible:
+		_glitch.color.a = 0.05 + (0.08 if (now / 70) % 5 == 0 else 0.0)
+		_body.position.x = 2.0 if (now / 50) % 9 == 0 else 0.0
 	var dt := (now - _last_ticks) / 1000.0
 	_last_ticks = now
 	var total := _current_text().length()
@@ -161,6 +178,7 @@ func _finish() -> void:
 	var id := _id
 	_open = false
 	visible = false
+	_glitch.visible = false
 	_lines = []
 	_id = ""
 	if id != "":
@@ -189,6 +207,13 @@ func _build() -> void:
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_root)
+	_glitch = ColorRect.new()
+	_glitch.name = "AxiomaGlitch"
+	_glitch.color = Color(1.0, 0.15, 0.1, 0.06)
+	_glitch.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_glitch.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_glitch.visible = false
+	_root.add_child(_glitch)
 
 	var panel := PanelContainer.new()
 	_panel_style = StyleBoxFlat.new()

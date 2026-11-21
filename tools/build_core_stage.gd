@@ -95,6 +95,12 @@ func build() -> Node:
 	if SHOW_ZONE_LABELS:
 		_add_zone_labels(lvl)
 	_dialogue_trigger(lvl, "core_elevator", Vector2(64, 16))
+	# A Axioma fala pelos alto-falantes no primeiro alarme do Núcleo.
+	var ad := Node.new()
+	ad.name = "AlarmDialogue"
+	ad.set_script(load("res://scripts/core/alarm_dialogue.gd"))
+	ad.set("dialogue_id", "core_first_alarm")
+	lvl.add_child(ad)
 	_player_and_ui(lvl, Vector2(64, 16))
 	return lvl
 

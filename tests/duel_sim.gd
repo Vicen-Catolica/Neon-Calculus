@@ -48,6 +48,7 @@ func run(a: DuelAttack) -> Array:
 
 
 func _ready() -> void:
+	GameManager.mark_dialogue_seen("duel_confront")  # parte 1: sem o confronto
 	lvl = load(LEVEL).instantiate()
 	lvl.get_node("ParadoxDuel").process_mode = Node.PROCESS_MODE_DISABLED  # parte 1: peças isoladas
 	add_child(lvl)
@@ -157,6 +158,7 @@ func full_duel() -> void:
 	lvl.queue_free()
 	await step(5)
 	GameManager.story_flags.clear()
+	GameManager.dialogues_seen.clear()
 	GameManager.set_flag("vance_rescued")  # Protocolo Vance ligado nesta rodada
 	lvl = load(LEVEL).instantiate()
 	lvl.get_node("ParadoxDuel").set("rng_seed", 7)
@@ -167,6 +169,17 @@ func full_duel() -> void:
 	var ui = get_tree().get_first_node_in_group("hacking_ui")
 	await step(5)
 	check("Duelo: começa esperando", duel.state == ParadoxDuel.State.WAITING)
+	for i in 20:
+		await get_tree().process_frame
+	check("confronto: a Axioma fala ao entrar no Domo", Dialogue.is_open() and Dialogue.current_speaker() == "AXIOMA")
+	check("confronto: interferência vermelha quando a Axioma fala", (Dialogue.find_child("AxiomaGlitch", true, false) as CanvasItem).visible)
+	var lines: Array = Dialogue.lines_for("duel_confront")
+	check("confronto: fala do Vance só com o resgate", lines.any(func(l): return "Vance" in String(l["text"])))
+	GameManager.story_flags.clear()
+	check("confronto: sem o resgate, a fala some", not Dialogue.lines_for("duel_confront").any(func(l): return "Vance" in String(l["text"])))
+	GameManager.set_flag("vance_rescued")
+	check("o Duelo espera o confronto acabar", duel.state == ParadoxDuel.State.WAITING)
+	Dialogue.skip()
 	await step(int(duel.start_delay * 60.0) + 10)
 	check("Duelo: camada 1 acende o nó da esquerda", duel.state == ParadoxDuel.State.LAYER and duel.layer == 1
 		and duel.nodes[0].state == SurveillanceNode.State.ACTIVE and duel.nodes[1].state == SurveillanceNode.State.IDLE)
@@ -188,11 +201,16 @@ func full_duel() -> void:
 	# Acertar: camada derrubada, núcleo danificado, ataques somem, próxima camada.
 	hv.debug_hack(nh, true); await step(3)
 	check("Duelo: camada 1 derrubada danifica o núcleo", duel.state == ParadoxDuel.State.BETWEEN and duel.core.damage_level == 1)
+	await get_tree().process_frame
+	check("a Axioma comenta a camada derrubada", Dialogue.is_open() and Dialogue.current_speaker() == "AXIOMA")
+	Dialogue.skip()
 	check("Duelo: ataques somem entre as camadas", get_tree().get_nodes_in_group("duel_attack").is_empty())
 	await step(160)
 	check("Duelo: camada 2 acende o nó da direita", duel.layer == 2 and duel.nodes[1].state == SurveillanceNode.State.ACTIVE)
 	check("Duelo: camada 2 ataca mais rápido", duel.intervals[1] < duel.intervals[0])
 	hv.debug_hack(duel.nodes[1].get_node("Hackable"), true)
+	await step(3)
+	Dialogue.skip()
 	await step(160)
 	var top_h := duel.nodes[2].get_node("Hackable") as Hackable
 	check("Duelo: camada 3 é o nó de cima, com parênteses", duel.layer == 3 and top_h.get_difficulty() == Vector2i(5, 1))
@@ -200,6 +218,8 @@ func full_duel() -> void:
 	check("Vance: brecha maior nos pulsos", duel._pulse().gap_width_deg == ParadoxDuel.VANCE_PULSE_GAP)
 	await step(300)
 	hv.debug_hack(top_h, true)
+	await step(3)
+	Dialogue.skip()
 	await step(160)
 	check("Duelo: 3 nós no chão abrem o núcleo", duel.state == ParadoxDuel.State.PARADOX and duel.core.paradox_open and duel.core.can_be_hacked())
 	# Paradoxo pela tela de hack, como o jogador.
@@ -221,6 +241,14 @@ func full_duel() -> void:
 	await step(5)
 	check("Paradoxo aceito: a Axioma colapsa", duel.state == ParadoxDuel.State.WON and duel.core.collapsed)
 	check("vitória marcada no save do jogo", GameManager.has_flag("axioma_defeated"))
+	var ended := [false]
+	duel.ending_ready.connect(func() -> void: ended[0] = true)
+	await get_tree().create_timer(1.8).timeout
+	check("vitória: falas finais com a Axioma travando", Dialogue.is_open() and Dialogue.current_speaker() == "AXIOMA")
+	check("vitória: o Vance manda recado (resgatado)", Dialogue.lines_for("duel_victory").any(func(l): return "Vance" in String(l["text"])))
+	Dialogue.skip()
+	await step(3)
+	check("depois das falas, a tela de encerramento pode entrar", ended[0])
 	check("depois da vitória o jogo volta a andar", not get_tree().paused and GameManager.state == GameManager.State.PLAYING)
 	GameManager.story_flags.clear()
 

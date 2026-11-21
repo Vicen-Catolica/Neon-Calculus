@@ -164,6 +164,17 @@ func _ready() -> void:
 	check("D: porta do Domo (saída) alcançável", exit.overlaps_body(p), pos())
 	check("D: porta leva à arena do Duelo", exit_target == GameManager.LEVELS[5]["scene"], exit_target)
 
+	# Primeiro alarme do Núcleo: a Axioma fala pelos alto-falantes (uma vez).
+	GameManager.raise_alarm(p.global_position)
+	for i in 10:
+		await get_tree().process_frame
+	check("primeiro alarme: a Axioma fala pelos alto-falantes", Dialogue.is_open() and Dialogue.current_speaker() == "AXIOMA")
+	Dialogue.skip()
+	GameManager.raise_alarm(p.global_position)
+	for i in 10:
+		await get_tree().process_frame
+	check("segundo alarme: não repete a fala", not Dialogue.is_open())
+
 	# Por último (abre o game over): cair com pouca defesa desconecta.
 	p.current_defense = 15.0
 	tp(1500, 300); await step(10)

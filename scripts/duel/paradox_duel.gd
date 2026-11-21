@@ -19,6 +19,8 @@ signal layer_started(n: int)
 signal layer_cleared(n: int)
 signal paradox_ready
 signal won
+## Depois das falas da vitória: hora da tela de encerramento.
+signal ending_ready
 
 enum State { WAITING, LAYER, BETWEEN, PARADOX, WON }
 
@@ -31,6 +33,8 @@ enum State { WAITING, LAYER, BETWEEN, PARADOX, WON }
 @export var rng_seed: int = 0
 
 const VANCE_FLAG := "vance_rescued"
+## O Duelo só começa depois do confronto (e não o repete após um game over).
+const INTRO_DIALOGUE := "duel_confront"
 const WIN_FLAG := "axioma_defeated"
 const PULSE_GAP := 50.0
 const VANCE_PULSE_GAP := 80.0
@@ -79,6 +83,8 @@ func _process(delta: float) -> void:
 			nodes[layer - 1].activate()
 	match state:
 		State.WAITING:
+			if not (INTRO_DIALOGUE in GameManager.dialogues_seen):
+				return
 			_timer -= delta
 			if _timer <= 0.0:
 				_begin_layer(1)
@@ -115,6 +121,7 @@ func _on_node_broken(i: int) -> void:
 	_timer = 2.5
 	_flash("CAMADA %d DERRUBADA" % layer, Color(0.22, 1.0, 0.08))
 	layer_cleared.emit(layer)
+	_say("duel_layer_%d" % layer)
 
 
 func _on_node_failed(i: int) -> void:
@@ -141,6 +148,18 @@ func _on_paradox_inserted() -> void:
 	core.collapse()
 	GameManager.set_flag(WIN_FLAG)
 	won.emit()
+	# Deixa o colapso aparecer um pouco antes das falas finais.
+	await get_tree().create_timer(1.5).timeout
+	if _say("duel_victory"):
+		await Dialogue.finished
+	ending_ready.emit()
+
+
+## Toca uma fala da Axioma/SINE (pausa o jogo enquanto aberta). false se não há roteiro.
+func _say(dialogue_id: String) -> bool:
+	if Dialogue.lines_for(dialogue_id).is_empty() or Dialogue.is_open():
+		return false
+	return Dialogue.play_id(dialogue_id)
 
 
 func clear_attacks() -> void:

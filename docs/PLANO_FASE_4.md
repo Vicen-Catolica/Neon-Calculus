@@ -116,7 +116,7 @@ Paleta do Núcleo: preto-azulado profundo, linhas de grade ciano finas, geometri
 4. ✅ **Ponte de luz** (hack, mão única, queda no abismo). *Teste:* `stage4_sim`.
 5. ✅ **Núcleo, nós e ataques** (arena em cena própria `core_duel.tscn`, checkpoint antes do chefe; ataques: varredura com brecha — lateral só agachado —, pulso em anel com brecha e **grade de lasers** no lugar do laser giratório, que não teria como ser desviado no chão) (cada ataque isolado, com telegrafia e dano). *Teste:* um OK/FALHOU por ataque.
 6. ✅ **Duelo de Paradoxo** (camadas 1–3, erros, game over no checkpoint, Paradoxo final). *Teste:* `duel_sim` jogando o Duelo inteiro por código.
-7. **Cutscenes e diálogos** (elevador, alto-falantes, confronto, falas por camada, colapso).
+7. ✅ **Cutscenes e diálogos** (elevador, alto-falantes, confronto, falas por camada, colapso).
 8. **Final do jogo** (vitória, encerramento com estatísticas e créditos, save "concluído", derrota do GDD).
 9. **Lore** (`data/lore/core.json`): o registro de fundação da Axioma (2115, assinado por Vance), o último log da SINE antes de ser "descartada", o "manifesto" da Axioma sobre a variância, com dica da SINE sobre o nível 5.
 10. **Arte** (PixelLab + scripts).

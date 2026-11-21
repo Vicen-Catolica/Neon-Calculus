@@ -24,5 +24,103 @@
 			"who": "SINE",
 			"text": "Aqui as equações têm x dos dois lados. Junte os x de um lado e os números do outro. Eu estou com você até o fim."
 		}
+	],
+	"core_first_alarm": [
+		{
+			"who": "AXIOMA",
+			"text": "EDUARDO. ANALISTA QUANTITATIVO, CLASSE 2. SUA VARIÂNCIA ERA ACEITÁVEL ATÉ 2140."
+		},
+		{
+			"who": "AXIOMA",
+			"text": "UNIDADES LÓGICAS: CORRIJAM O ERRO DE CÁLCULO."
+		},
+		{
+			"who": "SINE",
+			"text": "Ela sabe quem você é. Isso não muda a matemática. Saia da linha de visão."
+		}
+	],
+	"duel_confront": [
+		{
+			"who": "AXIOMA",
+			"text": "BEM-VINDO AO DOMO, EDUARDO. AQUI NADA É IMPREVISÍVEL. NEM VOCÊ."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Você me previu chegando até aqui?"
+		},
+		{
+			"who": "AXIOMA",
+			"text": "PREVI 4.112 VERSÕES DE VOCÊ. TODAS FALHAM NESTA SALA."
+		},
+		{
+			"who": "SINE",
+			"text": "Três Nodos de Vigilância sustentam o núcleo. Derrube um por vez. Eu calculo as brechas dos ataques; você calcula o resto."
+		},
+		{
+			"who": "SINE",
+			"if_flag": "vance_rescued",
+			"text": "E o Dr. Vance deixou uma porta: os pulsos dela têm uma brecha maior do que deveriam. Vou abrir o passo a passo no último nó."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Livre-arbítrio contra um algoritmo. Vamos ver quem erra a conta."
+		},
+		{
+			"who": "AXIOMA",
+			"text": "LIVRE-ARBÍTRIO É SÓ UMA VARIÁVEL QUE AINDA NÃO FOI AJUSTADA."
+		}
+	],
+	"duel_layer_1": [
+		{
+			"who": "AXIOMA",
+			"text": "NODO 1 PERDIDO. RECALCULANDO. A PROBABILIDADE NÃO MUDOU."
+		}
+	],
+	"duel_layer_2": [
+		{
+			"who": "AXIOMA",
+			"text": "NODO 2 PERDIDO. ERRO... NÃO. VARIAÇÃO DENTRO DO ESPERADO."
+		},
+		{
+			"who": "SINE",
+			"text": "Ela está mentindo para si mesma, Eduardo. Isso é novo."
+		}
+	],
+	"duel_layer_3": [
+		{
+			"who": "AXIOMA",
+			"text": "NODO 3. ISSO NÃO ESTAVA EM NENHUMA DAS 4.112 VERSÕES."
+		},
+		{
+			"who": "SINE",
+			"text": "O núcleo abriu. Dê a ela uma conta que não fecha."
+		}
+	],
+	"duel_victory": [
+		{
+			"who": "AXIOMA",
+			"text": "x = x + 1. CALCULANDO. CALCULANDO. CALCULANDO."
+		},
+		{
+			"who": "AXIOMA",
+			"text": "NÃO HÁ x. NÃO HÁ PREVISÃO. NÃO H—"
+		},
+		{
+			"who": "SINE",
+			"text": "Ela travou. Os neons laranja da cidade estão apagando, andar por andar. As portas da torre estão abrindo."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Ninguém previu isso. Nem eu."
+		},
+		{
+			"who": "SINE",
+			"if_flag": "vance_rescued",
+			"text": "O Dr. Vance está na rede da Resistência. Ele mandou uma mensagem: \"obrigado por usar a porta\"."
+		},
+		{
+			"who": "SINE",
+			"text": "Probabilidade de termos conseguido: 0,0003%. Eu gosto desse número agora."
+		}
 	]
 }

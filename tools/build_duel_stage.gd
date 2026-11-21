@@ -84,6 +84,8 @@ func build() -> Node:
 	duel.name = "ParadoxDuel"
 	duel.set_script(load("res://scripts/duel/paradox_duel.gd"))
 	lvl.add_child(duel)
+	# Confronto com a Axioma ao entrar no Domo (o Duelo espera ele terminar).
+	_dialogue_trigger(lvl, "duel_confront", Vector2(120, 16))
 	_player_and_ui(lvl, Vector2(120, 16))
 	return lvl
 

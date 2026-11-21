@@ -151,6 +151,10 @@ func _run() -> void:
 	check("arena do Duelo carrega (ainda andar 4)", lvl != null and lvl.scene_file_path == ld and lvl.floor_number == 4)
 	check("título do Domo na transição", GameManager.level_title(ld) == "Domo de Controle Neural")
 	check("checkpoint fica antes do chefe", SaveGame.load_checkpoint()["scene"] == ld)
+	for i in 10:
+		await get_tree().process_frame
+	check("confronto com a Axioma abre ao entrar no Domo", Dialogue.is_open())
+	Dialogue.skip()
 	await get_tree().physics_frame
 	p = get_tree().get_first_node_in_group("Player")
 	p.take_damage(1000.0)
@@ -161,6 +165,9 @@ func _run() -> void:
 		await wait_transition()
 	lvl = get_tree().current_scene as Level
 	check("game over no Duelo volta ao começo do Duelo", go4.size() == 1 and lvl != null and lvl.scene_file_path == ld)
+	for i in 10:
+		await get_tree().process_frame
+	check("depois do game over, o confronto não se repete", not Dialogue.is_open())
 
 	# Restaura o save do jogador.
 	SaveGame.clear()

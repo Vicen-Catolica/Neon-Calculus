@@ -118,12 +118,14 @@ func _build_ui() -> void:
 	_bar = ColorRect.new()
 	_bar.position = bg.position
 	_bar.size = bg.size
+	_bar.color = CYAN  # estado inicial (antes do 1º _process)
 	ui.add_child(_bar)
 	_label = Label.new()
 	_label.position = Vector2(28, 1032)
 	_label.add_theme_font_override("font", font)
 	_label.add_theme_font_size_override("font_size", 18)
 	_label.add_theme_color_override("font_color", CYAN)
+	_label.text = "CAMUFLAGEM [C]  PRONTA"
 	ui.add_child(_label)
 
 

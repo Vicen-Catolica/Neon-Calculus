@@ -192,12 +192,14 @@ func _build_ui() -> void:
 	_bar = ColorRect.new()
 	_bar.position = bg.position
 	_bar.size = bg.size
+	_bar.color = CYAN  # estado inicial (antes do 1º _process, ex.: começa pausado num diálogo)
 	_ui.add_child(_bar)
 	_label = Label.new()
 	_label.position = Vector2(28, 992)
 	_label.add_theme_font_override("font", font)
 	_label.add_theme_font_size_override("font_size", 18)
 	_label.add_theme_color_override("font_color", CYAN)
+	_label.text = "SONAR [V]  PRONTO"
 	_ui.add_child(_label)
 
 
