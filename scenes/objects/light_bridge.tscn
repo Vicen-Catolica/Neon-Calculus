@@ -1,0 +1,16 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/objects/light_bridge.gd" id="1_hgho3"]
+[ext_resource type="Script" path="res://scripts/hacking/hackable.gd" id="2_cvk5y"]
+
+[node name="LightBridge" type="Node2D" unique_id=630022605]
+script = ExtResource("1_hgho3")
+
+[node name="Hackable" type="Node2D" parent="." unique_id=601363633]
+position = Vector2(6, -18)
+script = ExtResource("2_cvk5y")
+display_name = "PONTE DE LUZ"
+
+[node name="Body" type="StaticBody2D" parent="." unique_id=1350436148]
+
+[node name="Shape" type="CollisionShape2D" parent="Body" unique_id=280467004]

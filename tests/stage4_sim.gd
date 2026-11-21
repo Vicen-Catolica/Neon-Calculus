@@ -89,15 +89,53 @@ func _ready() -> void:
 	Dialogue.skip()
 	await step(5)
 
-	# B: plataformas flutuantes ligadas pelas pontes (provisórias até a etapa 4).
+	# B: pontes de luz sobre o abismo.
+	var hv := p.get_node("HackVision") as HackVision
+	var br1 := lvl.get_node("LightBridges/Bridge13") as LightBridge
+	var br2 := lvl.get_node("LightBridges/Bridge28") as LightBridge
+	var br3 := lvl.get_node("LightBridges/Bridge43") as LightBridge
+	var h1 := br1.get_node("Hackable") as Hackable
+	check("B: ponte 1 começa apagada e hackeável", not br1.is_solid() and br1.can_be_hacked() and h1.get_label() == "PONTE DE LUZ")
+	check("B: emissor da ponte pede equação de câmera do andar (nível 4)", h1.get_difficulty() == Vector2i(4, 0))
+	# Ponte apagada: cai no abismo, volta à plataforma A e perde defesa.
+	var d0 := p.current_defense
+	var falls := [0]
+	(lvl.get_node("Abyss") as AbyssZone).player_fell.connect(func(_r: Vector2) -> void: falls[0] += 1)
+	tp(470, 0); await step(90)  # em cima da ponte apagada
+	check("abismo: queda volta à plataforma A", falls[0] == 1 and absf(p.global_position.x - 360.0) < 30.0 and absf(p.global_position.y - 16.0) < 8.0, pos())
+	check("abismo: queda tira Defesa Neural (sem game over)", p.current_defense == d0 - 20.0 and not p.is_dead, "%.0f -> %.0f" % [d0, p.current_defense])
+	# Hack materializa a ponte: dá para atravessar.
+	hv.debug_hack(h1, true); await step(3)
+	check("B: hack materializa a ponte 1", br1.is_solid() and not br1.can_be_hacked())
+	tp(330, 16); await step(5)
+	await walk_until("move_right", 760.0)
+	check("B: atravessa a ponte 1 até a plataforma flutuante", p.global_position.x > 740.0 and absf(p.global_position.y - 16.0) < 6.0, pos())
+	while br1._hold_left > br1.warn_time - 0.3:
+		await step(1)
+	check("B: ponte pisca antes de sumir", br1.is_warning() and br1.is_solid())
+	await step(int(br1.warn_time * 60.0) + 10)
+	check("B: ponte some sozinha", not br1.is_solid() and br1.can_be_hacked())
+	# Ponte 2: liga e desliga sozinha; atravessa quando está ligada.
+	var seen_on := false
+	var seen_off := false
+	for i in 320:
+		await step(1)
+		seen_on = seen_on or br2.is_solid()
+		seen_off = seen_off or not br2.is_solid()
+	check("B: ponte 2 liga e desliga sozinha", seen_on and seen_off and br2.mode == LightBridge.Mode.TIMED)
+	while br2.is_solid():
+		await step(1)
+	while not br2.is_solid():
+		await step(1)
+	tp(860, 16); await step(2)
+	Input.action_press("run")
+	await walk_until("move_right", 1180.0, 200)
+	check("B: atravessa a ponte 2 no tempo dela", p.global_position.x > 1160.0 and absf(p.global_position.y - 16.0) < 6.0, pos())
+	# Ponte 3 (sob a câmera): hack e atravessa até a galeria.
+	hv.debug_hack(br3.get_node("Hackable"), true); await step(3)
+	tp(1300, 16); await step(5)
 	await walk_until("move_right", 1640.0)
-	check("B: atravessa as pontes até a galeria", p.global_position.x > 1600.0 and absf(p.global_position.y - 16.0) < 6.0, pos())
-	check("B: 3 pontes de luz marcadas", lvl.get_node("BridgeSlots").get_child_count() == 3)
-	# Cair no abismo não prende: piso de segurança + escada de volta.
-	tp(16 * 32 + 60, 200); await step(90)
-	check("abismo: cai no piso de segurança", absf(p.global_position.y - 336.0) < 6.0, pos())
-	await climb(16 * 32 + 16, 336.0, 420)
-	check("abismo: escada leva de volta à ponte (y≈16)", absf(p.global_position.y - 16.0) < 6.0, pos())
+	check("B: ponte 3 leva à galeria", p.global_position.x > 1600.0 and absf(p.global_position.y - 16.0) < 6.0, pos())
 
 	# C: galeria dos servidores.
 	await climb(58 * 32 + 16, 16.0)
@@ -122,6 +160,11 @@ func _ready() -> void:
 	var exit := lvl.get_node("LevelExit") as LevelExit
 	check("D: porta do Domo (saída) alcançável", exit.overlaps_body(p), pos())
 	check("D: porta desligada até existir o Duelo", exit.next_stage == "")
+
+	# Por último (abre o game over): cair com pouca defesa desconecta.
+	p.current_defense = 15.0
+	tp(1500, 300); await step(10)
+	check("abismo: com pouca defesa a queda desconecta", p.is_dead)
 
 	print("TUDO OK — 0 falha(s)" if fails == 0 else "%d FALHA(S)" % fails)
 	get_tree().quit(1 if fails > 0 else 0)

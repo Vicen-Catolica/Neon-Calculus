@@ -3,10 +3,9 @@ extends "res://tools/stage_builder_base.gd"
 ##   godot --headless --path . res://tools/build_core_stage.tscn
 ## Reexecutar sobrescreve a cena gerada (não edite-a à mão; edite este script).
 ##
-## GREYBOX (etapa 3 do docs/PLANO_FASE_4.md): a aproximação ao Domo (A–D) com as
-## mecânicas que já existem. As pontes de luz (etapa 4) ainda são passarelas
-## comuns marcadas em "BridgeSlots"; embaixo do abismo há um piso de segurança
-## com escadas (vira queda com retorno na etapa 4). O Duelo (E) vem nas etapas 5–6.
+## GREYBOX (etapas 3–4 do docs/PLANO_FASE_4.md): a aproximação ao Domo (A–D).
+## B tem pontes de luz (hack / temporizada) sobre o abismo; cair volta à última
+## plataforma com dano. O Duelo (E) vem nas etapas 5–6.
 ## Arte provisória: tiles do P&D escurecidos, geometrias em Polygon2D.
 ##
 ## Percurso, da esquerda para a direita:
@@ -23,7 +22,6 @@ const NEXT_STAGE := ""
 const GROUND_TINT := Color(0.42, 0.46, 0.56)
 const WALL_TINT := Color(0.3, 0.33, 0.42)
 const HALL_CEILING_Y := -368.0
-const CATCH_Y := 336.0          # piso de segurança sob o abismo
 const DOOR_X := 126 * 32 - 24   # porta do Domo (saída)
 
 const GROUND_RECTS := [
@@ -31,7 +29,6 @@ const GROUND_RECTS := [
 	[20, 0, 27, 2],       # B: plataforma flutuante 1
 	[35, 0, 42, 2],       # B: plataforma flutuante 2
 	[50, 0, 126, 12],     # C + D
-	[13, 10, 49, 14],     # piso de segurança sob o abismo (greybox)
 ]
 
 const WALL_RECTS := [
@@ -46,26 +43,27 @@ const CATWALKS := [
 	[58, 97, -5, false],  # C: mezanino dos servidores (y = -144)
 ]
 
-## Pontes de luz da etapa 4 (por enquanto passarelas comuns): [x0, x1, linha]
+## Pontes de luz: [x0, x1 (células), modo, fase]. A 1ª e a 3ª só por hack
+## (a 3ª sob a câmera); a do meio liga e desliga sozinha.
 const BRIDGES := [
-	[13, 19, 0],
-	[28, 34, 0],
-	[43, 49, 0],
+	[13, 19, LightBridge.Mode.HACK, 0.0],
+	[28, 34, LightBridge.Mode.TIMED, 0.0],
+	[43, 49, LightBridge.Mode.HACK, 0.0],
 ]
+
+## Pontos de retorno de quem cai no abismo (ponta direita de cada plataforma).
+const RESPAWNS := [Vector2(360, 16), Vector2(840, 16), Vector2(1320, 16), Vector2(1640, 16)]
 
 ## Escadas: [célula x, linha do topo, y da base]
 const LADDERS := [
 	[58, -5, 16.0],       # C: chão -> mezanino
 	[97, -5, 16.0],
-	[16, 0, CATCH_Y],     # abismo -> pontes (greybox)
-	[31, 0, CATCH_Y],
-	[46, 0, CATCH_Y],
 ]
 
 const SHOW_ZONE_LABELS := true
 const ZONES := [
 	["A // ELEVADOR EXECUTIVO", Vector2(-180, -330)],
-	["B // PONTES DE LUZ", Vector2(560, -330)],
+	["B // PONTES DE LUZ (hackeie o emissor)", Vector2(560, -330)],
 	["C // GALERIA DOS SERVIDORES", Vector2(1700, -330)],
 	["D // ANTECÂMARA DO DOMO", Vector2(3420, -330)],
 ]
@@ -82,15 +80,13 @@ func build() -> Node:
 	# O Núcleo inteiro é segurança máxima (hacks com 80% do tempo).
 	lvl.set("max_security_rect", Rect2(-400, -1200, 131 * T + 800, 1800))
 	_add_background(lvl)
-	var all_walks: Array = CATWALKS.duplicate()
-	for b in BRIDGES:
-		all_walks.append([b[0], b[1], b[2], false])
 	_terrain_layer(lvl, "Buildings", GROUND_TS, WALL_RECTS, WALL_TINT)
 	_terrain_layer(lvl, "Ground", GROUND_TS, GROUND_RECTS, GROUND_TINT)
-	_structures(lvl, all_walks)
+	_structures(lvl, CATWALKS)
 	_catwalk_band(lvl, CATWALKS)
 	_ladders(lvl, LADDERS)
-	_add_bridge_slots(lvl)
+	_add_bridges(lvl)
+	_add_abyss(lvl)
 	_add_servers(lvl)
 	_add_lasers(lvl)
 	_add_cameras(lvl)
@@ -134,22 +130,34 @@ func _add_background(lvl: Node) -> void:
 		par.add_child(poly)
 
 
-# --- B: pontes de luz (marcadores) --------------------------------------------
+# --- B: pontes de luz e abismo -------------------------------------------------
 
-func _add_bridge_slots(lvl: Node) -> void:
-	var holder := _holder(lvl, "BridgeSlots")
+func _add_bridges(lvl: Node) -> void:
+	var holder := _holder(lvl, "LightBridges")
 	for b in BRIDGES:
-		var m := Marker2D.new()
-		m.name = "Bridge%d" % b[0]
-		m.position = Vector2(b[0] * T, _y(b[2]))
-		m.set_meta("width", (b[1] - b[0] + 1) * T)
-		holder.add_child(m)
-		var glow := ColorRect.new()
-		glow.name = "Glow"
-		glow.color = Color(0.0, 0.9, 1.0, 0.25)
-		glow.position = Vector2(0, -2)
-		glow.size = Vector2((b[1] - b[0] + 1) * T, 4)
-		m.add_child(glow)
+		# Encosta 8 px em cada plataforma: sem frestas para os pés escorregarem.
+		var x0: float = b[0] * T - 8.0
+		var w: float = (b[1] - b[0] + 1) * T + 16.0
+		var br := _instance("res://scenes/objects/light_bridge.tscn", "Bridge%d" % b[0], Vector2(x0, 16))
+		br.set("width", w)
+		br.set("mode", b[2])
+		br.set("phase", b[3])
+		holder.add_child(br)
+
+
+## Faixa sob as plataformas de B: quem cai volta à última plataforma (com dano).
+func _add_abyss(lvl: Node) -> void:
+	var zone := Area2D.new()
+	zone.name = "Abyss"
+	zone.set_script(load("res://scripts/core/abyss_zone.gd"))
+	var rect := Rect2(12 * T, 220, (50 - 12) * T, 200)
+	zone.position = rect.get_center()
+	zone.add_child(_rect_shape(rect.size))
+	var pts: Array[Vector2] = []
+	for r in RESPAWNS:
+		pts.append(r)
+	zone.set("respawn_points", pts)
+	lvl.add_child(zone)
 
 
 # --- C: servidores massivos (cobertura escura) ---------------------------------

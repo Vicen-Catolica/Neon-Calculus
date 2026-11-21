@@ -8,7 +8,7 @@ signal hacked
 signal hack_failed
 
 ## Novos tipos sempre no fim: o valor numérico fica salvo nas cenas.
-enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK, VALVE, CONVEYOR, DRONE, LASER }
+enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK, VALVE, CONVEYOR, DRONE, LASER, BRIDGE }
 
 @export var kind: Kind = Kind.CAMERA
 @export var display_name: String = "ALVO"
@@ -30,6 +30,7 @@ const KIND_LABEL := {
 	Kind.CYBORG: "UNIDADE LÓGICA", Kind.LIGHT: "LUZ NEON", Kind.KIOSK: "QUIOSQUE AXIOMA",
 	Kind.VALVE: "VÁLVULA DE VAPOR", Kind.CONVEYOR: "ESTEIRA",
 	Kind.DRONE: "DRONE DE PATRULHA", Kind.LASER: "BARREIRA LASER",
+	Kind.BRIDGE: "PONTE DE LUZ",
 }
 
 

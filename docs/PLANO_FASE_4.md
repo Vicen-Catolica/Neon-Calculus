@@ -113,7 +113,7 @@ Paleta do Núcleo: preto-azulado profundo, linhas de grade ciano finas, geometri
 1. ✅ **Ligação e esqueleto**: `GameManager.LEVELS[4]`, saída da Fase 3 → Fase 4, `tools/build_core_stage.gd` vazio. *Teste:* o elevador executivo leva à Fase 4 com "Acessando... Núcleo Quântico"; "Continuar" volta ao andar 4.
 2. ✅ **Equação do nível 5** (C# + validador + NUnit + SINE + visual). *Teste:* NUnit e `ui_sim` (o passo a passo chega na resposta).
 3. ✅ **Greybox A–D** com o que já existe + diálogo de elevador. *Teste:* atravessável; capturas.
-4. **Ponte de luz** (hack, mão única, queda no abismo). *Teste:* `stage4_sim`.
+4. ✅ **Ponte de luz** (hack, mão única, queda no abismo). *Teste:* `stage4_sim`.
 5. **Núcleo, nós e ataques** (cada ataque isolado, com telegrafia e dano). *Teste:* um OK/FALHOU por ataque.
 6. **Duelo de Paradoxo** (camadas 1–3, erros, game over no checkpoint, Paradoxo final). *Teste:* `duel_sim` jogando o Duelo inteiro por código.
 7. **Cutscenes e diálogos** (elevador, alto-falantes, confronto, falas por camada, colapso).
