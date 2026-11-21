@@ -19,6 +19,14 @@ const DIALOGUE_DIR := "res://data/dialogue/"
 const CHARS_PER_SEC := 55.0
 
 ## Nome exibido e cor de cada falante (GDD §8: ciano = SINE, vermelho/laranja = Axioma).
+## Retratos (PixelLab, tools/gen_core_art.py); sem arquivo, a caixa mostra a inicial.
+const PORTRAITS := {
+	"SINE": "res://assets/ui/portraits/sine.png",
+	"EDUARDO": "res://assets/ui/portraits/eduardo.png",
+	"AXIOMA": "res://assets/ui/portraits/axioma.png",
+	"VANCE": "res://assets/ui/portraits/vance.png",
+}
+
 const SPEAKERS := {
 	"SINE": ["S.I.N.E.", Color("00f0ff")],
 	"EDUARDO": ["EDUARDO", Color("e8eef2")],
@@ -29,6 +37,7 @@ const SPEAKERS := {
 var _root: Control
 var _glitch: ColorRect
 var _portrait: Label
+var _portrait_tex: TextureRect
 var _portrait_box: PanelContainer
 var _portrait_style: StyleBoxFlat
 var _panel_style: StyleBoxFlat
@@ -137,6 +146,9 @@ func _show_line() -> void:
 	_name.add_theme_color_override("font_color", color)
 	_portrait.text = String(info[0]).left(1)
 	_portrait.add_theme_color_override("font_color", color)
+	var tex_path: String = PORTRAITS.get(who, "")
+	_portrait_tex.texture = load(tex_path) if tex_path != "" and ResourceLoader.exists(tex_path) else null
+	_portrait.visible = _portrait_tex.texture == null
 	_portrait_style.border_color = color
 	_panel_style.border_color = Color(color, 0.85)
 	_body.text = _current_text()
@@ -246,6 +258,13 @@ func _build() -> void:
 	_portrait.add_theme_font_override("font", font)
 	_portrait.add_theme_font_size_override("font_size", 72)
 	_portrait_box.add_child(_portrait)
+	_portrait_tex = TextureRect.new()
+	_portrait_tex.name = "PortraitArt"
+	_portrait_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_portrait_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_portrait_tex.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_portrait_tex.custom_minimum_size = Vector2(142, 142)
+	_portrait_box.add_child(_portrait_tex)
 
 	var col := VBoxContainer.new()
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL

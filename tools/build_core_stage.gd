@@ -6,7 +6,8 @@ extends "res://tools/stage_builder_base.gd"
 ## GREYBOX (etapas 3–4 do docs/PLANO_FASE_4.md): a aproximação ao Domo (A–D).
 ## B tem pontes de luz (hack / temporizada) sobre o abismo; cair volta à última
 ## plataforma com dano. O Duelo (E) vem nas etapas 5–6.
-## Arte provisória: tiles do P&D escurecidos, geometrias em Polygon2D.
+## Arte: tileset do tema "core" (tools/gen_rnd_tiles.py core) e o fundo do vazio
+## do PixelLab (tools/gen_core_art.py).
 ##
 ## Percurso, da esquerda para a direita:
 ##   A  chegada do elevador executivo (diálogo)
@@ -14,13 +15,13 @@ extends "res://tools/stage_builder_base.gd"
 ##   C  galeria dos servidores massivos: 2 Unidades Lógicas, lasers, domo
 ##   D  antecâmara do Domo de Controle Neural (porta = saída)
 
-const GROUND_TS := "res://assets/tilesets/rnd/rnd_ground.tres"
+const GROUND_TS := "res://assets/tilesets/core/core_ground.tres"
 const OUT_LEVEL := "res://scenes/levels/core/core_stage4.tscn"
 ## A porta do Domo leva à arena do Duelo de Paradoxo.
 const NEXT_STAGE := "res://scenes/levels/core/core_duel.tscn"
 
-const GROUND_TINT := Color(0.42, 0.46, 0.56)
-const WALL_TINT := Color(0.3, 0.33, 0.42)
+const GROUND_TINT := Color.WHITE
+const WALL_TINT := Color(0.78, 0.8, 0.86)
 const HALL_CEILING_Y := -368.0
 const DOOR_X := 126 * 32 - 24   # porta do Domo (saída)
 
@@ -60,7 +61,7 @@ const LADDERS := [
 	[97, -5, 16.0],
 ]
 
-const SHOW_ZONE_LABELS := true
+const SHOW_ZONE_LABELS := false
 const ZONES := [
 	["A // ELEVADOR EXECUTIVO", Vector2(-180, -330)],
 	["B // PONTES DE LUZ (hackeie o emissor)", Vector2(560, -330)],
@@ -120,26 +121,26 @@ func _add_background(lvl: Node) -> void:
 	bg.position = Vector2(-1200, -2000)
 	bg.size = Vector2(7000, 3000)
 	lvl.add_child(bg)
+	# O vazio do topo da torre (PixelLab), em parallax: geometrias e torres de
+	# servidores ao longe, mais escuro para cima.
 	var par := Parallax2D.new()
-	par.name = "Geometry"
-	par.scroll_scale = Vector2(0.5, 0.8)
+	par.name = "BackgroundFar"
+	par.scroll_scale = Vector2(0.4, 0.9)
+	par.repeat_size = Vector2(1536, 0)
+	par.repeat_times = 6
 	lvl.add_child(par)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 4
-	for i in 26:
-		var poly := Line2D.new()
-		poly.name = "Shape%d" % i
-		var r := rng.randf_range(18.0, 60.0)
-		var sides: int = [3, 4, 6][i % 3]
-		var pts := PackedVector2Array()
-		var rot := rng.randf() * TAU
-		for k in sides + 1:
-			pts.append(Vector2.from_angle(rot + TAU * k / sides) * r)
-		poly.points = pts
-		poly.width = 1.5
-		poly.default_color = Color(1.0, 0.45, 0.12, 0.35) if i % 4 == 0 else Color(0.0, 0.9, 1.0, 0.22)
-		poly.position = Vector2(rng.randf_range(-300, 4300), rng.randf_range(-800, 300))
-		par.add_child(poly)
+	var tex: Texture2D = load("res://assets/backgrounds/core/bg_core_seamless.png")
+	var h := tex.get_height()
+	var tints := [Color(1, 1, 1), Color(0.6, 0.6, 0.68), Color(0.4, 0.4, 0.46)]
+	for k in range(tints.size() - 1, -1, -1):
+		var s := Sprite2D.new()
+		s.name = "Void%d" % k
+		s.texture = tex
+		s.centered = false
+		s.modulate = tints[k]
+		s.flip_h = k % 2 == 1
+		s.position = Vector2(-768, 120 - h * (k + 1))
+		par.add_child(s)
 
 
 # --- B: pontes de luz e abismo -------------------------------------------------
@@ -221,16 +222,13 @@ func _add_guards(lvl: Node) -> void:
 func _add_exit(lvl: Node) -> void:
 	var exit := _exit(lvl, NEXT_STAGE, Vector2(DOOR_X, 16))
 	exit.name = "LevelExit"
-	var door := ColorRect.new()
-	door.name = "DomeDoor"
-	door.color = Color(1.0, 0.42, 0.1, 0.25)
-	door.position = Vector2(DOOR_X - 40, -176)
-	door.size = Vector2(80, 192)
-	lvl.add_child(door)
+	# Porta do Domo: as portas do elevador executivo, tingidas do laranja da Axioma.
+	var door := _prop(lvl, RND_PROPS + "exec_elevator.png", DOOR_X, 16.0, "DomeDoor")
+	door.modulate = Color(1.0, 0.62, 0.45)
 	var sign := Label.new()
 	sign.name = "DomeSign"
 	sign.text = "DOMO DE CONTROLE NEURAL"
-	sign.position = Vector2(DOOR_X - 160, -260)
+	sign.position = Vector2(DOOR_X - 150, -250)
 	sign.add_theme_font_size_override("font_size", 16)
 	sign.add_theme_color_override("font_color", Color("FF6A1A"))
 	lvl.add_child(sign)

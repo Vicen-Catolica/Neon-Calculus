@@ -57,6 +57,19 @@ func _build() -> void:
 	bg.color = Color(0.01, 0.015, 0.03)
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
+	# A torre com as portas abertas ao amanhecer (PixelLab), escurecida sob o texto.
+	var art := TextureRect.new()
+	art.name = "EndingArt"
+	art.texture = load("res://assets/backgrounds/core/ending.png")
+	art.set_anchors_preset(Control.PRESET_FULL_RECT)
+	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	art.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(art)
+	var shade := ColorRect.new()
+	shade.color = Color(0.0, 0.01, 0.03, 0.72)
+	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(shade)
 
 	var row := HBoxContainer.new()
 	row.position = Vector2(140, 110)

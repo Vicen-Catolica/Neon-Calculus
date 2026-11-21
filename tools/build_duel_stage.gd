@@ -13,10 +13,10 @@ extends "res://tools/stage_builder_base.gd"
 ## plataforma do meio (y = -464) leva à plataforma de cima (y = -624), sobre o
 ## núcleo, com o terceiro nó.
 
-const GROUND_TS := "res://assets/tilesets/rnd/rnd_ground.tres"
+const GROUND_TS := "res://assets/tilesets/core/core_ground.tres"
 const OUT_LEVEL := "res://scenes/levels/core/core_duel.tscn"
-const GROUND_TINT := Color(0.38, 0.42, 0.52)
-const WALL_TINT := Color(0.26, 0.29, 0.38)
+const GROUND_TINT := Color.WHITE
+const WALL_TINT := Color(0.7, 0.72, 0.8)
 const CORE_POS := Vector2(960, -400)
 
 const GROUND_RECTS := [
@@ -97,6 +97,14 @@ func _add_background(lvl: Node) -> void:
 	bg.position = Vector2(-600, -1600)
 	bg.size = Vector2(3200, 2000)
 	lvl.add_child(bg)
+	# O Domo (PixelLab): túnel de anéis com o "olho" atrás do núcleo (3×, sem filtro).
+	var dome_bg := Sprite2D.new()
+	dome_bg.name = "DomeArt"
+	dome_bg.texture = load("res://assets/backgrounds/core/bg_dome.png")
+	dome_bg.scale = Vector2(3, 3)
+	dome_bg.position = CORE_POS + Vector2(0, -40)
+	dome_bg.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	lvl.add_child(dome_bg)
 	# Grade fina e anéis concêntricos atrás do núcleo: o Domo.
 	var dome := Node2D.new()
 	dome.name = "DomeLines"
