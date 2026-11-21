@@ -41,6 +41,9 @@ var lore_read: Array[String] = []
 var dialogues_seen: Array[String] = []
 ## Marcos da história (ex.: "vance_rescued"); vão para o save na hora.
 var story_flags: Array[String] = []
+## Estatísticas da partida (tela de encerramento). "time" em segundos reais de
+## jogo dentro das fases; o resto são contagens. Vão para o save.
+var stats: Dictionary = _empty_stats()
 ## Variância somada por cada alarme disparado.
 const ALARM_VARIANCE: float = 20.0
 ## Segundos sem hack/alarme até a variância começar a cair.
@@ -56,8 +59,20 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
+static func _empty_stats() -> Dictionary:
+	return {"time": 0.0, "hacks": 0, "hack_errors": 0, "alarms": 0}
+
+
+func add_stat(key: String, amount: int = 1) -> void:
+	stats[key] = int(stats.get(key, 0)) + amount
+
+
 ## Variância baixa sozinha quando o jogador passa um tempo sem hackear nem ser visto.
 func _process(delta: float) -> void:
+	# Tempo de jogo: só dentro de uma fase e com o jogo rodando (em tempo real,
+	# mesmo com o mundo desacelerado na visão hacker ou no hack).
+	if not get_tree().paused and get_tree().current_scene is Level and state != State.GAME_OVER:
+		stats["time"] = float(stats.get("time", 0.0)) + delta / maxf(Engine.time_scale, 0.01)
 	if state != State.PLAYING or get_tree().paused:
 		return
 	_calm_time += delta
@@ -104,6 +119,7 @@ func start_level(floor_number: int) -> void:
 
 
 func raise_alarm(world_position: Vector2) -> void:
+	add_stat("alarms")
 	alarm_raised.emit(world_position)
 	add_variance(ALARM_VARIANCE)
 
@@ -146,6 +162,7 @@ func reset_progress() -> void:
 	lore_read.clear()
 	dialogues_seen.clear()
 	story_flags.clear()
+	stats = _empty_stats()
 	current_floor = 1
 	reset_variance()
 

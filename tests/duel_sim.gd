@@ -162,6 +162,7 @@ func full_duel() -> void:
 	GameManager.set_flag("vance_rescued")  # Protocolo Vance ligado nesta rodada
 	lvl = load(LEVEL).instantiate()
 	lvl.get_node("ParadoxDuel").set("rng_seed", 7)
+	lvl.get_node("ParadoxDuel").set("go_to_ending", false)  # não troca de cena no teste
 	add_child(lvl)
 	p = lvl.get_node("Eduardo")
 	var duel := lvl.get_node("ParadoxDuel") as ParadoxDuel
@@ -181,6 +182,7 @@ func full_duel() -> void:
 	check("o Duelo espera o confronto acabar", duel.state == ParadoxDuel.State.WAITING)
 	Dialogue.skip()
 	await step(int(duel.start_delay * 60.0) + 10)
+	check("Duelo: a trilha do Duelo toca na camada 1", duel._music.playing and duel._music.stream.resource_path.ends_with("The_Axioma_Resolve.mp3"))
 	check("Duelo: camada 1 acende o nó da esquerda", duel.state == ParadoxDuel.State.LAYER and duel.layer == 1
 		and duel.nodes[0].state == SurveillanceNode.State.ACTIVE and duel.nodes[1].state == SurveillanceNode.State.IDLE)
 	var nh := duel.nodes[0].get_node("Hackable") as Hackable
@@ -240,6 +242,7 @@ func full_duel() -> void:
 	await get_tree().create_timer(2.4, true, false, true).timeout
 	await step(5)
 	check("Paradoxo aceito: a Axioma colapsa", duel.state == ParadoxDuel.State.WON and duel.core.collapsed)
+	check("vitória em silêncio (a trilha para)", not duel._music.playing)
 	check("vitória marcada no save do jogo", GameManager.has_flag("axioma_defeated"))
 	var ended := [false]
 	duel.ending_ready.connect(func() -> void: ended[0] = true)

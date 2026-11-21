@@ -435,6 +435,7 @@ func _on_paradox_answer() -> void:
 
 func _trigger_error(wrong_value: int = 0) -> void:
 	error_count += 1
+	GameManager.add_stat("hack_errors")
 	current_input_text = ""
 	_update_input_display()
 

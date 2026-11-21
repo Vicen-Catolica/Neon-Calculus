@@ -200,6 +200,28 @@ func _ready() -> void:
 	check("terminais do P&D trazem dica", tips.is_empty(), str(tips))
 	await frames(2)
 
+	# --- Estatísticas e tela de encerramento ---
+	var st0: Dictionary = GameManager.stats.duplicate()
+	var al0 := int(st0.get("alarms", 0))
+	GameManager.raise_alarm(Vector2.ZERO)
+	check("estatística: alarme conta", int(GameManager.stats["alarms"]) == al0 + 1)
+	check("estatística: tempo de jogo corre dentro da fase", float(GameManager.stats["time"]) > 0.0, "%.1f s" % float(GameManager.stats["time"]))
+	check("estatística: erros de cálculo contados nos hacks acima", int(GameManager.stats["hack_errors"]) >= 3, str(GameManager.stats["hack_errors"]))
+	GameManager.stats = {"time": 3725.0, "hacks": 31, "hack_errors": 4, "alarms": 2}
+	GameManager.set_flag("vance_rescued")
+	var ending := (load("res://scenes/ui/ending.tscn") as PackedScene).instantiate() as EndingScreen
+	tree.root.add_child(ending)
+	await frames(3)
+	var stats_text: String = (ending.find_child("Stats", true, false) as Label).text
+	check("encerramento: Nova Gödel livre", (ending.find_child("Title", true, false) as Label).text == "NOVA GÖDEL LIVRE")
+	check("encerramento: tempo, hacks, erros e alarmes", "01:02:05" in stats_text and "Hacks bem-sucedidos: 31" in stats_text
+		and "Erros de cálculo: 4" in stats_text and "Alarmes disparados: 2" in stats_text, stats_text.replace("\n", " | "))
+	check("encerramento: lore lida de um total e o Vance", ("de %d" % LoreDatabase.count()) in stats_text and "resgatado" in stats_text and LoreDatabase.count() >= 13)
+	check("encerramento: créditos com os 5 autores", (ending.find_child("Authors", true, false) as Label).text.count("\n") == 4)
+	ending.queue_free()
+	GameManager.story_flags.clear()
+	await frames(2)
+
 	# --- Caixa de diálogo ---
 	var script_lines: Array = Dialogue.lines_for("rnd_elevator")
 	var unknown := script_lines.filter(func(l): return not Dialogue.SPEAKERS.has(String(l["who"])))

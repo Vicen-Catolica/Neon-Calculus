@@ -31,6 +31,12 @@ enum State { WAITING, LAYER, BETWEEN, PARADOX, WON }
 ## Segundos entre ataques em cada camada (a última vale também no Paradoxo).
 @export var intervals: Array[float] = [3.4, 2.8, 2.2]
 @export var rng_seed: int = 0
+## Depois das falas da vitória: branco, silêncio e a tela de encerramento.
+## (As simulações desligam para não trocar de cena.)
+@export var go_to_ending: bool = true
+
+const ENDING_SCENE := "res://scenes/ui/ending.tscn"
+const MUSIC := "res://assets/Music/The_Axioma_Resolve.mp3"
 
 const VANCE_FLAG := "vance_rescued"
 ## O Duelo só começa depois do confronto (e não o repete após um game over).
@@ -50,6 +56,7 @@ var nodes: Array[SurveillanceNode] = []
 var _timer: float = 0.0
 var _recover_left: float = 0.0
 var _rng := RandomNumberGenerator.new()
+var _music: AudioStreamPlayer
 
 
 func _ready() -> void:
@@ -70,6 +77,12 @@ func _ready() -> void:
 	(nodes[2].get_node("Hackable") as Hackable).sine_at_start = GameManager.has_flag(VANCE_FLAG)
 	(core.get_node("Hackable") as Hackable).hacked.connect(_on_paradox_inserted)
 	_timer = start_delay
+	# Trilha do Duelo (GDD §6: synthwave no Duelo de Paradoxo).
+	_music = AudioStreamPlayer.new()
+	_music.name = "DuelMusic"
+	_music.stream = load(MUSIC)
+	_music.volume_db = -6.0
+	add_child(_music)
 
 
 func vance() -> bool:
@@ -77,6 +90,9 @@ func vance() -> bool:
 
 
 func _process(delta: float) -> void:
+	# A música cede lugar à do terminal durante o hack.
+	if _music.playing:
+		_music.stream_paused = GameManager.state == GameManager.State.HACKING
 	if _recover_left > 0.0:
 		_recover_left -= delta
 		if _recover_left <= 0.0 and state == State.LAYER:
@@ -108,6 +124,8 @@ func _begin_layer(n: int) -> void:
 	nodes[n - 1].activate()
 	_timer = 1.5
 	_flash("CAMADA %d/3 — HACKEIE O NODO DE VIGILÂNCIA" % n, CYAN)
+	if n == 1 and not _music.playing:
+		_music.play()
 	layer_started.emit(n)
 
 
@@ -145,6 +163,7 @@ func _on_paradox_inserted() -> void:
 		return
 	state = State.WON
 	clear_attacks()
+	_music.stop()  # a vitória é em silêncio
 	core.collapse()
 	GameManager.set_flag(WIN_FLAG)
 	won.emit()
@@ -153,6 +172,24 @@ func _on_paradox_inserted() -> void:
 	if _say("duel_victory"):
 		await Dialogue.finished
 	ending_ready.emit()
+	if go_to_ending:
+		await _white_out(2.5)
+		Engine.time_scale = 1.0
+		get_tree().change_scene_to_file(ENDING_SCENE)
+
+
+## Tela vai ao branco (tempo real): os neons apagam, sobra a luz.
+func _white_out(seconds: float) -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 90
+	var white := ColorRect.new()
+	white.color = Color(1, 1, 1, 0)
+	white.set_anchors_preset(Control.PRESET_FULL_RECT)
+	layer.add_child(white)
+	get_parent().add_child(layer)
+	var tw := create_tween().set_ignore_time_scale(true)
+	tw.tween_property(white, "color:a", 1.0, seconds)
+	await tw.finished
 
 
 ## Toca uma fala da Axioma/SINE (pausa o jogo enquanto aberta). false se não há roteiro.

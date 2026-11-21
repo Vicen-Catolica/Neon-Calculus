@@ -98,6 +98,7 @@ func can_be_hacked() -> bool:
 func resolve(success: bool) -> void:
 	if success:
 		GameManager.add_variance(variance_cost)
+		GameManager.add_stat("hacks")
 		hacked.emit()
 	else:
 		GameManager.add_variance(variance_fail_cost)
