@@ -8,7 +8,7 @@ signal hacked
 signal hack_failed
 
 ## Novos tipos sempre no fim: o valor numérico fica salvo nas cenas.
-enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK, VALVE, CONVEYOR, DRONE, LASER, BRIDGE }
+enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK, VALVE, CONVEYOR, DRONE, LASER, BRIDGE, NODE }
 
 @export var kind: Kind = Kind.CAMERA
 @export var display_name: String = "ALVO"
@@ -22,6 +22,8 @@ enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK, VALVE, CONVEYOR, DRONE, L
 @export var time_limit_mult: float = 1.0
 ## Falso: Esc não abandona o hack (lockdown).
 @export var abortable: bool = true
+## >= 0: força o subtópico da equação (nós do Duelo escolhem o tipo do nível 5).
+@export var sub_topic_override: int = -1
 ## Colisor do próprio alvo, ignorado no teste de linha de visão (ex.: porta).
 @export var ignore_body: CollisionObject2D
 
@@ -30,7 +32,7 @@ const KIND_LABEL := {
 	Kind.CYBORG: "UNIDADE LÓGICA", Kind.LIGHT: "LUZ NEON", Kind.KIOSK: "QUIOSQUE AXIOMA",
 	Kind.VALVE: "VÁLVULA DE VAPOR", Kind.CONVEYOR: "ESTEIRA",
 	Kind.DRONE: "DRONE DE PATRULHA", Kind.LASER: "BARREIRA LASER",
-	Kind.BRIDGE: "PONTE DE LUZ",
+	Kind.BRIDGE: "PONTE DE LUZ", Kind.NODE: "NODO DE VIGILÂNCIA",
 }
 
 
@@ -53,6 +55,8 @@ func get_difficulty() -> Vector2i:
 		Kind.CYBORG:
 			floor_level += 1
 			sub_topic = 1
+	if sub_topic_override >= 0:
+		sub_topic = sub_topic_override
 	return Vector2i(clampi(floor_level + difficulty_bonus, 1, 5), sub_topic)
 
 

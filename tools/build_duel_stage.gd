@@ -1,0 +1,103 @@
+extends "res://tools/stage_builder_base.gd"
+## Monta a arena do Duelo de Paradoxo (Domo de Controle Neural, Fase 4). Uso:
+##   godot --headless --path . res://tools/build_duel_stage.tscn
+## Cena própria: o checkpoint do andar fica logo antes do chefe (game over aqui
+## volta ao começo do Duelo, não ao elevador). Câmera com zoom 1: a arena cabe
+## inteira na tela (~1920×1080).
+##
+## ETAPA 5 do docs/PLANO_FASE_4.md: arena, núcleo e os 3 Nodos de Vigilância.
+## Os ataques (scripts/duel/*_attack.gd) são criados pelo controlador do Duelo
+## (etapa 6); aqui só a geometria e as peças.
+##
+## Arena: chão inteiro; plataforma esquerda e direita (y = -272) com um nó cada;
+## plataforma do meio (y = -464) leva à plataforma de cima (y = -624), sobre o
+## núcleo, com o terceiro nó.
+
+const GROUND_TS := "res://assets/tilesets/rnd/rnd_ground.tres"
+const OUT_LEVEL := "res://scenes/levels/core/core_duel.tscn"
+const GROUND_TINT := Color(0.38, 0.42, 0.52)
+const WALL_TINT := Color(0.26, 0.29, 0.38)
+const CORE_POS := Vector2(960, -400)
+
+const GROUND_RECTS := [
+	[-6, 0, 66, 12],
+]
+
+const WALL_RECTS := [
+	[-6, -40, -1, -1],    # parede esquerda
+	[60, -40, 66, -1],    # parede direita
+	[-6, -44, 66, -35],   # teto (face de baixo em -1104)
+]
+
+const CATWALKS := [
+	[5, 13, -9, false],    # esquerda (y = -272)
+	[47, 55, -9, false],   # direita
+	[13, 24, -15, false],  # meio (y = -464)
+	[24, 36, -20, false],  # topo, sobre o núcleo (y = -624)
+]
+
+const LADDERS := [
+	[5, -9, 16.0],         # chão -> esquerda
+	[55, -9, 16.0],        # chão -> direita
+	[13, -15, -272.0],     # esquerda -> meio
+	[24, -20, -464.0],     # meio -> topo
+]
+
+## [nome, posição (chão), subtópico do nível 5]
+const NODES := [
+	["NodeLeft", Vector2(300, -272), 0],
+	["NodeRight", Vector2(1660, -272), 0],
+	["NodeTop", Vector2(1060, -624), 1],
+]
+
+
+func out_path() -> String:
+	return OUT_LEVEL
+
+
+func build() -> Node:
+	var lvl := _new_level("CoreDuel", 4, -16, 60 * T + 16, -1104, 60)
+	lvl.set("camera_zoom", 1.0)
+	lvl.set("max_security_rect", Rect2(-400, -1400, 60 * T + 800, 1600))
+	_add_background(lvl)
+	_terrain_layer(lvl, "Buildings", GROUND_TS, WALL_RECTS, WALL_TINT)
+	_terrain_layer(lvl, "Ground", GROUND_TS, GROUND_RECTS, GROUND_TINT)
+	_structures(lvl, CATWALKS)
+	_catwalk_band(lvl, CATWALKS)
+	_ladders(lvl, LADDERS)
+	var core := Node2D.new()
+	core.name = "AxiomaCore"
+	core.set_script(load("res://scripts/duel/axioma_core.gd"))
+	core.position = CORE_POS
+	lvl.add_child(core)
+	var nodes := _holder(lvl, "SurveillanceNodes")
+	for n in NODES:
+		var node := _instance("res://scenes/objects/surveillance_node.tscn", n[0], n[1])
+		node.set("sub_topic", n[2])
+		nodes.add_child(node)
+	_player_and_ui(lvl, Vector2(120, 16))
+	return lvl
+
+
+func _add_background(lvl: Node) -> void:
+	var bg := ColorRect.new()
+	bg.name = "Background"
+	bg.color = Color(0.015, 0.02, 0.04)
+	bg.position = Vector2(-600, -1600)
+	bg.size = Vector2(3200, 2000)
+	lvl.add_child(bg)
+	# Grade fina e anéis concêntricos atrás do núcleo: o Domo.
+	var dome := Node2D.new()
+	dome.name = "DomeLines"
+	lvl.add_child(dome)
+	for i in 6:
+		var ring := Line2D.new()
+		ring.name = "Ring%d" % i
+		var pts := PackedVector2Array()
+		var r := 220.0 + i * 140.0
+		for k in 65:
+			pts.append(CORE_POS + Vector2.from_angle(TAU * k / 64.0) * r)
+		ring.points = pts
+		ring.width = 1.0
+		ring.default_color = Color(1.0, 0.42, 0.1, 0.12 - i * 0.015)
+		dome.add_child(ring)

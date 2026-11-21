@@ -13,6 +13,8 @@ extends Node2D
 ## médios). Alvos dentro dela usam `max_security_time_mult`. Vazia = nenhuma.
 @export var max_security_rect: Rect2 = Rect2()
 @export var max_security_time_mult: float = 0.8
+## > 0: zoom da câmera nesta fase (a arena do Duelo usa 1 para caber inteira).
+@export var camera_zoom: float = 0.0
 
 
 func _ready() -> void:
@@ -30,3 +32,5 @@ func _ready() -> void:
 		cam.limit_right = limit_right
 		cam.limit_top = limit_top
 		cam.limit_bottom = limit_bottom
+		if camera_zoom > 0.0:
+			cam.zoom = Vector2(camera_zoom, camera_zoom)

@@ -27,6 +27,7 @@ func _build_object_scenes() -> void:
 	_build_laser()
 	_build_holding_cell()
 	_build_light_bridge()
+	_build_surveillance_node()
 	_build_ui()
 
 
@@ -247,6 +248,14 @@ func _build_light_bridge() -> void:
 	body.add_child(cs)
 	b.add_child(body)
 	_save(b, "res://scenes/objects/light_bridge.tscn")
+
+
+func _build_surveillance_node() -> void:
+	var n := Node2D.new()
+	n.name = "SurveillanceNode"
+	n.set_script(load("res://scripts/duel/surveillance_node.gd"))
+	n.add_child(_hackable("NODO DE VIGILÂNCIA", Vector2(0, -70)))
+	_save(n, "res://scenes/objects/surveillance_node.tscn")
 
 
 func _build_conveyor() -> void:
