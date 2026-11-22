@@ -31,7 +31,7 @@ git diff --stat feature/rnd-stage-3...feature/core-stage-4
 tools/run_tests.sh
 ```
 
-O roteiro importa o projeto, compila o C#, roda os 23 testes NUnit e 12 simulações headless. Leva **mais de 10 minutos**. Para rodar só algumas simulações:
+O roteiro importa o projeto, compila o C#, roda os 23 testes NUnit e 13 simulações headless. Leva **mais de 10 minutos**. Para rodar só algumas simulações:
 
 ```bash
 SIMS="duel_sim duel_bot_sim" tools/run_tests.sh
@@ -48,6 +48,12 @@ SIMS="duel_sim duel_bot_sim" tools/run_tests.sh
 | `duel_bot_sim` | robô que só desvia vence o Duelo em 3 sementes (os padrões são justos) |
 | `balance_sim` | tabela de tempos de hack por tipo, lockdown, laser, ciborgue, Duelo |
 | `ui_sim` | tela de hack (acerto, erro, abortar, SINE, nível 5, Paradoxo), diálogos, Como jogar, pausa, lore, encerramento |
+| `edge_sim` | casos-limite do playtest automatizado: hack pendurado na escada, Esc no quadro em que o hack abre, pausa na visão hacker, Esc repetido, hack escondido, abismo com pouca defesa, reiniciar andar com o Vance resgatado, pausa bloqueada depois de vencer o Duelo |
+
+Fora do roteiro (não entram no CI):
+
+- `tests/chaos_sim.tscn`: robô que aperta teclas ao acaso em cada fase (andar, pular, escadas, esconder, visão hacker, hack certo/errado/abortado/sem tempo, sonar, camuflagem, pausa, reiniciar, game over) e vigia travas de estado a cada quadro (jogo pausado sem tela, câmera lenta presa, duas telas abertas, mundo rodando atrás do game over, Eduardo fora do mapa…). `CHAOS_SECS=100 CHAOS_SEED=1 godot --headless --path . res://tests/chaos_sim.tscn`; `CHAOS_LEVELS=4,5` limita as fases.
+- `tests/ui_shots.tscn`: fotos das telas sobrepostas (hack nível 5 com SINE, Paradoxo, pausa, Como jogar, diálogos, game over, encerramento). Precisa de janela: `LIBGL_ALWAYS_SOFTWARE=1 godot --path . --windowed --resolution 1920x1080 res://tests/ui_shots.tscn -- <pasta>`.
 
 > O import do Godot reformata `MathGenerator.cs`, `math_visualizer.gd` e `EquationGenerator.cs` (tabs/CRLF). Se aparecerem como modificados depois de rodar os testes sem você ter mexido neles: `git restore` nos três.
 
@@ -154,6 +160,7 @@ Nada disto foi jogado com teclado e mouse, só por simulação. Vale passar por 
 - **"Configurações" no menu de pausa** (GDD §8): a pausa tem Retomar, Como jogar, Reiniciar andar e Menu principal; as opções só estão no menu principal.
 - **Ciclos de Processamento / upgrades do traje** (WDD §10): fora do escopo.
 - **Build de Windows** (M5 do cronograma): não foi gerada nem testada.
+- **Dicas de tecla fixas no texto:** a HUD ("[F] ESCONDER", "SONAR [V]"…), a visão hacker ("[E] HACKEAR") e o "Como jogar" mostram as teclas padrão; se o jogador remapear nas Opções, essas dicas não acompanham.
 - **Arte ainda desenhada em código:** emissor de laser, cela, ponte de luz, núcleo e nós (funcionam e combinam com o estilo, mas não são pixel art desenhada).
 
 ---

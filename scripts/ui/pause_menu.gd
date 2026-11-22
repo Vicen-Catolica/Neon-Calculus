@@ -40,6 +40,10 @@ func _can_open() -> bool:
 	var scene := get_tree().current_scene
 	if not (scene is Level) or get_tree().paused or LevelTransition.is_busy():
 		return false
+	# Cenas de encerramento (vitória no Duelo → tela branca) não abrem a pausa:
+	# ela ficaria escondida atrás do branco.
+	if get_tree().get_first_node_in_group("blocks_pause") != null:
+		return false
 	if GameManager.state != GameManager.State.PLAYING and GameManager.state != GameManager.State.HACK_VISION:
 		return false
 	var p := get_tree().get_first_node_in_group("Player")

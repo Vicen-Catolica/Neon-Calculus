@@ -14,21 +14,42 @@ signal accessibility_settings_changed
 
 const EQUATION_FONT_SIZES: Array[int] = [24, 30, 36]
 
+## Teclas remapeáveis nas Opções: as ações que o jogo usa de verdade (o Eduardo
+## lê só move_*/jump/crouch/...; nunca ui_*). Remapear troca só esta tecla
+## principal: as extras do Input Map (Ctrl para agachar, Tab, botão do mouse)
+## continuam valendo. As ui_* não são tocadas (Enter/setas seguem nos menus).
 const DEFAULT_CONTROLS: Dictionary = {
-	"ui_left": KEY_A,
-	"ui_right": KEY_D,
-	"ui_accept": KEY_SPACE,
-	"ui_down": KEY_S,
-	"Interact": KEY_E
+	"move_left": KEY_A,
+	"move_right": KEY_D,
+	"run": KEY_SHIFT,
+	"crouch": KEY_S,
+	"jump": KEY_SPACE,
+	"climb_up": KEY_W,
+	"climb_down": KEY_S,
+	"interact_world": KEY_F,
+	"hack_vision": KEY_Q,
+	"hack_confirm": KEY_E,
+	"sonar_ping": KEY_V,
+	"camo": KEY_C,
 }
 
 const ACTION_DISPLAY_NAMES: Dictionary = {
-	"ui_left": "Mover para a Esquerda",
-	"ui_right": "Mover para a Direita",
-	"ui_accept": "Pular",
-	"ui_down": "Mover para Baixo",
-	"Interact": "Interagir"
+	"move_left": "Andar para a esquerda",
+	"move_right": "Andar para a direita",
+	"run": "Correr",
+	"crouch": "Agachar",
+	"jump": "Pular",
+	"climb_up": "Subir escada",
+	"climb_down": "Descer escada",
+	"interact_world": "Esconder-se / ler terminal",
+	"hack_vision": "Visão hacker (segurar)",
+	"hack_confirm": "Hackear alvo",
+	"sonar_ping": "Ping Sonar",
+	"camo": "Variável Oculta (camuflagem)",
 }
+
+## Tecla que esta sessão colocou em cada ação (para trocar só ela depois).
+var _bound_keys: Dictionary = {}
 
 var colorblind_layer: CanvasLayer
 var colorblind_rect: ColorRect
@@ -99,21 +120,36 @@ func apply_settings() -> void:
 	apply_controls_settings()
 
 func apply_controls_settings() -> void:
+	# Saves antigos remapeavam ui_*/"Interact" (ações que o jogo não usa).
+	for legacy in ["ui_left", "ui_right", "ui_accept", "ui_down", "Interact"]:
+		if config.has_section_key("Controls", legacy):
+			config.erase_section_key("Controls", legacy)
 	for action in DEFAULT_CONTROLS.keys():
 		var keycode: int = config.get_value("Controls", action, DEFAULT_CONTROLS[action])
 		_bind_action_key(action, keycode)
 
+## Troca a tecla principal de `action` por `keycode`, sem apagar as outras.
 func _bind_action_key(action: String, keycode: int) -> void:
 	if not InputMap.has_action(action):
-		InputMap.add_action(action)
-
+		return
+	var old: int = _bound_keys.get(action, DEFAULT_CONTROLS.get(action, KEY_NONE))
+	if old == keycode:
+		_bound_keys[action] = keycode
+		return
 	for event in InputMap.action_get_events(action):
 		if event is InputEventKey:
-			InputMap.action_erase_event(action, event)
-
-	var new_event := InputEventKey.new()
-	new_event.physical_keycode = keycode as Key
-	InputMap.action_add_event(action, new_event)
+			var k: int = event.physical_keycode if event.physical_keycode != 0 else event.keycode
+			if k == old:
+				InputMap.action_erase_event(action, event)
+	var already := false
+	for event in InputMap.action_get_events(action):
+		if event is InputEventKey and (event.physical_keycode == keycode or event.keycode == keycode):
+			already = true
+	if not already:
+		var new_event := InputEventKey.new()
+		new_event.physical_keycode = keycode as Key
+		InputMap.action_add_event(action, new_event)
+	_bound_keys[action] = keycode
 
 func get_action_keycode(action: String) -> int:
 	return config.get_value("Controls", action, DEFAULT_CONTROLS.get(action, KEY_NONE))

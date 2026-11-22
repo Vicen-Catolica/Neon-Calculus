@@ -3,8 +3,16 @@ extends RefCounted
 ## Dano dos ataques do Duelo de Paradoxo: tira Defesa Neural do Eduardo com
 ## invulnerabilidade curta depois de cada golpe (dois ataques ao mesmo tempo não
 ## somam). O corpo é o colisor ativo do Eduardo (agachado é mais baixo).
+## A invulnerabilidade conta no relógio do mundo (GameManager.world_time), o mesmo
+## dos ataques: na visão hacker (mundo a 25%) ou com o jogo lento, um ataque de
+## 1 s continua acertando uma vez só.
 
 const IFRAMES_MS := 1000
+
+
+## Agora, em ms do relógio do mundo.
+static func now_ms() -> int:
+	return int(GameManager.world_time * 1000.0)
 
 
 ## Retângulo global do corpo (em pé ou agachado).
@@ -20,8 +28,8 @@ static func body_rect(player: Node2D) -> Rect2:
 static func hit(player: Node2D, amount: float) -> bool:
 	if player == null or player.get("is_dead"):
 		return false
-	var now := Time.get_ticks_msec()
-	if int(player.get_meta("duel_iframe_until", 0)) > now:
+	var now := now_ms()
+	if int(player.get_meta("duel_iframe_until", 0)) >= now:
 		return false
 	player.set_meta("duel_iframe_until", now + IFRAMES_MS)
 	player.get_tree().call_group("stealth_hud", "_flash", "ATAQUE DO NÚCLEO — DEFESA NEURAL -%d" % int(amount), Color(1.0, 0.2, 0.25))

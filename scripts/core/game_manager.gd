@@ -51,6 +51,9 @@ const VARIANCE_DECAY_DELAY: float = 8.0
 ## Pontos de variância perdidos por segundo depois do atraso.
 const VARIANCE_DECAY_RATE: float = 2.5
 var _calm_time: float = 0.0
+## Relógio do mundo em segundos: anda com o Engine.time_scale e para na pausa,
+## como os ataques e timers da fase (o Ticks do sistema não desacelera).
+var world_time: float = 0.0
 ## Acessibilidade: pausa total durante a equação em vez de câmera lenta.
 var pause_on_hacking: bool = false
 
@@ -69,6 +72,8 @@ func add_stat(key: String, amount: int = 1) -> void:
 
 ## Variância baixa sozinha quando o jogador passa um tempo sem hackear nem ser visto.
 func _process(delta: float) -> void:
+	if not get_tree().paused:
+		world_time += delta
 	# Tempo de jogo: só dentro de uma fase e com o jogo rodando (em tempo real,
 	# mesmo com o mundo desacelerado na visão hacker ou no hack).
 	if not get_tree().paused and get_tree().current_scene is Level and state != State.GAME_OVER:

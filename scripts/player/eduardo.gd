@@ -70,6 +70,8 @@ func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
 	if _hacking:
+		if state == State.CLIMB:
+			return  # parado na escada durante o hack
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		if not is_on_floor():
 			velocity.y += _gravity * delta
@@ -421,6 +423,12 @@ func _on_game_state_changed(new_state: GameManager.State) -> void:
 	if hacking_now == _hacking:
 		return
 	_hacking = hacking_now
+	if state == State.CLIMB:
+		# Hackeando da escada: continua agarrado (antes virava IDLE no ar e caía).
+		velocity = Vector2.ZERO
+		if hacking_now:
+			sprite.pause()
+		return
 	if _hidden or (_crouching and not _can_stand()):
 		# Hackeando escondido ou embaixo de um teto baixo (túnel, puxadinho):
 		# continua agachado (levantar aqui prendia o Eduardo no teto) e usa a

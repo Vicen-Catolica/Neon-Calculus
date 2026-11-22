@@ -45,7 +45,10 @@ func _process(delta: float) -> void:
 	elif phase == Phase.ACTIVE:
 		_tick(delta, clampf(t / active_time, 0.0, 1.0))
 		var p := get_tree().get_first_node_in_group("Player") as Node2D
-		if p and _hits_player(p) and DuelHit.hit(p, damage):
+		# Só acerta dentro da janela ativa [0, active_time): no quadro em que ela
+		# fecha, a invulnerabilidade de 1 s de um golpe no começo também acaba,
+		# e um ataque de 1 s acertava duas vezes.
+		if p and t < active_time and _hits_player(p) and DuelHit.hit(p, damage):
 			hits += 1
 			hit_player.emit()
 		if t >= active_time:

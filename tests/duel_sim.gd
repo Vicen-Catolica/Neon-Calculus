@@ -126,6 +126,14 @@ func _ready() -> void:
 	var gr := LaserGridAttack.new()
 	r = await run(gr)
 	check("grade: dentro de uma coluna, acerta", r[1] == 25.0, "dano %.0f" % r[1])
+	# Na visão hacker o mundo anda a 25%: a grade dura 4x mais em tempo real,
+	# e a invulnerabilidade (tempo do mundo) acompanha — continua um golpe só.
+	await reset_player(800)
+	GameManager.set_state(GameManager.State.HACK_VISION)
+	gr = LaserGridAttack.new()
+	r = await run(gr)
+	GameManager.set_state(GameManager.State.PLAYING)
+	check("grade na visão hacker (mundo a 25%): ainda um golpe só", r[1] == 25.0, "dano %.0f" % r[1])
 	await reset_player(1000)
 	gr = LaserGridAttack.new()
 	r = await run(gr)
@@ -194,7 +202,7 @@ func full_duel() -> void:
 	check("Duelo: quem fica parado leva dano", p.current_defense < p.max_defense and not p.is_dead, "defesa %.0f" % p.current_defense)
 	# Daqui em diante, invulnerável: o teste é da lógica das camadas.
 	p.current_defense = p.max_defense
-	p.set_meta("duel_iframe_until", Time.get_ticks_msec() + 3600 * 1000)
+	p.set_meta("duel_iframe_until", DuelHit.now_ms() + 3600 * 1000)
 	# Errar o hack: o núcleo recupera a camada por alguns segundos.
 	hv.debug_hack(nh, false); await step(3)
 	check("Duelo: errar apaga o nó (o núcleo recupera a camada)", duel.nodes[0].state == SurveillanceNode.State.IDLE and duel.layer == 1)

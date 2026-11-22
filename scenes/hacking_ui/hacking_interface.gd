@@ -413,6 +413,18 @@ func _ensure_paradox_button() -> void:
 	_paradox_btn.add_theme_font_override("font", load("res://assets/fonts/ui_font.tres"))
 	_paradox_btn.add_theme_font_size_override("font_size", 20)
 	_paradox_btn.add_theme_color_override("font_color", FEEDBACK_WARN)
+	_paradox_btn.focus_mode = Control.FOCUS_NONE
+	# Mesmo visual do "Confirmar", em amarelo (antes ficava no cinza padrão do Godot).
+	for st in ["normal", "hover", "pressed"]:
+		var base := submit_button.get_theme_stylebox(st)
+		if base is StyleBoxFlat:
+			var sb := base.duplicate() as StyleBoxFlat
+			sb.border_color = FEEDBACK_WARN
+			if st != "normal":
+				sb.bg_color = FEEDBACK_WARN
+			_paradox_btn.add_theme_stylebox_override(st, sb)
+	for c in ["font_hover_color", "font_focus_color", "font_hover_pressed_color", "font_pressed_color"]:
+		_paradox_btn.add_theme_color_override(c, Color(0.02, 0.055, 0.094))
 	_paradox_btn.pressed.connect(_on_paradox_answer)
 	submit_button.get_parent().add_child(_paradox_btn)
 	submit_button.get_parent().move_child(_paradox_btn, submit_button.get_index() + 1)

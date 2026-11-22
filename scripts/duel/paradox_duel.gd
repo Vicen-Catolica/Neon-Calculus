@@ -173,6 +173,7 @@ func _on_paradox_inserted() -> void:
 	if state != State.PARADOX:
 		return
 	state = State.WON
+	add_to_group("blocks_pause")
 	clear_attacks()
 	_music.stop()  # a vitória é em silêncio
 	core.collapse()
