@@ -24,6 +24,10 @@ signal alarm_triggered(last_position: Vector2)
 @export var walk_hearing_radius: float = 140.0
 ## Raio em que o guarda responde a um alarme de câmera/varredura.
 @export var alarm_response_radius: float = 900.0
+## Ao avistar o Eduardo, chama pelo rádio os agentes neste raio (eles chegam
+## depois de `radio_delay` s). Quem atende ao rádio não repassa o chamado.
+@export var radio_radius: float = 700.0
+@export var radio_delay: float = 0.5
 
 ## Segundos para encher a barra de detecção com o jogador no limite do cone
 ## (de perto enche em `detect_time_near`).
@@ -73,6 +77,8 @@ var _climb_ladder: Area2D = null
 var _climb_dir: int = 0
 var _saved_mask: int = 0
 var _jump_cooldown: float = 0.0
+## true quando o alerta veio do rádio de outro agente (não repassa).
+var _by_radio: bool = false
 const SUSPECT_AT: float = 0.35
 ## Nó filho que desenha a barra por cima do sprite (o _draw do próprio guarda
 ## fica atrás dos filhos e o sprite cobria a barra).
@@ -520,12 +526,53 @@ func investigate(world_point: Vector2) -> void:
 		state_machine.transition_to("Investigate")
 
 
+## Chamado pelo StateMaxAlert ao entrar em alerta máximo. Se foi ele quem viu o
+## Eduardo (não veio do rádio nem de um alarme), chama os vizinhos.
+func on_max_alert(by_alarm: bool) -> void:
+	if _by_radio or by_alarm:
+		_by_radio = false
+		return
+	var called := 0
+	for g in get_tree().get_nodes_in_group("guards"):
+		if g == self or not (g is Enemy):
+			continue
+		var e := g as Enemy
+		if e._current_state_name() in ["maxalert", "stunned", "distracted"] or e.is_blind():
+			continue
+		if e.global_position.distance_to(global_position) > radio_radius:
+			continue
+		e._answer_radio(last_known_player_pos, radio_delay)
+		called += 1
+	if called > 0:
+		get_tree().call_group("stealth_hud", "_flash", "AGENTE CHAMOU REFORÇOS PELO RÁDIO", Color(1.0, 0.6, 0.15))
+	Tutorial.event("spotted")
+
+
+func _answer_radio(pos: Vector2, delay: float) -> void:
+	await get_tree().create_timer(delay, false).timeout
+	if not is_inside_tree() or _current_state_name() in ["maxalert", "stunned"]:
+		return
+	_by_radio = true
+	last_known_player_pos = pos
+	state_machine.transition_to("MaxAlert")
+
+
+var _alarm_entering: bool = false
+
+
+func entered_by_alarm() -> bool:
+	var v := _alarm_entering
+	_alarm_entering = false
+	return v
+
+
 func _on_alarm_raised(world_position: Vector2) -> void:
 	if _current_state_name() in ["stunned"]:
 		return
 	if global_position.distance_to(world_position) > alarm_response_radius:
 		return
 	last_known_player_pos = world_position
+	_alarm_entering = true
 	state_machine.transition_to("MaxAlert")
 
 

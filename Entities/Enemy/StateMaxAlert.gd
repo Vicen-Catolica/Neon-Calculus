@@ -7,6 +7,8 @@ var lose_sight_timer: float = 0.0
 func enter() -> void:
 	lose_sight_timer = 0.0
 	enemy.alarm_triggered.emit(enemy.last_known_player_pos)
+	# Viu o Eduardo com os próprios olhos: chama os vizinhos pelo rádio.
+	enemy.on_max_alert(enemy.entered_by_alarm())
 
 func physics_update(delta: float) -> void:
 	var target_player = enemy.get_player()

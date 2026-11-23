@@ -109,5 +109,31 @@ func _ready() -> void:
 		"a %.0f px do alvo, " % dx + pos())
 	check("e olha para o alvo", g.get_facing_direction().x > 0.0)
 
+	# 6. Rádio: quem vê o Eduardo chama os agentes próximos; os longe não ouvem.
+	var g1 := lvl.get_node("Guards/Guard1") as Enemy
+	var g4 := lvl.get_node("Guards/Guard4") as Enemy
+	for e in [g1, g4]:
+		var en2 = e.get_node_or_null("VisibleOnScreenEnabler2D")
+		if en2:
+			en2.free()
+	g.state_machine.process_mode = Node.PROCESS_MODE_INHERIT
+	g.vision_range = 0.0
+	g.global_position = Vector2(1100, 16)
+	g.state_machine.transition_to("Patrol")
+	g1.global_position = Vector2(600, 16)
+	g1.process_mode = Node.PROCESS_MODE_INHERIT
+	g4.process_mode = Node.PROCESS_MODE_INHERIT
+	g4.vision_range = 0.0
+	p.global_position = Vector2(500, 16)
+	await step(5)
+	Tutorial.allow_in_tests = true
+	g1.last_known_player_pos = p.global_position
+	g1.state_machine.transition_to("MaxAlert")
+	await step(60)
+	check("agente a 500 px atende ao rádio e entra em alerta", g._current_state_name() == "maxalert", g._current_state_name())
+	check("agente a 3600 px não ouve o rádio", g4._current_state_name() != "maxalert", g4._current_state_name())
+	check("SINE avisa na primeira vez que você é visto", Dialogue.is_open() or "tut_spotted" in GameManager.dialogues_seen)
+	check("o fala do aviso existe", not Dialogue.lines_for("tut_spotted").is_empty())
+
 	print("TUDO OK — 0 falha(s)" if fails == 0 else "%d FALHA(S)" % fails)
 	get_tree().quit(1 if fails > 0 else 0)
