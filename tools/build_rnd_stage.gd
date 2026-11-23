@@ -158,6 +158,8 @@ func _add_background(lvl: Node) -> void:
 func _add_tiles(lvl: Node) -> void:
 	_terrain_layer(lvl, "Buildings", GROUND_TS, WALL_RECTS, WALL_TINT)
 	_terrain_layer(lvl, "Ground", GROUND_TS, GROUND_RECTS, GROUND_TINT)
+	# Piso em profundidade (falso 3D) como nas outras fases (tools/gen_floor_band.py rnd).
+	_floor_band(lvl, _surface_runs(GROUND_RECTS), "res://assets/tilesets/rnd/floor_band.png")
 	_structures(lvl, CATWALKS)
 	_catwalk_band(lvl, CATWALKS)
 
@@ -179,13 +181,13 @@ func _add_props(lvl: Node) -> void:
 		["monitor_stand", 1560.0, -144.0, false, 0],    # B: mezanino
 		["filing_cabinet", 2000.0, -144.0, true, 44],   # B: mezanino
 		["plant", 2420.0, 16.0, false, 0],
-		["server_white", 3680.0, -144.0, false, 0],     # D: mezanino
+		["server_white", 3770.0, -144.0, false, 0],     # D: mezanino
 		["lab_bench", 3800.0, 16.0, true, 72],          # D: bancada no escuro
 		["sample_tank", 4050.0, 16.0, false, 0],
 		["lab_bench", 4420.0, 16.0, true, 72],          # D: sob a luz
 		["sample_tank", 4620.0, 16.0, false, 0],
 		["filing_cabinet", 3900.0, -144.0, true, 44],   # D: mezanino
-		["server_white", 4720.0, -144.0, false, 0],
+		["server_white", 4650.0, -144.0, false, 0],
 		["filing_cabinet", 5100.0, -240.0, true, 44],   # E: no meio do átrio
 		["water_cooler", 5360.0, -496.0, false, 0],
 	]
@@ -325,8 +327,10 @@ func _add_guards(lvl: Node) -> void:
 
 
 func _add_exit(lvl: Node) -> void:
-	var exit := _exit(lvl, NEXT_STAGE, EXIT_POS)
+	# Só vale em pé dentro do elevador (não encostando por baixo da passarela).
+	var exit := _exit(lvl, NEXT_STAGE, EXIT_POS, Vector2(80, 120))
 	exit.name = "LevelExit"
+	exit.set("require_standing", true)
 	var sign := Label.new()
 	sign.name = "ElevatorSign"
 	sign.text = "ELEVADOR EXECUTIVO  ->  NÚCLEO"

@@ -8,6 +8,8 @@ extends Node
 
 const LEVEL := "res://scenes/levels/core/core_duel.tscn"
 
+## Dano de um golpe do núcleo (DuelAttack.damage).
+var HIT: float = DuelAttack.new().damage
 var lvl: Node
 var p: Eduardo
 var fails := 0
@@ -83,7 +85,7 @@ func _ready() -> void:
 	sw.gap_center = 1300.0
 	var r := await run(sw)
 	check("varredura: o aviso não causa dano", r[0] == 0.0)
-	check("varredura: fora da brecha, acerta uma vez (-25)", r[1] == 25.0, "dano %.0f" % r[1])
+	check("varredura: fora da brecha, acerta uma vez (um golpe)", r[1] == HIT, "dano %.0f" % r[1])
 	await reset_player(1300)
 	sw = SweepAttack.new()
 	sw.gap_center = 1300.0
@@ -96,7 +98,7 @@ func _ready() -> void:
 	sw.dir = SweepAttack.Dir.RIGHT
 	sw.gap_center = SweepAttack.CROUCH_GAP
 	r = await run(sw)
-	check("varredura lateral: em pé, acerta", r[1] == 25.0, "dano %.0f" % r[1])
+	check("varredura lateral: em pé, acerta", r[1] == HIT, "dano %.0f" % r[1])
 	await reset_player(900)
 	Input.action_press("crouch")
 	await step(10)
@@ -113,7 +115,7 @@ func _ready() -> void:
 	pu.center = core.global_position
 	pu.gap_angle_deg = 90.0
 	r = await run(pu)
-	check("pulso: fora da brecha, acerta", r[1] == 25.0, "dano %.0f" % r[1])
+	check("pulso: fora da brecha, acerta", r[1] == HIT, "dano %.0f" % r[1])
 	await reset_player(300)
 	pu = PulseAttack.new()
 	pu.center = core.global_position
@@ -125,7 +127,7 @@ func _ready() -> void:
 	await reset_player(800)
 	var gr := LaserGridAttack.new()
 	r = await run(gr)
-	check("grade: dentro de uma coluna, acerta", r[1] == 25.0, "dano %.0f" % r[1])
+	check("grade: dentro de uma coluna, acerta", r[1] == HIT, "dano %.0f" % r[1])
 	# Na visão hacker o mundo anda a 25%: a grade dura 4x mais em tempo real,
 	# e a invulnerabilidade (tempo do mundo) acompanha — continua um golpe só.
 	await reset_player(800)
@@ -133,7 +135,7 @@ func _ready() -> void:
 	gr = LaserGridAttack.new()
 	r = await run(gr)
 	GameManager.set_state(GameManager.State.PLAYING)
-	check("grade na visão hacker (mundo a 25%): ainda um golpe só", r[1] == 25.0, "dano %.0f" % r[1])
+	check("grade na visão hacker (mundo a 25%): ainda um golpe só", r[1] == HIT, "dano %.0f" % r[1])
 	await reset_player(1000)
 	gr = LaserGridAttack.new()
 	r = await run(gr)
@@ -153,7 +155,16 @@ func _ready() -> void:
 	a1.start()
 	a2.start()
 	await step(int((a1.telegraph_time + 0.6) * 60.0) + 10)
-	check("dois ataques ao mesmo tempo tiram um golpe só", d0 - p.current_defense == 25.0, "dano %.0f" % (d0 - p.current_defense))
+	check("dois ataques ao mesmo tempo tiram um golpe só", d0 - p.current_defense == HIT, "dano %.0f" % (d0 - p.current_defense))
+
+	# Nós hackeáveis do chão da arena (alcance grande, sem linha de visão).
+	var far_ok := true
+	var floor_eye := Vector2(960, -100)
+	for n in get_tree().get_nodes_in_group("surveillance_node"):
+		var h := n.get_node("Hackable") as Hackable
+		if not (h.ignore_line_of_sight and h.hack_range >= floor_eye.distance_to(h.global_position)):
+			far_ok = false
+	check("nós do Duelo hackeáveis do meio do chão da arena", far_ok)
 
 	await full_duel()
 	print("TUDO OK — 0 falha(s)" if fails == 0 else "%d FALHA(S)" % fails)

@@ -21,6 +21,16 @@ func wait_transition() -> float:
 	return (Time.get_ticks_msec() - t0) / 1000.0
 
 
+## Põe o Eduardo em pé dentro da saída (elas só valem em pé) e espera a troca.
+func stand_in_exit(exit: LevelExit, pl: CharacterBody2D) -> void:
+	pl.global_position = exit.global_position + Vector2(0, -4)
+	pl.velocity = Vector2.ZERO
+	for i in 40:
+		await get_tree().physics_frame
+		if LevelTransition.is_busy():
+			break
+
+
 func wait_real(sec: float) -> void:
 	await get_tree().create_timer(sec, true, false, true).timeout
 
@@ -138,7 +148,8 @@ func _run() -> void:
 	var exit3 := lvl.get_node("LevelExit") as LevelExit
 	check("saída da Fase 3 aponta para a Fase 4", exit3.next_stage == l4, exit3.next_stage)
 	check("título da Fase 4 na transição", GameManager.level_title(l4) == "Núcleo Quântico")
-	exit3._on_body_entered(p)
+	check("saída da Fase 3 exige estar em pé no elevador", exit3.require_standing)
+	await stand_in_exit(exit3, p)
 	dt = await wait_transition()
 	lvl = get_tree().current_scene as Level
 	check("elevador executivo leva à Fase 4", lvl != null and lvl.floor_number == 4)
@@ -158,7 +169,8 @@ func _run() -> void:
 		Dialogue.skip()
 	var exit4 := lvl.get_node("LevelExit") as LevelExit
 	check("porta do Domo leva à arena do Duelo", exit4.next_stage == ld, exit4.next_stage)
-	exit4._on_body_entered(p)
+	check("porta do Domo exige estar em pé na frente dela", exit4.require_standing)
+	await stand_in_exit(exit4, p)
 	dt = await wait_transition()
 	lvl = get_tree().current_scene as Level
 	check("arena do Duelo carrega (ainda andar 4)", lvl != null and lvl.scene_file_path == ld and lvl.floor_number == 4)

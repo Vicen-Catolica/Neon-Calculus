@@ -23,7 +23,7 @@ const NEXT_STAGE := "res://scenes/levels/core/core_duel.tscn"
 const GROUND_TINT := Color.WHITE
 const WALL_TINT := Color(0.78, 0.8, 0.86)
 const HALL_CEILING_Y := -368.0
-const DOOR_X := 126 * 32 - 24   # porta do Domo (saída)
+const DOOR_X := 126 * 32 - 70   # porta do Domo (saída), encostada na parede direita
 
 const GROUND_RECTS := [
 	[-12, 0, 12, 12],     # A: plataforma de chegada
@@ -36,7 +36,7 @@ const WALL_RECTS := [
 	[-12, -24, -7, -1],   # parede esquerda (elevador)
 	[50, -16, 51, -6],    # C: verga da entrada da galeria (vão de 192 px)
 	[52, -16, 126, -12],  # C + D: teto da galeria (face de baixo em -368)
-	[126, -24, 131, -1],  # parede direita (Domo)
+	[126, -24, 131, 0],   # parede direita (Domo), até o chão
 ]
 
 ## Passarelas (mão única): [x0, x1, linha, vigas de apoio?]
@@ -83,6 +83,8 @@ func build() -> Node:
 	_add_background(lvl)
 	_terrain_layer(lvl, "Buildings", GROUND_TS, WALL_RECTS, WALL_TINT)
 	_terrain_layer(lvl, "Ground", GROUND_TS, GROUND_RECTS, GROUND_TINT)
+	# Piso em profundidade (falso 3D) como nas outras fases (tools/gen_floor_band.py core).
+	_floor_band(lvl, _surface_runs(GROUND_RECTS), "res://assets/tilesets/core/floor_band.png")
 	_structures(lvl, CATWALKS)
 	_catwalk_band(lvl, CATWALKS)
 	_ladders(lvl, LADDERS)
@@ -206,7 +208,8 @@ func _add_lasers(lvl: Node) -> void:
 func _add_cameras(lvl: Node) -> void:
 	var holder := _holder(lvl, "Cameras")
 	# B: vigia as pontes do alto da plataforma 2.
-	_camera(holder, false, "BridgeCamera", Vector2(42 * T + 10, -60),
+	# (em cima da plataforma: a haste desce até ela)
+	_camera(holder, false, "BridgeCamera", Vector2(42 * T - 24, -60),
 		{"facing_left": true, "sweep_min_deg": 10.0, "sweep_max_deg": 50.0, "vision_range": 520.0})
 	_camera(holder, true, "GalleryDome", Vector2(2550, HALL_CEILING_Y + 24),
 		{"sweep_min_deg": 55.0, "sweep_max_deg": 125.0, "vision_range": 400.0, "fov_deg": 30.0})
@@ -220,8 +223,9 @@ func _add_guards(lvl: Node) -> void:
 
 
 func _add_exit(lvl: Node) -> void:
-	var exit := _exit(lvl, NEXT_STAGE, Vector2(DOOR_X, 16))
+	var exit := _exit(lvl, NEXT_STAGE, Vector2(DOOR_X, 16), Vector2(80, 120))
 	exit.name = "LevelExit"
+	exit.set("require_standing", true)
 	# Porta do Domo: as portas do elevador executivo, tingidas do laranja da Axioma.
 	var door := _prop(lvl, RND_PROPS + "exec_elevator.png", DOOR_X, 16.0, "DomeDoor")
 	door.modulate = Color(1.0, 0.62, 0.45)

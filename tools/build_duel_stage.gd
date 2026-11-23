@@ -62,6 +62,8 @@ func build() -> Node:
 	_add_background(lvl)
 	_terrain_layer(lvl, "Buildings", GROUND_TS, WALL_RECTS, WALL_TINT)
 	_terrain_layer(lvl, "Ground", GROUND_TS, GROUND_RECTS, GROUND_TINT)
+	# Piso em profundidade (falso 3D) como nas outras fases (tools/gen_floor_band.py core).
+	_floor_band(lvl, _surface_runs(GROUND_RECTS), "res://assets/tilesets/core/floor_band.png")
 	_structures(lvl, CATWALKS)
 	_catwalk_band(lvl, CATWALKS)
 	_ladders(lvl, LADDERS)

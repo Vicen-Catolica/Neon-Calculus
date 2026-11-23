@@ -56,3 +56,7 @@ func _draw() -> void:
 		var r := fmod(t * 90.0 + i * 40.0, 120.0) + 10.0
 		var a := clampf(1.0 - r / 130.0, 0.0, 1.0) * 0.7
 		draw_arc(c, r, -PI * 0.9, -PI * 0.1, 24, Color(1.0, 0.3, 0.25, a), 2.0)
+
+
+func hack_time_left() -> float:
+	return _alarm / maxf(alarm_time, 0.01) if _alarm > 0.0 else 0.0

@@ -30,6 +30,11 @@ enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK, VALVE, CONVEYOR, DRONE, L
 @export var sine_at_start: bool = false
 ## Colisor do próprio alvo, ignorado no teste de linha de visão (ex.: porta).
 @export var ignore_body: CollisionObject2D
+## > 0: alcance próprio da visão hacker para este alvo (os nós do Duelo são
+## hackeáveis de longe). 0 = o alcance padrão do HackVision.
+@export var hack_range: float = 0.0
+## Dispensa a linha de visão (ex.: nós do Duelo atrás das passarelas).
+@export var ignore_line_of_sight: bool = false
 
 const KIND_LABEL := {
 	Kind.CAMERA: "CÂMERA", Kind.DOOR: "PORTA", Kind.GUARD: "AGENTE",
@@ -40,8 +45,50 @@ const KIND_LABEL := {
 }
 
 
+## Barra do tempo de efeito do hack: o objeto pai informa quanto falta com
+## `hack_time_left() -> float` (1 = acabou de ser hackeado, 0 = acabou o efeito).
+## Agentes e ciborgues desenham a própria barra junto com a de detecção.
+const BAR_W := 40.0
+const BAR_H := 5.0
+## Distância da barra acima deste nó (ponto onde a visão hacker mira).
+@export var bar_offset: float = 26.0
+var _bar_ratio: float = 0.0
+
+
 func _ready() -> void:
 	add_to_group("hackable")
+	z_index = 20
+	set_process(true)
+
+
+func time_left_ratio() -> float:
+	if kind == Kind.GUARD or kind == Kind.CYBORG:
+		return 0.0
+	var p := get_parent()
+	if p and p.has_method("hack_time_left"):
+		return clampf(float(p.hack_time_left()), 0.0, 1.0)
+	return 0.0
+
+
+func _process(_delta: float) -> void:
+	var r := time_left_ratio()
+	if r != _bar_ratio or r > 0.0:
+		_bar_ratio = r
+		queue_redraw()
+
+
+func _draw() -> void:
+	if _bar_ratio <= 0.0:
+		return
+	# Desfaz a escala/rotação do pai (câmeras giram, sprites espelham).
+	draw_set_transform_matrix(get_global_transform().affine_inverse() * Transform2D(0.0, global_position))
+	var pos := Vector2(-BAR_W * 0.5, -bar_offset)
+	var col := Color(0.2, 0.95, 1.0)
+	if _bar_ratio < 0.25 and int(Time.get_ticks_msec() / 150) % 2 == 0:
+		col = Color(1, 1, 1)
+	draw_rect(Rect2(pos - Vector2(2, 2), Vector2(BAR_W + 4, BAR_H + 4)), Color(0, 0, 0, 0.85))
+	draw_rect(Rect2(pos, Vector2(BAR_W * _bar_ratio, BAR_H)), col)
+	draw_rect(Rect2(pos - Vector2(1, 1), Vector2(BAR_W + 2, BAR_H + 2)), Color(col, 0.9), false, 1.0)
 
 
 func get_label() -> String:

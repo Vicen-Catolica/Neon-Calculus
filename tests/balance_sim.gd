@@ -95,7 +95,7 @@ func _ready() -> void:
 	print("   Paradoxo final: %.0f s" % ui.PARADOX_TIME)
 	var hits_to_die := int(ceil(100.0 / DuelAttack.new().damage))
 	print("   golpes do núcleo até cair: %d (invulnerável %.1f s depois de cada um)" % [hits_to_die, DuelHit.IFRAMES_MS / 1000.0])
-	check("Duelo perdoa erros de desvio (4 golpes)", hits_to_die >= 4)
+	check("Duelo perdoa erros de desvio (6+ golpes)", hits_to_die >= 6)
 	var sw := SweepAttack.new()
 	var reach := sw.telegraph_time + sw.active_time * (990.0 / 1106.0)
 	var need := (ParadoxDuel.GAP_NEAR_MAX - sw.gap_size / 2.0) / 200.0

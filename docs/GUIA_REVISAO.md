@@ -223,3 +223,13 @@ Para rever: o guia e as conversas tocam uma vez por save; use "Novo jogo" para v
 | Raio do taser saindo do meio do corpo | Sai da ponta da arma (`muzzle_offset`, espelha com o lado) | `enemy.gd` (`muzzle_position`) |
 | Tempo de hack no guarda | Barra ciano em cima do agente hackeado que esvazia até ele voltar (pisca no fim); vale também para a visão apagada do ciborgue | `enemy.gd` (`hack_time_left`) |
 | Quadrados da tela de hack | Trocados por uma balança em equilíbrio: cada prato é um lado da equação, com caixas "x" e pesos com número (vermelho = tirar); k(x + a) vira k bandejas [x a]. Regra de três, retângulo e triângulo continuam com a figura | `scenes/hacking_ui/math_visualizer.gd` |
+
+### Quarto playtest
+
+| Pedido | O que mudou | Onde |
+|---|---|---|
+| Tempo do hack em tudo | Barra ciano em cima de **todo** alvo com efeito temporário (câmera, drone, válvula, esteira, laser, ponte de luz, letreiro, quiosque), que esvazia e pisca no fim. O componente `Hackable` desenha; cada objeto só informa `hack_time_left()` | `scripts/hacking/hackable.gd` + cada objeto |
+| Piso 2D nos Setores 3 e 4 | Faixa de piso em profundidade: porcelanato com friso ciano (P&D) e placa escura com grade de luz (Núcleo e arena do Duelo) | `tools/gen_floor_band.py rnd` / `core`, builders |
+| Objetos flutuando | Automático em todas as fases: câmera de parede sem parede atrás ganha haste até o teto (ou poste até o chão); emissor de laser sem teto ganha haste; porta mais baixa que o teto ganha verga de aço com faixa de perigo. Servidores do mezanino de P&D movidos para cima da passarela; câmera da ponte do Núcleo sobre a plataforma | `scripts/core/supports.gd`, `security_camera.gd`, `laser_barrier.gd`, `security_door.gd` |
+| Porta "teleportando" por baixo / porta final estranha | Saídas de P&D e do Núcleo só valem em pé dentro (como o elevador do Setor 2). Porta do Domo encostada na parede direita, que agora vai até o chão | `build_rnd_stage.gd`, `build_core_stage.gd` |
+| Duelo difícil demais | Golpe tira 15 (antes 25: 7 golpes até cair), intervalos entre ataques 2,4/1,9/1,5 s (antes 1,6/1,2/0,8), brecha do pulso 90° (120° com o Vance). Os nós ("cristais") são hackeáveis a até 900 px e sem linha de visão: dá para mirar do chão, sem subir até eles | `scripts/duel/*`, `hackable.gd` (`hack_range`, `ignore_line_of_sight`) |

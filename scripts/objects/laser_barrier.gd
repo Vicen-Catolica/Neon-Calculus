@@ -12,6 +12,8 @@ extends Node2D
 ##
 ## Origem = chão sob o feixe. Filhos: Hackable (no emissor) e Beam (Area2D).
 
+const Supports := preload("res://scripts/core/supports.gd")
+
 signal tripped(body: Node2D)
 signal power_changed(on: bool)
 
@@ -56,6 +58,18 @@ func _ready() -> void:
 		cs.position = Vector2(0, -height / 2.0)
 	_was_on = is_on()
 	queue_redraw()
+	_add_support.call_deferred()
+
+
+## Emissor do alto sem teto em cima: haste até o teto.
+func _add_support() -> void:
+	await get_tree().physics_frame
+	if not is_inside_tree():
+		return
+	var top := global_position + Vector2(0, -height)
+	var up = Supports.hit(self, top + Vector2(0, -2), top + Vector2(0, -420))
+	if up != null and top.y - (up as Vector2).y > 3.0:
+		Supports.pole(self, top + Vector2(0, -4), up, 4.0, "EmitterPole")
 
 
 ## Feixe ligado agora (perigoso).
@@ -138,3 +152,7 @@ func _draw() -> void:
 		while y < b.y:
 			draw_line(Vector2(0, y), Vector2(0, minf(y + 4.0, b.y)), OFF, 1.0)
 			y += 12.0
+
+
+func hack_time_left() -> float:
+	return _hack_left / maxf(hack_off_time, 0.01)

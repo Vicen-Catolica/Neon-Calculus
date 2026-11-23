@@ -253,9 +253,6 @@ func _add_kiosk_and_door(lvl: Node) -> void:
 	shutter.set("start_open", true)
 	shutter.set("hackable_enabled", false)
 	lvl.add_child(shutter)
-	# Vergas até o teto: as portas não ficam soltas no ar.
-	_door_header(lvl, Vector2(3590, 16), SERVER_CEILING_Y, "LockdownShutterWest")
-	_door_header(lvl, Vector2(146 * T + 40, 16), _y(-5), "SecurityDoor")
 	_add_lockdown(lvl)
 
 

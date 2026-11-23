@@ -442,50 +442,6 @@ func _dialogue_trigger(lvl: Node, dialogue_id: String, pos: Vector2, size: Vecto
 	return t
 
 
-## Verga de aço sobre uma porta (SecurityDoor, 144 px de altura) até o teto,
-## para a porta não ficar "solta" no ar. Só visual (atrás da porta).
-func _door_header(lvl: Node, door_pos: Vector2, ceiling_y: float, door_name: String) -> void:
-	var top := door_pos.y - 144.0
-	if ceiling_y >= top - 1.0:
-		return
-	var h := Node2D.new()
-	h.name = "Header_" + door_name
-	var w := 34.0
-	var body := Polygon2D.new()
-	body.color = Color(0.16, 0.18, 0.21)
-	body.polygon = PackedVector2Array([Vector2(-w, ceiling_y), Vector2(w, ceiling_y), Vector2(w, top + 4), Vector2(-w, top + 4)])
-	h.add_child(body)
-	# Trilhos laterais (por onde a porta sobe) e faixa de perigo na base.
-	for sx in [-1.0, 1.0]:
-		var rail := Polygon2D.new()
-		rail.color = Color(0.32, 0.35, 0.4)
-		var x0: float = sx * w
-		var x1: float = sx * (w - 6.0)
-		rail.polygon = PackedVector2Array([Vector2(x0, ceiling_y), Vector2(x1, ceiling_y), Vector2(x1, top + 4), Vector2(x0, top + 4)])
-		h.add_child(rail)
-	var stripe_h := minf(10.0, (top + 4) - ceiling_y)
-	var n := 6
-	for i in n:
-		var st := Polygon2D.new()
-		st.color = Color(0.95, 0.72, 0.1) if i % 2 == 0 else Color(0.08, 0.08, 0.08)
-		var xa := -w + 2.0 * w * i / n
-		var xb := -w + 2.0 * w * (i + 1) / n
-		var yb := top + 4.0
-		var ya := yb - stripe_h
-		st.polygon = PackedVector2Array([Vector2(xa + 4, ya), Vector2(xb + 4, ya), Vector2(xb, yb), Vector2(xa, yb)])
-		h.add_child(st)
-	for bx in [-w + 10.0, w - 10.0]:
-		for by in [ceiling_y + 8.0, top - 10.0]:
-			if by <= ceiling_y + 4.0 or by >= top:
-				continue
-			var bolt := Polygon2D.new()
-			bolt.color = Color(0.5, 0.53, 0.58)
-			bolt.polygon = PackedVector2Array([Vector2(bx - 2, by - 2), Vector2(bx + 2, by - 2), Vector2(bx + 2, by + 2), Vector2(bx - 2, by + 2)])
-			h.add_child(bolt)
-	h.position = Vector2(door_pos.x, 0)
-	lvl.add_child(h)
-
-
 ## Guia passo a passo da SINE (Tutorial.guide) ao entrar na área.
 func _tutorial_trigger(lvl: Node, guide_name: String, pos: Vector2, size: Vector2 = Vector2(96, 400)) -> Area2D:
 	var t := _dialogue_trigger(lvl, "", pos, size)

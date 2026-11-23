@@ -5,6 +5,8 @@ extends Node2D
 ## (angles.json). Varre entre dois limites; ao ver o jogador, segue-o e, após um
 ## tempo de exposição, dispara o alarme. Hackeada, desliga por `disabled_time`.
 
+const Supports := preload("res://scripts/core/supports.gd")
+
 enum Model { WALL, DOME }
 enum Mode { SWEEP, ALERT, HACKED, DISABLED }
 
@@ -57,6 +59,28 @@ func _ready() -> void:
 	hackable.kind = Hackable.Kind.CAMERA
 	hackable.hacked.connect(_on_hacked)
 	_apply_frame()
+	if model == Model.WALL:
+		_add_support.call_deferred()
+
+
+## Câmera de parede sem parede atrás (vidro, vão): haste até o teto, ou até o
+## chão se não houver teto perto.
+func _add_support() -> void:
+	await get_tree().physics_frame
+	if not is_inside_tree():
+		return
+	var back := 1.0 if facing_left else -1.0
+	# placa do suporte (atrás da câmera, um pouco abaixo do centro)
+	var mount := global_position + Vector2(back * 28.0, 4.0)
+	if Supports.hit(self, global_position, global_position + Vector2(back * 44.0, 0.0)) != null:
+		return  # presa numa parede de verdade
+	var up = Supports.hit(self, mount, mount + Vector2(0, -420))
+	if up != null:
+		Supports.pole(self, mount, up, 5.0, "CameraPole")
+		return
+	var down = Supports.hit(self, mount, mount + Vector2(0, 420))
+	if down != null:
+		Supports.pole(self, mount, down, 5.0, "CameraPole")
 
 
 func _load_model() -> void:
@@ -223,6 +247,15 @@ func _sees_player() -> bool:
 	var q := PhysicsRayQueryParameters2D.create(origin, target, world_mask)
 	q.exclude = [(player as CollisionObject2D).get_rid()]
 	return get_world_2d().direct_space_state.intersect_ray(q).is_empty()
+
+
+## Desligada pelo hack: fração do tempo que falta até voltar a vigiar.
+func hack_time_left() -> float:
+	if mode == Mode.HACKED:
+		return 1.0
+	if mode == Mode.DISABLED:
+		return _mode_timer / maxf(disabled_time, 0.01)
+	return 0.0
 
 
 func _on_hacked() -> void:

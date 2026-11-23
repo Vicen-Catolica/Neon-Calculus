@@ -31,7 +31,7 @@ enum State { WAITING, LAYER, BETWEEN, PARADOX, WON }
 ## Pausa (s) entre um padrão de ataque e o próximo em cada camada (a última vale
 ## também no Paradoxo). Um padrão por vez: o próximo só começa quando o anterior
 ## acaba, para as saídas nunca se contradizerem (balanceamento, etapa 11).
-@export var intervals: Array[float] = [1.6, 1.2, 0.8]
+@export var intervals: Array[float] = [2.4, 1.9, 1.5]
 @export var rng_seed: int = 0
 ## Depois das falas da vitória: branco, silêncio e a tela de encerramento.
 ## (As simulações desligam para não trocar de cena.)
@@ -44,8 +44,8 @@ const VANCE_FLAG := "vance_rescued"
 ## O Duelo só começa depois do confronto (e não o repete após um game over).
 const INTRO_DIALOGUE := "duel_confront"
 const WIN_FLAG := "axioma_defeated"
-const PULSE_GAP := 50.0
-const VANCE_PULSE_GAP := 80.0
+const PULSE_GAP := 90.0
+const VANCE_PULSE_GAP := 120.0
 const GRID_SLOTS := [240.0, 480.0, 720.0, 960.0, 1200.0, 1440.0, 1680.0]
 ## Brechas sorteadas perto do jogador (balanceamento, etapa 11): a varredura
 ## chega à altura dele em ~2,6 s e correr cobre ~520 px nesse tempo.

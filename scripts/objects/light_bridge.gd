@@ -116,3 +116,7 @@ func _draw() -> void:
 		while x < width:
 			draw_line(Vector2(x, 1), Vector2(minf(x + 6.0, width), 1), Color(CYAN, 0.18), 1.0)
 			x += 14.0
+
+
+func hack_time_left() -> float:
+	return _hold_left / maxf(solid_time, 0.01) if _hold_left > 0.0 else 0.0

@@ -10,6 +10,8 @@ jogador pisarem "dentro" da passarela.
 
 Uso: python tools/gen_floor_band.py  ->  assets/tilesets/slums/floor_band.png
      python tools/gen_floor_band.py industrial  ->  assets/tilesets/industrial/floor_band.png
+     python tools/gen_floor_band.py rnd         ->  assets/tilesets/rnd/floor_band.png
+     python tools/gen_floor_band.py core        ->  assets/tilesets/core/floor_band.png
 """
 import random
 from pathlib import Path
@@ -206,10 +208,100 @@ def industrial() -> None:
     print("salvo", IND_OUT, img.size)
 
 
+def rnd_lab() -> None:
+    """Piso do Setor de P&D em profundidade: porcelanato cinza-azulado polido,
+    juntas finas em perspectiva, reflexos das luzes do teto e o friso ciano da
+    beirada (o mesmo do tileset)."""
+    rnd = random.Random(23)
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    px = img.load()
+    back, mid, front = (40, 46, 58), (78, 88, 104), (104, 114, 130)
+    seam, shine, cyan = (34, 38, 48), (150, 166, 186), (70, 230, 245)
+    lip = H - 4
+    for y in range(lip):
+        t = y / (lip - 1)
+        base = lerp(back, mid, min(t * 1.3, 1.0)) if t < 0.75 else lerp(mid, front, (t - 0.75) / 0.25)
+        for x in range(W):
+            n = rnd.randint(-2, 2)
+            px[x, y] = (*(max(0, min(255, v + n)) for v in base), 255)
+    # juntas: duas horizontais e "raios" para o fundo (placas grandes)
+    for y in (8, 17):
+        for x in range(W):
+            px[x, y] = (*seam, 255)
+    for x0 in range(0, W, 64):
+        for y in range(lip):
+            x = (x0 + int((lip - y) * 0.45)) % W
+            px[x, y] = (*seam, 255)
+    # reflexos verticais borrados das lâmpadas do teto (chão encerado)
+    for cx in (40, 150, 214):
+        for y in range(2, lip - 1):
+            k = 0.28 * (1 - abs(y - lip * 0.55) / (lip * 0.6))
+            for dx in range(-3, 4):
+                x = (cx + dx) % W
+                r, g, b, _a = px[x, y]
+                px[x, y] = (*lerp((r, g, b), shine, max(0.0, k * (1 - abs(dx) / 4))), 255)
+    # beirada: friso claro + linha ciano tracejada + sombra
+    for x in range(W):
+        px[x, lip] = (*shine, 255)
+        px[x, lip + 1] = (*(cyan if (x // 6) % 3 != 2 else (30, 60, 70)), 255)
+        px[x, lip + 2] = (24, 28, 36, 255)
+        px[x, lip + 3] = (12, 14, 18, 255)
+    out = OUT.parent.parent / "rnd" / "floor_band.png"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    img.save(out)
+    print("salvo", out, img.size)
+
+
+def core() -> None:
+    """Piso do Núcleo Quântico em profundidade: placa escura quase preta com
+    grade de luz ciano em perspectiva e pontos violeta nos cruzamentos."""
+    rnd = random.Random(31)
+    img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    px = img.load()
+    back, front = (10, 12, 22), (30, 34, 54)
+    grid, node, glow = (40, 200, 230), (170, 90, 255), (20, 70, 90)
+    lip = H - 4
+    for y in range(lip):
+        t = y / (lip - 1)
+        base = lerp(back, front, t)
+        for x in range(W):
+            n = rnd.randint(-2, 2)
+            px[x, y] = (*(max(0, min(255, v + n)) for v in base), 255)
+    rows = (6, 13, 21)
+    for y in rows:
+        a = 0.35 + 0.5 * (y / lip)
+        for x in range(W):
+            r, g, b, _a = px[x, y]
+            px[x, y] = (*lerp((r, g, b), grid, a), 255)
+            if y + 1 < lip:
+                r, g, b, _a = px[x, y + 1]
+                px[x, y + 1] = (*lerp((r, g, b), glow, 0.4), 255)
+    for x0 in range(0, W, 32):
+        for y in range(lip):
+            x = (x0 + int((lip - y) * 0.5)) % W
+            r, g, b, _a = px[x, y]
+            px[x, y] = (*lerp((r, g, b), grid, 0.25 + 0.5 * (y / lip)), 255)
+            if y in rows:
+                px[x, y] = (*node, 255)
+    for x in range(W):
+        px[x, lip] = (*grid, 255)
+        px[x, lip + 1] = (*glow, 255)
+        px[x, lip + 2] = (8, 10, 18, 255)
+        px[x, lip + 3] = (4, 4, 10, 255)
+    out = OUT.parent.parent / "core" / "floor_band.png"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    img.save(out)
+    print("salvo", out, img.size)
+
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1 and sys.argv[1] == "industrial":
         industrial()
+    elif len(sys.argv) > 1 and sys.argv[1] == "rnd":
+        rnd_lab()
+    elif len(sys.argv) > 1 and sys.argv[1] == "core":
+        core()
     else:
         main()
         catwalk()

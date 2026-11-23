@@ -138,3 +138,7 @@ func _draw() -> void:
 	if body_top > top:
 		draw_texture_rect(TEX_PIPE, Rect2(-size.x / 2.0, top, size.x, body_top - top), true)
 	draw_texture(tex, Vector2(-size.x / 2.0, body_top))
+
+
+func hack_time_left() -> float:
+	return _time_left / maxf(steam_time, 0.01) if active else 0.0

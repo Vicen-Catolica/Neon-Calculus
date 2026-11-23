@@ -109,6 +109,7 @@ func _ready() -> void:
 	check("C: andando não vence a esteira", p.global_position.x < 3050.0, pos())
 	hv0.debug_hack(belt.get_node("Hackable"), true); await step(5)
 	check("C: hack para a esteira", not belt.running and not belt.can_be_hacked())
+	check("barra do hack na esteira", (belt.get_node("Hackable") as Hackable).time_left_ratio() > 0.9)
 	tp(3050, 100); await step(10)
 	await walk_right(120)
 	check("C: com a esteira parada dá para atravessar", p.global_position.x > 3200.0, pos())
@@ -154,6 +155,7 @@ func _ready() -> void:
 	check("válvula fechada pode ser hackeada", valve.can_be_hacked())
 	hv.debug_hack(valve.get_node("Hackable"), true); await step(5)
 	check("hack abre o vapor", valve.active and valve.is_blocking())
+	check("barra do hack na válvula", (valve.get_node("Hackable") as Hackable).time_left_ratio() > 0.9)
 	check("vapor tapa a visão do guarda", not guard.has_line_of_sight_to(p, p.get_aim_point()))
 	tp(1560, 16); await step(5)
 	check("dentro do vapor o jogador some", not guard.has_line_of_sight_to(p, p.get_aim_point()))
@@ -214,6 +216,10 @@ func _ready() -> void:
 	hv.debug_hack(drone.get_node("Hackable"), true); await step(5)
 	check("hack reinicia o drone", drone.mode == PatrolDrone.Mode.REBOOT and not drone.sees_player())
 	check("drone reiniciando não aceita novo hack", not drone.can_be_hacked())
+	var dh := drone.get_node("Hackable") as Hackable
+	var r0 := dh.time_left_ratio()
+	await step(60)
+	check("barra do hack no drone aparece e esvazia", r0 > 0.9 and dh.time_left_ratio() < r0 - 0.05, "%.2f -> %.2f" % [r0, dh.time_left_ratio()])
 	var x_reboot := drone.global_position.x
 	await step(60)
 	check("drone parado durante o reboot", absf(drone.global_position.x - x_reboot) < 0.5)

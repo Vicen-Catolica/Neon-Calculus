@@ -241,3 +241,8 @@ func _draw_exposure_bar(o: Vector2) -> void:
 	var pos := o + Vector2(-15, -32)
 	draw_rect(Rect2(pos - Vector2(1, 1), Vector2(32, 6)), Color(0, 0, 0, 0.75))
 	draw_rect(Rect2(pos, Vector2(30 * ratio, 4)), Color(1.0, 0.8, 0.15).lerp(Color(1.0, 0.1, 0.25), ratio))
+
+
+## Reiniciando depois do hack: fração do tempo que falta até voltar.
+func hack_time_left() -> float:
+	return _reboot_left / maxf(reboot_time, 0.01) if mode == Mode.REBOOT else 0.0

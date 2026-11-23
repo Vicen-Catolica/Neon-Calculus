@@ -81,3 +81,7 @@ func _on_light_body_entered(body: Node2D) -> void:
 func _on_light_body_exited(body: Node2D) -> void:
 	if body.has_method("exit_light"):
 		body.exit_light(self)
+
+
+func hack_time_left() -> float:
+	return _off_timer / off_time if off_time > 0.0 and not powered and _off_timer > 0.0 else 0.0

@@ -27,6 +27,10 @@ func _ready() -> void:
 		h.sub_topic_override = sub_topic
 		h.abortable = false
 		h.position = Vector2(0, -70)
+		# Hackeável de longe e sem linha de visão: dá para mirar do chão da
+		# arena, desviando dos ataques, sem subir até a plataforma do nó.
+		h.hack_range = 900.0
+		h.ignore_line_of_sight = true
 		h.hacked.connect(_on_hacked)
 
 

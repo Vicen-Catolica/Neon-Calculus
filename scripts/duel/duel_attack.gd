@@ -14,7 +14,7 @@ const RED := Color(1.0, 0.18, 0.25)
 
 @export var telegraph_time: float = 0.8
 @export var active_time: float = 2.0
-@export var damage: float = 25.0
+@export var damage: float = 15.0
 ## Área da arena (global): limites dos desenhos.
 @export var arena: Rect2 = Rect2(0, -1090, 1920, 1106)
 
