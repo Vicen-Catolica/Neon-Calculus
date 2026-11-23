@@ -16,9 +16,12 @@ enum Mode { PATROL, ALERT, REBOOT }
 @export var speed: float = 70.0
 @export var end_pause: float = 1.2
 @export var vision_range: float = 260.0
-@export var fov_deg: float = 50.0
+## Cone do sensor: de (tilt - fov/2) a (tilt + fov/2) graus abaixo do horizonte.
+## 40/70 cobre de 5° a 75°: vê o chão à frente até o alcance (com 55/50 só via
+## quem estava logo embaixo, e no chão quase ninguém).
+@export var fov_deg: float = 70.0
 ## Ângulo do sensor abaixo da horizontal, no sentido em que o drone voa.
-@export var sensor_tilt_deg: float = 55.0
+@export var sensor_tilt_deg: float = 40.0
 @export var exposure_to_alarm: float = 1.2
 @export var reboot_time: float = 8.0
 @export var world_mask: int = 1
@@ -145,7 +148,17 @@ func sees_player() -> bool:
 	if player.has_method("is_detectable") and not player.is_detectable():
 		return false
 	var origin := lens_global()
-	var target: Vector2 = player.get_aim_point()
+	# Pés, centro e cabeça: o sensor vê qualquer parte do corpo no cone (só o
+	# centro deixava de fora quem estava na mesma altura do drone).
+	var aim: Vector2 = player.get_aim_point()
+	var feet: Vector2 = player.global_position + Vector2(0, -6)
+	for target in [feet, aim, aim.lerp(feet, -0.4)]:
+		if _sees_point(origin, target, player):
+			return true
+	return false
+
+
+func _sees_point(origin: Vector2, target: Vector2, player: Node2D) -> bool:
 	var to := target - origin
 	if to.length() > vision_range:
 		return false

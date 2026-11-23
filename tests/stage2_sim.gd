@@ -172,6 +172,22 @@ func _ready() -> void:
 	await step(int(valve.cooldown * 60.0) + 20)
 	check("válvula rearma depois do cooldown", valve.can_be_hacked())
 
+	# Drone do chão (playtest à mão: só via quem estava na esteira): vê o chão à frente.
+	var fdrone := lvl.get_node("Drones/FloorDrone") as PatrolDrone
+	fdrone.global_position = Vector2(2300, -60)
+	fdrone.facing = 1.0
+	tp(2440, 16); await step(5)
+	check("drone do chão vê o jogador no chão à frente", fdrone.sees_player())
+	tp(2300 + 400, 16); await step(5)
+	check("drone do chão não vê além do alcance", not fdrone.sees_player())
+	tp(2150, 16); await step(5)
+	check("drone do chão não vê atrás dele", not fdrone.sees_player())
+	var pdrone := lvl.get_node("Drones/PitDrone") as PatrolDrone
+	pdrone.global_position = Vector2(2780, -30)
+	pdrone.facing = 1.0
+	tp(2900, 16); await step(5)
+	check("drone do fosso vê o jogador fora da esteira (na beira)", pdrone.sees_player() or absf(2900.0 - 2780.0) > pdrone.vision_range)
+
 	# Drone do fosso: vê, dispara alarme, e o hack o reinicia.
 	var drone := lvl.get_node("Drones/PitDrone") as PatrolDrone
 	var alarms := [0]
