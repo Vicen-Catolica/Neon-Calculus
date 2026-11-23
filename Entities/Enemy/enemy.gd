@@ -20,6 +20,9 @@ signal alarm_triggered(last_position: Vector2)
 @export_flags_2d_physics var vision_mask: int = 3 # Camada 1 (Mundo) + Camada 2 (Player)
 ## Altura dos olhos em relação à origem do nó (guardas com sprite de 128 px usam ~-100).
 @export var eye_offset: Vector2 = Vector2(0, -20)
+## Ponta da arma (olhando para a direita; espelha com o lado). O raio do
+## taser sai daqui, não do meio do corpo.
+@export var muzzle_offset: Vector2 = Vector2(30, -74)
 ## Andar normal (não agachado) só é ouvido dentro deste raio; correr usa a HearingArea inteira.
 @export var walk_hearing_radius: float = 140.0
 ## Raio em que o guarda responde a um alarme de câmera/varredura.
@@ -170,7 +173,7 @@ func _process(delta: float) -> void:
 	_update_animation()
 
 	if is_firing_taser and is_instance_valid(taser_target_ref):
-		var start_pos = global_position + eye_offset + Vector2(0, 30)
+		var start_pos = muzzle_position()
 		var end_pos = _aim_point(taser_target_ref)
 		generate_lightning_beam(start_pos, end_pos)
 
@@ -581,11 +584,29 @@ func _on_alarm_raised(world_position: Vector2) -> void:
 
 # --- Animação --------------------------------------------------------------
 
+func muzzle_position() -> Vector2:
+	return global_position + Vector2(muzzle_offset.x * get_facing_direction().x, muzzle_offset.y)
+
+
+var _anim_backwards: bool = false
+
+
 func _update_animation() -> void:
 	var spr := get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
 	if spr == null or spr.sprite_frames == null or spr.sprite_frames.get_animation_names().is_empty():
 		return
 	var moving := absf(velocity.x) > 8.0
+	# Recuando (anda para um lado olhando para o outro): passos ao contrário.
+	var backing := moving and is_on_floor() and signf(velocity.x) != signf(get_facing_direction().x)
+	if backing:
+		var walk: StringName = &"patrol"
+		if spr.sprite_frames.has_animation(walk) and (spr.animation != walk or not _anim_backwards):
+			spr.play_backwards(walk)
+			_anim_backwards = true
+		return
+	if _anim_backwards:
+		_anim_backwards = false
+		spr.play(spr.animation)
 	var anim: StringName = &"idle"
 	match _current_state_name():
 		"patrol":
@@ -648,8 +669,34 @@ func _draw_vision_cone() -> void:
 
 # --- Barra de detecção -----------------------------------------------------
 
+## Hackeado (implante tocando / visão apagada): barra ciano que esvazia até ele
+## voltar ao normal.
+func hack_time_left() -> float:
+	if _current_state_name() == "distracted":
+		var s: Node = state_machine.current_state
+		return clampf(1.0 - float(s.get("timer")) / maxf(float(s.get("duration")), 0.01), 0.0, 1.0)
+	if is_blind():
+		return clampf(blind_left / maxf(blind_time, 0.01), 0.0, 1.0)
+	return 0.0
+
+
 func _draw_awareness_bar() -> void:
 	var st := _current_state_name()
+	var hack_left := hack_time_left()
+	if hack_left > 0.0:
+		var hb := _awareness_bar
+		var hw := 46.0
+		var htop := eye_offset.y - 32.0
+		if state_indicator:
+			htop = state_indicator.position.y + state_indicator.size.y + 1.0
+		var hp := Vector2(-hw * 0.5, htop)
+		var cyan := Color(0.2, 0.95, 1.0)
+		if hack_left < 0.25 and int(Time.get_ticks_msec() / 150) % 2 == 0:
+			cyan = Color(1, 1, 1)
+		hb.draw_rect(Rect2(hp - Vector2(2, 2), Vector2(hw + 4, 10)), Color(0, 0, 0, 0.85))
+		hb.draw_rect(Rect2(hp, Vector2(hw * hack_left, 6)), cyan)
+		hb.draw_rect(Rect2(hp - Vector2(1, 1), Vector2(hw + 2, 8)), Color(cyan.r, cyan.g, cyan.b, 0.9), false, 1.0)
+		return
 	var alert := st == "maxalert"
 	if st in ["distracted", "stunned"] or (awareness <= 0.01 and not alert):
 		return

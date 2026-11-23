@@ -214,3 +214,12 @@ Para rever: o guia e as conversas tocam uma vez por save; use "Novo jogo" para v
 | Fórmula na tela / SINE sem resposta | Linha "FÓRMULA" com a regra geral de cada tipo; a SINE monta a conta mas termina em "faça a conta" (nunca o número pronto) | `hacking_interface.gd` (`formula_for`) |
 | Elevador do Setor 2 | Cabine apoiada na passarela, cabos até a tampa do poço; a saída só vale em pé dentro da cabine (subir a escada por baixo não troca mais de fase) | `build_industrial_stage.gd`, `level_exit.gd` (`require_standing`) |
 
+
+### Terceiro playtest
+
+| Pedido | O que mudou | Onde |
+|---|---|---|
+| Guarda recuando sem animação | Ao recuar (anda para um lado olhando para o outro) toca a caminhada ao contrário | `enemy.gd` (`_update_animation`) |
+| Raio do taser saindo do meio do corpo | Sai da ponta da arma (`muzzle_offset`, espelha com o lado) | `enemy.gd` (`muzzle_position`) |
+| Tempo de hack no guarda | Barra ciano em cima do agente hackeado que esvazia até ele voltar (pisca no fim); vale também para a visão apagada do ciborgue | `enemy.gd` (`hack_time_left`) |
+| Quadrados da tela de hack | Trocados por uma balança em equilíbrio: cada prato é um lado da equação, com caixas "x" e pesos com número (vermelho = tirar); k(x + a) vira k bandejas [x a]. Regra de três, retângulo e triângulo continuam com a figura | `scenes/hacking_ui/math_visualizer.gd` |

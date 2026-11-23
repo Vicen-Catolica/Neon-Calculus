@@ -129,6 +129,25 @@ func _ready() -> void:
 			bad.append(d)
 	check("passo a passo sem X maiúsculo em todos os tipos", bad.is_empty(), str(bad))
 
+	# Balança: os dois pratos têm o mesmo valor com o x certo (a figura bate
+	# com a equação) em todos os tipos de equação.
+	var mv = ui.math_visualizer
+	var unbalanced := []
+	var re_num_x := RegEx.create_from_string("(\\d)(x|\\()")
+	for t in [[1, 0], [1, 1], [2, 0], [2, 1], [4, 0], [5, 0], [5, 1]]:
+		for i in 20:
+			var data: Dictionary = ui.math_generator.GenerateValidEquation(t[0], t[1])
+			mv.setup_visual(t[0], t[1], data)
+			var sides: Array = mv.scale_sides()
+			var vals := []
+			for sd in sides:
+				var ex := Expression.new()
+				ex.parse(re_num_x.sub(mv.side_label(sd), "$1*$2", true), ["x"])
+				vals.append(ex.execute([float(data["Solution"])]))
+			if sides.size() != 2 or absf(float(vals[0]) - float(vals[1])) > 0.001:
+				unbalanced.append(str(data["Expression"]) + " -> " + mv.side_label(sides[0]) + " = " + mv.side_label(sides[1]))
+	check("balança: os dois pratos se equilibram com o x certo (140 equações)", unbalanced.is_empty(), str(unbalanced.slice(0, 3)))
+
 	# Nível 5 (Núcleo): x dos dois lados; o passo a passo termina na resposta.
 	var wrong5 := []
 	for i in 40:

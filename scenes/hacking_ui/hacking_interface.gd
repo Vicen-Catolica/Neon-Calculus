@@ -568,7 +568,7 @@ func formula_for(floor_level: int, sub_topic: int) -> String:
 			return "k · (x + a) = c   →   x = (c − k · a) ÷ k" if sub_topic == 0 else "A + B + x = 180°   →   x = 180° − (A + B)"
 		5:
 			if sub_topic == 1:
-				return "k · (x + m) = c · x + n   →   distribua o k e junte os x de um lado"
+				return "k · (x + m) = c · x + n   →   distribua o k primeiro"
 			return "a · x + b = c · x + d   →   x = (d − b) ÷ (a − c)"
 	return ""
 
