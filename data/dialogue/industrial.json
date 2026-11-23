@@ -1,0 +1,68 @@
+{
+	"ind_arrival": [
+		{
+			"who": "SINE",
+			"text": "Setor Industrial. Aqui as fábricas não dormem e os drones não se cansam."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Igual a você."
+		},
+		{
+			"who": "SINE",
+			"text": "Eu me canso. Só não tenho onde deitar. Esteiras e drones seguem padrões fixos: observe primeiro, depois passe."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Quando foi que você ficou engraçada?"
+		},
+		{
+			"who": "SINE",
+			"text": "Você deixou o módulo de humor ligado na versão 0.9. Nunca desligou."
+		}
+	],
+	"ind_drones": [
+		{
+			"who": "SINE",
+			"text": "O sensor dos drones aponta para o chão à frente. Se você estiver atrás ou acima, ele não vê."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Fui eu que escrevi a rotina de patrulha desses drones. Faz três anos."
+		},
+		{
+			"who": "SINE",
+			"text": "Eu sei. Os comentários no código ainda são seus. 'TODO: pensar se isso é ético'."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Eu nunca voltei nesse TODO."
+		},
+		{
+			"who": "SINE",
+			"text": "Está voltando agora."
+		}
+	],
+	"ind_top": [
+		{
+			"who": "SINE",
+			"text": "Elevador para o andar de P&D. Lá em cima, a Axioma vai perceber que não somos ruído."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Medo?"
+		},
+		{
+			"who": "SINE",
+			"text": "Não sei se o que eu sinto tem esse nome. Mas, se você subir, eu subo junto. Não por causa do código."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Por causa do quê, então?"
+		},
+		{
+			"who": "SINE",
+			"text": "Pergunte de novo quando a gente sair dessa torre."
+		}
+	]
+}

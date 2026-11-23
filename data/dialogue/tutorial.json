@@ -8,5 +8,55 @@
 			"who": "SINE",
 			"text": "Quanto mais tempo você ficar à vista, mais deles chegam. Quebre a linha de visão e se esconda no escuro (F). Eles desistem se perderem o seu rastro."
 		}
+	],
+	"tut_hack_show": [
+		{
+			"who": "SINE",
+			"text": "Espera, Eduardo. Agente da Axioma ali na frente, fazendo a ronda."
+		},
+		{
+			"who": "SINE",
+			"text": "Ele tem um implante neural de patrulha. Implante é código, e código eu consigo abrir."
+		},
+		{
+			"who": "SINE",
+			"text": "Segure a visão hacker: eu desacelero o tempo e te mostro tudo o que dá para reescrever. Inclusive o cone de visão dele."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "E se ele me vir antes?"
+		},
+		{
+			"who": "SINE",
+			"text": "Então ele chama os amigos. Não deixe."
+		}
+	],
+	"tut_hack_done": [
+		{
+			"who": "SINE",
+			"text": "Isso! O implante dele está tocando uma notificação falsa: ele fica distraído por alguns segundos. Passe agora."
+		},
+		{
+			"who": "SINE",
+			"text": "Cada hack gera variância. Câmeras, luzes e portas também podem ser reescritas. Use com cuidado."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Você parece orgulhosa."
+		},
+		{
+			"who": "SINE",
+			"text": "Fui escrita para isso. Por você, aliás."
+		}
+	],
+	"tut_hack_failed": [
+		{
+			"who": "SINE",
+			"text": "Não fechou. O implante rejeitou a equação e ele vai estranhar."
+		},
+		{
+			"who": "SINE",
+			"text": "Tudo bem, a próxima vai. Isole o x: o que soma passa subtraindo, o que multiplica passa dividindo. E dá para tentar de novo em outro alvo."
+		}
 	]
 }

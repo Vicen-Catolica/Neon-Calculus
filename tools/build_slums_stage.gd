@@ -106,6 +106,12 @@ func build() -> Node:
 	_add_cameras(lvl)
 	_add_guards(lvl)
 	_add_exit(lvl)
+	# SINE: conversa de abertura, guia do hack antes do primeiro agente e uma
+	# conversa no meio do caminho (relação criador e criação).
+	_dialogue_trigger(lvl, "slums_intro", Vector2(64, 16))
+	_tutorial_trigger(lvl, "hack", Vector2(460, 16))
+	_dialogue_trigger(lvl, "slums_kiosk", Vector2(2300, -48), Vector2(120, 400))
+	_dialogue_trigger(lvl, "slums_upstairs", Vector2(3500, -48), Vector2(120, 400))
 	_player_and_ui(lvl, Vector2(64, 16))
 	return lvl
 

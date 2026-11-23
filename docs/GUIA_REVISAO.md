@@ -31,7 +31,7 @@ git diff --stat feature/rnd-stage-3...feature/core-stage-4
 tools/run_tests.sh
 ```
 
-O roteiro importa o projeto, compila o C#, roda os 23 testes NUnit e 13 simulações headless. Leva **mais de 10 minutos**. Para rodar só algumas simulações:
+O roteiro importa o projeto, compila o C#, roda os 23 testes NUnit e 16 simulações headless. Leva **mais de 10 minutos**. Para rodar só algumas simulações:
 
 ```bash
 SIMS="duel_sim duel_bot_sim" tools/run_tests.sh
@@ -48,6 +48,8 @@ SIMS="duel_sim duel_bot_sim" tools/run_tests.sh
 | `duel_bot_sim` | robô que só desvia vence o Duelo em 3 sementes (os padrões são justos) |
 | `balance_sim` | tabela de tempos de hack por tipo, lockdown, laser, ciborgue, Duelo |
 | `ui_sim` | tela de hack (acerto, erro, abortar, SINE, nível 5, Paradoxo), diálogos, Como jogar, pausa, lore, encerramento |
+| `guard_nav_sim` | agentes: atacam colados, sobem/descem escadas, pulam obstáculos, seguram distância sem caminho, rádio chama reforços |
+| `tutorial_sim` | guia do hack da SINE na Fase 1 (câmera no agente, avisos Q/E/equação), conversas novas das Fases 1 e 2 |
 | `edge_sim` | casos-limite do playtest automatizado: hack pendurado na escada, Esc no quadro em que o hack abre, pausa na visão hacker, Esc repetido, hack escondido, abismo com pouca defesa, reiniciar andar com o Vance resgatado, pausa bloqueada depois de vencer o Duelo |
 
 Fora do roteiro (não entram no CI):
@@ -156,7 +158,7 @@ Nada disto foi jogado com teclado e mouse, só por simulação. Vale passar por 
 
 - **Playtest com teclado e mouse** (seção 5).
 - **Créditos das músicas:** a tela final lista só os títulos das três faixas; falta o autor.
-- **Efeitos sonoros e "Voice Blips"** do GDD §9: não há arquivos de som para eles.
+- **Efeitos sonoros provisórios:** os sons (voice blips, taser, alerta, passos, hack…) são sintetizados por `tools/gen_sfx.py`. Para trocar por um som gravado, basta sobrescrever `assets/sfx/<nome>.wav` com o mesmo nome.
 - **"Configurações" no menu de pausa** (GDD §8): a pausa tem Retomar, Como jogar, Reiniciar andar e Menu principal; as opções só estão no menu principal.
 - **Ciclos de Processamento / upgrades do traje** (WDD §10): fora do escopo.
 - **Build de Windows** (M5 do cronograma): não foi gerada nem testada.
@@ -178,3 +180,22 @@ Nada disto foi jogado com teclado e mouse, só por simulação. Vale passar por 
 | Duelo | `scripts/duel/` (controlador, núcleo, nós, ataques) |
 | Interface | `scripts/ui/` (diálogo, pausa, Como jogar, encerramento) e `scripts/player/` (sonar, camuflagem) |
 | Textos | `data/lore/*.json`, `data/dialogue/*.json` |
+
+---
+
+## 9. Correções do primeiro playtest (branch `feature/playtest-fixes`)
+
+| Pedido | O que mudou | Onde |
+|---|---|---|
+| Aviso por cima da tela de hack | A tela de hack fica na camada 30 (acima do lockdown e da HUD; abaixo do diálogo e da pausa) | `scenes/hacking_ui/hacking_interface.gd` |
+| Agente colado não ataca | Encostado no Eduardo conta como "vendo" (o raio começava dentro dele) | `Entities/Enemy/enemy.gd` (`is_player_in_los`) |
+| Agentes não pulam / espelham por baixo | Perseguição nova (`chase_move`): pulam obstáculos, sobem e descem escadas, saltam de bordas; sem caminho, sobem o que dá e esperam a ~150 px mirando | `Entities/Enemy/enemy.gd`, estados `State*.gd` |
+| Drone só vê na esteira | O sensor aponta 40° para baixo com cone de 70° e testa pés, centro e cabeça | `scripts/enemies/patrol_drone.gd` |
+| Piso reto no Setor Industrial | Faixa de piso em profundidade (2.5D) como a das favelas | `tools/gen_floor_band.py industrial`, `tools/build_industrial_stage.gd` |
+| Alerta chama os outros | Quem vê o Eduardo chama pelo rádio os agentes a até 700 px (chegam em 0,5 s; quem atende não repassa). Aviso "AGENTE CHAMOU REFORÇOS" e fala da SINE na 1ª vez | `enemy.gd` (`on_max_alert`), `scripts/ui/tutorial.gd` |
+| Sons | Autoload `Sfx` (bus SFX). Voice blips por falante, taser, "!" e "?" dos agentes, rádio, passos (andando/correndo; agachado é silencioso), esconder, pulo, queda, dano, hack (abrir, tecla, certo, errado, abortar), sonar, camuflagem, sirene do lockdown | `scripts/core/sfx.gd`, `assets/sfx/`, `tools/gen_sfx.py` |
+| Tutorial dentro do jogo | Autoload `Tutorial`. Na Fase 1, antes do 1º agente: a SINE pausa, a câmera vai até ele, e um aviso no alto espera cada passo (segurar Q, mirar e E, resolver x). As teclas saem do InputMap | `scripts/ui/tutorial.gd`, `data/dialogue/tutorial.json`, `_tutorial_trigger` no builder |
+| Relação SINE–Eduardo | Conversas novas: abertura, quiosque e telhados (Fase 1); chegada, drones e elevador (Fase 2) | `data/dialogue/slums.json`, `data/dialogue/industrial.json` |
+
+Para rever: o guia e as conversas tocam uma vez por save; use "Novo jogo" para vê-los de novo.
+

@@ -109,6 +109,9 @@ func build() -> Node:
 	_add_exit(lvl)
 	if SHOW_ZONE_LABELS:
 		_add_zone_labels(lvl)
+	_dialogue_trigger(lvl, "ind_arrival", Vector2(64, 16))
+	_dialogue_trigger(lvl, "ind_drones", Vector2(2250, 16), Vector2(120, 400))
+	_dialogue_trigger(lvl, "ind_top", Vector2(4860, -1008), Vector2(120, 300))
 	_player_and_ui(lvl, Vector2(64, 16))
 	return lvl
 

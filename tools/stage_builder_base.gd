@@ -442,6 +442,14 @@ func _dialogue_trigger(lvl: Node, dialogue_id: String, pos: Vector2, size: Vecto
 	return t
 
 
+## Guia passo a passo da SINE (Tutorial.guide) ao entrar na área.
+func _tutorial_trigger(lvl: Node, guide_name: String, pos: Vector2, size: Vector2 = Vector2(96, 400)) -> Area2D:
+	var t := _dialogue_trigger(lvl, "", pos, size)
+	t.name = "Tutorial_" + guide_name
+	t.set("guide", guide_name)
+	return t
+
+
 ## Varredura de Rotina, Eduardo e toda a interface (HUD, furtividade, hacking, lore).
 func _player_and_ui(lvl: Node, spawn: Vector2) -> void:
 	var sweep := Node2D.new()
