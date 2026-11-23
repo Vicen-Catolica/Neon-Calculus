@@ -222,6 +222,9 @@ func _ready() -> void:
 	GameManager.story_flags.clear()
 	await frames(2)
 
+	# A tela de hack fica por cima do HUD do mundo (aviso de lockdown, alarme).
+	check("tela de hack acima do aviso de lockdown e do HUD de furtividade", ui.layer > 9 and ui.layer < Dialogue.layer)
+
 	# --- Caixa de diálogo ---
 	var script_lines: Array = Dialogue.lines_for("rnd_elevator")
 	var unknown := script_lines.filter(func(l): return not Dialogue.SPEAKERS.has(String(l["who"])))

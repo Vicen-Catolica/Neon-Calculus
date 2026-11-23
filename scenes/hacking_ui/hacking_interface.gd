@@ -76,6 +76,9 @@ const ABORT_ALERT_MAX := 0.6
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Por cima de todo o HUD do mundo (furtividade 8, lockdown 9, lore 20); abaixo
+	# só de diálogo (40), pausa (50) e game over/transição.
+	layer = 30
 	add_to_group("hacking_ui")
 	hide()
 	
