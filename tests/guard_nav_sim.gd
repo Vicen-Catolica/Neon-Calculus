@@ -63,6 +63,29 @@ func _ready() -> void:
 	await step(150)
 	check("guarda colado no jogador ataca com o taser", p.current_defense < p.max_defense, "defesa %.0f" % p.current_defense)
 	check("guarda colado conta como vendo", g.is_player_in_los())
+	# 1b. Colado: recua enquanto atira.
+	g.global_position = Vector2(1700, 16)
+	p.global_position = Vector2(1740, 16)
+	g.state_machine.transition_to("MaxAlert")
+	await step(50)
+	var gap := absf(p.global_position.x - g.global_position.x)
+	check("colado no jogador, recua enquanto atira", gap > 80.0, "distância %.0f px" % gap)
+
+	# 1c. Viu o Eduardo se esconder: vai até lá e o puxa para fora.
+	p.global_position = Vector2(1900, 16)
+	g.global_position = Vector2(1650, 16)
+	await step(20)
+	p._lights.clear()  # no escuro (no claro, escondido continua visível)
+	p.set("_hidden", true)
+	var pulled := false
+	for i in 300:
+		await get_tree().physics_frame
+		if not p.is_hidden():
+			pulled = true
+			break
+	check("agente que viu o Eduardo se esconder o puxa para fora", pulled, pos())
+	p.set("_hidden", false)
+
 	# Daqui em diante: guarda ligado, mas sem a máquina de estados (só navegação).
 	g.state_machine.process_mode = Node.PROCESS_MODE_DISABLED
 	g.vision_range = 0.0
@@ -97,6 +120,38 @@ func _ready() -> void:
 	await drive(Vector2(1420, 16), 6.0)
 	check("guarda pula um obstáculo baixo", g.global_position.x > 1380.0 and absf(g.global_position.y - 16.0) < 8.0, pos())
 	box.queue_free()
+
+	# 4b. Parede alta: não fica pulando contra ela (para e espera).
+	var wall := StaticBody2D.new()
+	var wcs := CollisionShape2D.new()
+	var wr := RectangleShape2D.new()
+	wr.size = Vector2(40, 400)
+	wcs.shape = wr
+	wall.add_child(wcs)
+	wall.position = Vector2(1300, 16 - 200)
+	lvl.add_child(wall)
+	g.global_position = Vector2(1180, 16)
+	g.velocity = Vector2.ZERO
+	await step(5)
+	var min_y := 16.0
+	for i in 180:
+		await get_tree().physics_frame
+		g.chase_move(Vector2(1420, 16), g.chase_speed)
+		g.move_and_slide()
+		min_y = minf(min_y, g.global_position.y)
+	check("parede alta: não fica pulando contra ela", min_y > 6.0, "subiu até y=%.0f" % min_y)
+	check("e fica parado encostado", absf(g.velocity.x) < 1.0 and g.global_position.x < 1290.0, pos())
+	wall.queue_free()
+
+	# 4c. Beirada: alvo lá embaixo, sem escada à mão: para na ponta, não cai.
+	g.global_position = Vector2(2000, -144)
+	g.velocity = Vector2.ZERO
+	var range_backup := g.ladder_search_range
+	g.ladder_search_range = 0.0
+	await step(5)
+	await drive(Vector2(3200, 16), 6.0)
+	check("não cai da plataforma seguindo o alvo", absf(g.global_position.y + 144.0) < 8.0, pos())
+	g.ladder_search_range = range_backup
 
 	# 5. Alvo num andar sem escada até lá: sobe o que der e segura distância.
 	g.global_position = Vector2(1500, 16)

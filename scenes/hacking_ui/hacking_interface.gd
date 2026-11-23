@@ -105,13 +105,16 @@ func _ready() -> void:
 			if btn is Button and (btn as Button).text.is_valid_int():
 				btn.pressed.connect(func(): _on_numpad_key_pressed(btn.text))
 				
-	if btn_0:
+	# O 0 normalmente está no numpad_grid e já foi ligado acima; ligar de novo
+	# fazia um clique no 0 digitar "00" (10 virava 100).
+	if btn_0 and not (numpad_grid and btn_0.get_parent() == numpad_grid):
 		btn_0.pressed.connect(func(): _on_numpad_key_pressed("0"))
 		
 	if input_line and input_line is LineEdit:
 		input_line.text_submitted.connect(func(_text): _on_submit_pressed())
 
 	_build_feedback()
+	_build_formula()
 	_update_accessibility_equation_size()
 	if SettingsManager.has_signal("accessibility_settings_changed"):
 		SettingsManager.accessibility_settings_changed.connect(_update_accessibility_equation_size)
@@ -239,6 +242,7 @@ func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 		subtitle_label.text = str(eq_data.get("Topic", "DESAFIO MATEMÁTICO"))
 
 	_setup_equation_steps(floor_level, sub_topic)
+	_show_formula(formula_for(floor_level, sub_topic))
 	current_input_text = ""
 	_update_input_display()
 	show()
@@ -378,6 +382,7 @@ func _on_submit_pressed() -> void:
 
 ## Paradoxo final: a "equação" x = x + 1, sem gerador. Nenhum número serve.
 func start_paradox() -> void:
+	_show_formula("se os x somem e sobra algo falso (0 = 1), não há solução")
 	paradox_mode = true
 	get_tree().paused = true
 	get_tree().call_group("hud", "hide_hud")
@@ -505,12 +510,67 @@ func _hint_both_sides() -> String:
 		text += " %d. Tire %d dos dois lados:\n" % [n, num]
 	else:
 		text += " %d. Some %d aos dois lados:\n" % [n, -num]
+	if coef == 1:
+		# Aqui já seria o resultado: mostra só a conta a fazer.
+		text += "    x = %d %s %d\n" % [rhs, "-" if num >= 0 else "+", absi(num)]
+		return text.trim_suffix("\n")
 	text += "    %s = %d\n" % [coef_x, diff]
 	n += 1
 	if coef != 1:
 		text += " %d. Divida por %d:\n" % [n, coef]
 		text += "    x = %d / %d" % [diff, coef]
 	return text.trim_suffix("\n")
+
+
+# --- Fórmula na tela ----------------------------------------------------
+# Quem joga tem 10–12 anos: a regra geral do tipo de equação fica sempre à
+# vista, embaixo da equação (em letras, sem os números da conta). O passo a
+# passo da SINE aplica a regra aos números, mas para antes do resultado.
+
+var _formula_label: Label
+
+
+func _build_formula() -> void:
+	var eq_panel := find_child("EquationPanel", true, false) as Control
+	if eq_panel == null:
+		return
+	_formula_label = Label.new()
+	_formula_label.name = "FormulaLabel"
+	_formula_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_formula_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_formula_label.add_theme_font_size_override("font_size", 20)
+	_formula_label.add_theme_color_override("font_color", Color(1.0, 0.78, 0.35))
+	var parent := eq_panel.get_parent()
+	parent.add_child(_formula_label)
+	parent.move_child(_formula_label, eq_panel.get_index() + 1)
+
+
+func _show_formula(text: String) -> void:
+	if _formula_label:
+		_formula_label.text = ("FÓRMULA:  " + text) if text != "" else ""
+		_formula_label.visible = text != ""
+
+
+func formula_text() -> String:
+	return _formula_label.text if _formula_label else ""
+
+
+## Regra geral de cada tipo de equação (mesmos tipos do EquationGenerator.cs).
+func formula_for(floor_level: int, sub_topic: int) -> String:
+	match floor_level:
+		1:
+			return "x + a = b   →   x = b − a" if sub_topic == 0 else "a · x = b   →   x = b ÷ a"
+		2:
+			return "a · x + b = c   →   x = (c − b) ÷ a"
+		3:
+			return "x ÷ a = b ÷ c   →   x = a · b ÷ c" if sub_topic == 0 else "Área = base · altura   →   base = Área ÷ altura"
+		4:
+			return "k · (x + a) = c   →   x = (c − k · a) ÷ k" if sub_topic == 0 else "A + B + x = 180°   →   x = 180° − (A + B)"
+		5:
+			if sub_topic == 1:
+				return "k · (x + m) = c · x + n   →   distribua o k e junte os x de um lado"
+			return "a · x + b = c · x + d   →   x = (d − b) ÷ (a − c)"
+	return ""
 
 
 func vance_protocol() -> bool:
@@ -646,6 +706,8 @@ func _generate_step_by_step_hint() -> String:
 		5:
 			text += _hint_both_sides()
 
+	# A SINE monta a conta, mas quem calcula é o jogador.
+	text += "\n > Agora faça a conta e digite o x."
 	return text
 
 func _process(delta: float) -> void:

@@ -705,7 +705,8 @@ func chase_move(target: Vector2, speed: float) -> bool:
 			else:
 				velocity.x = move_toward(velocity.x, 0.0, speed)
 			return false
-		# Alvo embaixo sem escada: anda até sair pela ponta da plataforma.
+		# Alvo embaixo sem escada: chega até a beirada e espera mirando
+		# (_walk não deixa cair de plataformas).
 	if absf(dx) <= 8.0:
 		velocity.x = move_toward(velocity.x, 0.0, speed)
 		return absf(dy) <= 64.0
@@ -713,13 +714,65 @@ func chase_move(target: Vector2, speed: float) -> bool:
 	return false
 
 
+## Maior queda que o agente encara andando (degraus, caixas). Mais que isso é
+## beirada: ele para e espera (desce só por escada).
+@export var max_step_down: float = 72.0
+
+
 func _walk(dir: float, speed: float) -> void:
 	update_facing(dir)
+	if is_on_floor() and _ledge_ahead(dir):
+		velocity.x = move_toward(velocity.x, 0.0, speed)
+		return
 	velocity.x = dir * speed
-	# Degrau ou obstáculo baixo na frente: pula.
-	if is_on_floor() and is_on_wall() and _jump_cooldown <= 0.0:
-		velocity.y = jump_velocity
-		_jump_cooldown = 0.6
+	if is_on_floor() and is_on_wall():
+		# Obstáculo baixo na frente: pula. Parede alta (ou teto baixo em cima):
+		# pular não adianta, então para em vez de ficar quicando.
+		if _can_jump_over(dir):
+			if _jump_cooldown <= 0.0:
+				velocity.y = jump_velocity
+				_jump_cooldown = 0.6
+		else:
+			velocity.x = 0.0
+
+
+## Perto demais para o taser: recua (de frente para o alvo) se houver chão e
+## espaço atrás. Devolve a velocidade x desejada (0 = fica parado).
+@export var back_off_distance: float = 110.0
+
+
+func back_off_velocity(target: Vector2) -> float:
+	var dx := target.x - global_position.x
+	if absf(dx) >= back_off_distance or not is_on_floor():
+		return 0.0
+	var away := -signf(dx) if dx != 0.0 else -get_facing_direction().x
+	if _ledge_ahead(away) or test_move(global_transform, Vector2(away * 10.0, 0)):
+		return 0.0
+	return away * move_speed * 0.8
+
+
+## Altura máxima do pulo (v²/2g).
+func _jump_height() -> float:
+	return jump_velocity * jump_velocity / (2.0 * maxf(gravity, 1.0))
+
+
+## Testa se, no alto do pulo, o caminho à frente está livre (e se há espaço
+## em cima para subir até lá).
+func _can_jump_over(dir: float) -> bool:
+	var h := _jump_height() - 6.0
+	if test_move(global_transform, Vector2(0, -h)):
+		return false  # teto baixo: bate a cabeça
+	return not test_move(global_transform.translated(Vector2(0, -h)), Vector2(dir * 14.0, 0))
+
+
+## Há chão logo à frente, até `max_step_down` abaixo dos pés?
+func _ledge_ahead(dir: float) -> bool:
+	var space := get_world_2d().direct_space_state
+	var from := global_position + Vector2(dir * 26.0, -8.0)
+	var q := PhysicsRayQueryParameters2D.create(from, from + Vector2(0, max_step_down + 8.0), collision_mask)
+	q.exclude = [get_rid()]
+	q.hit_from_inside = true
+	return space.intersect_ray(q).is_empty()
 
 
 ## Escada que leva para cima (ou para baixo) a partir do andar atual, a mais

@@ -292,6 +292,19 @@ func _unhide() -> void:
 	sprite.modulate = Color.WHITE
 
 
+## Um agente viu o Eduardo se esconder e o puxou para fora.
+func pulled_from_hiding(from: Vector2) -> void:
+	if not _hidden:
+		return
+	_unhide()
+	_crouching = false
+	_apply_crouch_shape(false)
+	velocity = Vector2(signf(from.x - global_position.x) * 160.0, -140.0)
+	_set_state(State.FALL)
+	Sfx.play("detect", -4.0)
+	get_tree().call_group("stealth_hud", "_flash", "UM AGENTE TE VIU SE ESCONDER E TE PUXOU PARA FORA", Color(1.0, 0.35, 0.3))
+
+
 func _process_hidden(delta: float, dir: float) -> void:
 	if not is_on_floor():
 		velocity.y += _gravity * delta

@@ -74,6 +74,12 @@ func _ready() -> void:
 	check("confirmar vazio só avisa", "Digite um número" in feedback() and ui.error_count == 0, feedback())
 	check("confirmar vazio não tira tempo", ui.hack_timer.time_left > t0 - 0.5)
 
+	# Clicar 1 e 0 no teclado da tela digita "10" (o 0 estava ligado duas vezes).
+	(ui.numpad_grid.get_node("Btn1") as Button).pressed.emit()
+	ui.btn_0.pressed.emit()
+	check("clicar 1 e 0 no teclado da tela digita 10", ui.current_input_text == "10", ui.current_input_text)
+	ui._clear_input()
+
 	type_answer(sol + 1)
 	t0 = ui.hack_timer.time_left
 	ui._on_submit_pressed()
@@ -89,6 +95,8 @@ func _ready() -> void:
 	check("2º erro abre o passo a passo da SINE", ui.ai_assistant_panel.visible and "SINE abriu" in feedback())
 	var hint: String = ui.ai_hint_label.text
 	check("passo a passo chega na resposta certa", hint.contains("x = %d / %d" % [sol * int(ui.eq_data["ParamMult"]), int(ui.eq_data["ParamMult"])]), hint.replace("\n", " | "))
+	check("SINE monta a conta mas não dá o resultado", not hint.contains("x = %d\n" % sol) and not hint.ends_with("x = %d" % sol) and hint.contains("faça a conta"), hint.replace("\n", " | "))
+	check("fórmula do tipo de equação aparece na tela", ui.formula_text().contains("x = (c − b) ÷ a"), ui.formula_text())
 	await real(1.4)
 	check("texto da SINE aparece todo em tempo real", ui.ai_hint_label.visible_ratio >= 0.99, "%.2f" % ui.ai_hint_label.visible_ratio)
 
@@ -130,13 +138,19 @@ func _ready() -> void:
 		ui.eq_data = ui.math_generator.GenerateValidEquation(5, sub5)
 		var sol5 := int(ui.eq_data["Solution"])
 		var h5: String = ui._generate_step_by_step_hint()
-		var last: String = h5.strip_edges().split("\n")[-1]
+		var lines5 := h5.strip_edges().split("\n")
+		var last: String = lines5[-2]  # a última é "faça a conta"
 		var ok5 := false
+		var rhs5 := last.split("=")[-1].strip_edges()
 		if "/" in last:
-			var parts := last.split("=")[-1].split("/")
+			var parts := rhs5.split("/")
 			ok5 = int(parts[1].strip_edges()) != 0 and int(parts[0].strip_edges()) == sol5 * int(parts[1].strip_edges())
-		else:
-			ok5 = last.ends_with("x = %d" % sol5)
+		elif " - " in rhs5:
+			ok5 = int(rhs5.split(" - ")[0]) - int(rhs5.split(" - ")[1]) == sol5
+		elif " + " in rhs5:
+			ok5 = int(rhs5.split(" + ")[0]) + int(rhs5.split(" + ")[1]) == sol5
+		# e nunca entrega o número pronto
+		ok5 = ok5 and not h5.contains("x = %d\n" % sol5)
 		if not ok5 or not ("dos dois lados" in h5):
 			wrong5.append(str(ui.eq_data["Expression"]) + " -> " + last)
 	check("nível 5: passo a passo chega na resposta (40 equações)", wrong5.is_empty(), str(wrong5.slice(0, 3)))

@@ -48,7 +48,7 @@ SIMS="duel_sim duel_bot_sim" tools/run_tests.sh
 | `duel_bot_sim` | robô que só desvia vence o Duelo em 3 sementes (os padrões são justos) |
 | `balance_sim` | tabela de tempos de hack por tipo, lockdown, laser, ciborgue, Duelo |
 | `ui_sim` | tela de hack (acerto, erro, abortar, SINE, nível 5, Paradoxo), diálogos, Como jogar, pausa, lore, encerramento |
-| `guard_nav_sim` | agentes: atacam colados, sobem/descem escadas, pulam obstáculos, seguram distância sem caminho, rádio chama reforços |
+| `guard_nav_sim` | agentes: atacam colados e recuam atirando, puxam o Eduardo do esconderijo se o viram entrar, sobem/descem escadas, pulam só o que dá para pular, param na beirada, seguram distância sem caminho, rádio chama reforços |
 | `tutorial_sim` | guia do hack da SINE na Fase 1 (câmera no agente, avisos Q/E/equação), conversas novas das Fases 1 e 2 |
 | `edge_sim` | casos-limite do playtest automatizado: hack pendurado na escada, Esc no quadro em que o hack abre, pausa na visão hacker, Esc repetido, hack escondido, abismo com pouca defesa, reiniciar andar com o Vance resgatado, pausa bloqueada depois de vencer o Duelo |
 
@@ -104,7 +104,8 @@ Nada disto foi jogado com teclado e mouse, só por simulação. Vale passar por 
 ### Geral (pedidos da professora)
 - [ ] Acentos (ã, õ, ç) legíveis em todos os textos (fonte Exo 2).
 - [ ] Ao confirmar a resposta: "CORRETO!" em verde ou "INCORRETO: x = … não resolve a equação. -3 s" em vermelho.
-- [ ] O passo a passo da SINE abre no 2º erro e chega na resposta certa.
+- [ ] O passo a passo da SINE abre no 2º erro e monta a conta (ex.: "x = 8 / 4") sem dar o resultado.
+- [ ] A fórmula do tipo de equação aparece embaixo da equação.
 - [ ] "Como jogar" no menu e na pausa, com o objetivo do jogo.
 - [ ] Cronômetro e SINE em tempo real durante a câmera lenta.
 
@@ -198,4 +199,18 @@ Nada disto foi jogado com teclado e mouse, só por simulação. Vale passar por 
 | Relação SINE–Eduardo | Conversas novas: abertura, quiosque e telhados (Fase 1); chegada, drones e elevador (Fase 2) | `data/dialogue/slums.json`, `data/dialogue/industrial.json` |
 
 Para rever: o guia e as conversas tocam uma vez por save; use "Novo jogo" para vê-los de novo.
+
+### Segundo playtest
+
+| Pedido | O que mudou | Onde |
+|---|---|---|
+| Guarda colado | Recua enquanto atira (fica a ~110 px), se houver chão e espaço atrás | `enemy.gd` (`back_off_velocity`), `StateMaxAlert.gd` |
+| Esconder-se na frente do guarda | Se ele viu o Eduardo entrar no esconderijo (estava em alerta e vendo), vai até lá e o puxa para fora | `StateMaxAlert.gd`, `eduardo.gd` (`pulled_from_hiding`) |
+| Guarda pulando contra a parede | Só pula se a altura do pulo passa do obstáculo e não há teto em cima; senão para | `enemy.gd` (`_can_jump_over`) |
+| Guarda caindo de plataformas | Para na beirada (quedas maiores que 72 px); desce só por escada | `enemy.gd` (`_ledge_ahead`) |
+| Drone parado ao ver o jogador | Era intencional (parava enquanto a barra enchia). Agora segue o jogador pelo ar, dentro da faixa de patrulha + 160 px | `scripts/enemies/patrol_drone.gd` |
+| Portas do lockdown sem apoio | Verga de aço com faixa de perigo da porta até o teto | `_door_header` no builder base |
+| 10 virava 100 | O botão 0 da tela estava ligado duas vezes (um clique = "00") | `hacking_interface.gd` |
+| Fórmula na tela / SINE sem resposta | Linha "FÓRMULA" com a regra geral de cada tipo; a SINE monta a conta mas termina em "faça a conta" (nunca o número pronto) | `hacking_interface.gd` (`formula_for`) |
+| Elevador do Setor 2 | Cabine apoiada na passarela, cabos até a tampa do poço; a saída só vale em pé dentro da cabine (subir a escada por baixo não troca mais de fase) | `build_industrial_stage.gd`, `level_exit.gd` (`require_standing`) |
 

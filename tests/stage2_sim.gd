@@ -203,6 +203,14 @@ func _ready() -> void:
 	check("drone vê o jogador no fosso", drone.mode == PatrolDrone.Mode.ALERT, PatrolDrone.Mode.keys()[drone.mode])
 	await step(90)
 	check("drone dispara o alarme", alarms[0] > 0, "alarmes=%d" % alarms[0])
+	# Em alerta, segue o jogador (antes parava no ar).
+	var x_before := drone.global_position.x
+	for i in 100:  # anda para a direita a ~120 px/s
+		tp(2945 + i * 2, 100)
+		await step(1)
+	await step(30)
+	check("drone em alerta segue o jogador", drone.global_position.x > x_before + 100.0 and drone.mode == PatrolDrone.Mode.ALERT,
+		"%.0f -> %.0f" % [x_before, drone.global_position.x])
 	hv.debug_hack(drone.get_node("Hackable"), true); await step(5)
 	check("hack reinicia o drone", drone.mode == PatrolDrone.Mode.REBOOT and not drone.sees_player())
 	check("drone reiniciando não aceita novo hack", not drone.can_be_hacked())

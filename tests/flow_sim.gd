@@ -97,7 +97,20 @@ func _run() -> void:
 	exit = lvl.get_node("LevelExit") as LevelExit
 	check("saída da Fase 2 aponta para a Fase 3", exit.next_stage == l3, exit.next_stage)
 	check("título da Fase 3 na transição", GameManager.level_title(l3) == "Setor de P&D")
-	exit._on_body_entered(p)
+	# A saída da Fase 2 é a cabine do elevador: subir a escada por baixo não
+	# conta, só em pé lá dentro.
+	check("saída da Fase 2 exige estar em pé na cabine", exit.require_standing)
+	p.global_position = exit.global_position + Vector2(0, 128 + 40)  # escada de baixo, cabeça na área
+	p.velocity = Vector2.ZERO
+	for i in 3:
+		await get_tree().physics_frame
+	check("encostar na área por baixo não troca de fase", not LevelTransition.is_busy())
+	p.global_position = exit.global_position + Vector2(0, -4)
+	p.velocity = Vector2.ZERO
+	for i in 30:
+		await get_tree().physics_frame
+		if LevelTransition.is_busy():
+			break
 	dt = await wait_transition()
 	lvl = get_tree().current_scene as Level
 	check("elevador leva à Fase 3", lvl != null and lvl.floor_number == 3)

@@ -24,6 +24,11 @@ enum Mode { PATROL, ALERT, REBOOT }
 @export var sensor_tilt_deg: float = 40.0
 @export var exposure_to_alarm: float = 1.2
 @export var reboot_time: float = 8.0
+## Em alerta, persegue o Eduardo pelo ar (sem sair da faixa de patrulha mais
+## esta folga), mantendo-se um pouco atrás para o sensor apontar para ele.
+@export var chase_speed: float = 120.0
+@export var chase_margin: float = 160.0
+@export var chase_offset: float = 90.0
 @export var world_mask: int = 1
 
 ## Sprites (PixelLab, ver tools/gen_industrial_art.py): só a cor do olho muda.
@@ -119,20 +124,36 @@ func _fly(delta: float) -> void:
 		global_position += to.normalized() * step
 
 
+var _last_seen_x: float = 0.0
+
+
 func _do_alert(delta: float) -> void:
-	# Para no ar e encara o jogador enquanto a barra enche.
+	# Segue o jogador enquanto a barra enche (e depois, até perdê-lo de vista).
 	var player := _player()
 	if sees_player() and player:
+		_last_seen_x = player.global_position.x
+		_chase(player.global_position.x, delta)
 		_lost = 0.0
 		_exposure += delta
 		if _exposure >= exposure_to_alarm and _alarm_cooldown <= 0.0:
 			_alarm_cooldown = 4.0
 			GameManager.raise_alarm(player.global_position)
 	else:
+		_chase(_last_seen_x, delta)
 		_lost += delta
 		_exposure = maxf(_exposure - delta, 0.0)
 		if _lost >= 1.5:
 			mode = Mode.PATROL
+
+
+func _chase(target_x: float, delta: float) -> void:
+	var dx := target_x - global_position.x
+	if absf(dx) > 6.0:
+		facing = signf(dx)
+	var lo := minf(point_a.x, point_b.x) - chase_margin
+	var hi := maxf(point_a.x, point_b.x) + chase_margin
+	var want := clampf(target_x - facing * chase_offset, lo, hi)
+	global_position.x = move_toward(global_position.x, want, chase_speed * delta)
 
 
 func _player() -> Node2D:

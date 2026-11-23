@@ -176,7 +176,19 @@ func _add_machinery(lvl: Node) -> void:
 		var arm := _wall_prop(m, PROP_DIR + "robot_arm.png", Vector2(x, CEILING_Y + 75), "Arm%d" % int(x))
 		arm.flip_h = x > 3000.0
 	# E: elevador de carga no topo do poço (o jogador entra nele = saída da fase)
-	_prop(m, PROP_DIR + "elevator.png", 5230.0, -1008.0 + 12.0, "ElevatorCage")
+	# A base em perspectiva afunda na grade (senão parece flutuar) e os cabos
+	# sobem até a tampa do poço.
+	var cage := _prop(m, PROP_DIR + "elevator.png", 5230.0, -1008.0 + 10.0, "ElevatorCage")
+	cage.z_index = 3  # na frente da grade: a base fica apoiada nela
+	var cage_top := cage.position.y - cage.texture.get_height() / 2.0
+	for cx in [5226.0, 5236.0, 5262.0, 5284.0]:
+		var cable := Line2D.new()
+		cable.name = "ElevatorCable%d" % int(cx)
+		cable.width = 2.0
+		cable.default_color = Color(0.55, 0.58, 0.62)
+		cable.points = PackedVector2Array([Vector2(cx, _y(-41) - 16.0), Vector2(cx, cage_top + 6.0)])
+		cable.z_index = -1
+		m.add_child(cable)
 
 
 # --- Props e esconderijos ----------------------------------------------------
@@ -241,6 +253,9 @@ func _add_kiosk_and_door(lvl: Node) -> void:
 	shutter.set("start_open", true)
 	shutter.set("hackable_enabled", false)
 	lvl.add_child(shutter)
+	# Vergas até o teto: as portas não ficam soltas no ar.
+	_door_header(lvl, Vector2(3590, 16), SERVER_CEILING_Y, "LockdownShutterWest")
+	_door_header(lvl, Vector2(146 * T + 40, 16), _y(-5), "SecurityDoor")
 	_add_lockdown(lvl)
 
 
@@ -336,8 +351,10 @@ func _add_guards(lvl: Node) -> void:
 
 
 func _add_exit(lvl: Node) -> void:
-	var exit := _exit(lvl, NEXT_STAGE, Vector2(5230, -1008))
+	# Dentro da cabine: só vale em pé lá dentro (não ao subir a escada de baixo).
+	var exit := _exit(lvl, NEXT_STAGE, Vector2(5236, -1008), Vector2(64, 120))
 	exit.name = "LevelExit"
+	exit.set("require_standing", true)
 	var sign := Label.new()
 	sign.name = "ElevatorSign"
 	sign.text = "ELEVADOR DE CARGA  ->  P&D"
