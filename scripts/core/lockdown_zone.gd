@@ -87,6 +87,7 @@ func start() -> void:
 	_ui.visible = true
 	_tint.visible = true
 	lockdown_started.emit()
+	Sfx.play("alarm", -4.0)
 
 
 func _process(delta: float) -> void:

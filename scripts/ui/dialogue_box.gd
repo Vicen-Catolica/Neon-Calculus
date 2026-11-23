@@ -170,8 +170,26 @@ func _process(_delta: float) -> void:
 	_last_ticks = now
 	var total := _current_text().length()
 	if _shown < total:
+		var before := int(_shown)
 		_shown = minf(_shown + CHARS_PER_SEC * dt, total)
 		_body.visible_characters = -1 if _shown >= total else int(_shown)
+		_blip(before, int(_shown))
+
+
+## Voice blips (GDD §9): um bipe a cada BLIP_EVERY letras escritas, com o
+## timbre de quem fala (assets/sfx/blip_<falante>.wav).
+const BLIP_EVERY := 3
+
+
+func _blip(from_char: int, to_char: int) -> void:
+	var text := _current_text()
+	for i in range(from_char, mini(to_char, text.length())):
+		if i % BLIP_EVERY != 0 or text[i] == " ":
+			continue
+		var who := current_speaker().to_lower()
+		var sfx := "blip_" + who if Sfx.stream("blip_" + who) else "blip_ui"
+		Sfx.play(sfx, -8.0, 0.08)
+		return
 
 
 func _unhandled_input(event: InputEvent) -> void:

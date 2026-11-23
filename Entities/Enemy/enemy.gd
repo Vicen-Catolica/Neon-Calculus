@@ -414,6 +414,7 @@ func _on_attack_timer_timeout() -> void:
 		if target_player.has_method("take_damage"):
 			target_player.take_damage(taser_defense_drain)
 		fire_taser_effect()
+		Sfx.play_at("taser", global_position + Vector2(0, -40), 0.0, 0.08)
 
 func update_state_indicator(state_name: String) -> void:
 	if not state_indicator:
@@ -532,6 +533,7 @@ func on_max_alert(by_alarm: bool) -> void:
 	if _by_radio or by_alarm:
 		_by_radio = false
 		return
+	Sfx.play_at("detect", global_position + Vector2(0, -60))
 	var called := 0
 	for g in get_tree().get_nodes_in_group("guards"):
 		if g == self or not (g is Enemy):
@@ -544,6 +546,7 @@ func on_max_alert(by_alarm: bool) -> void:
 		e._answer_radio(last_known_player_pos, radio_delay)
 		called += 1
 	if called > 0:
+		Sfx.play_at("radio", global_position + Vector2(0, -60), -4.0)
 		get_tree().call_group("stealth_hud", "_flash", "AGENTE CHAMOU REFORÇOS PELO RÁDIO", Color(1.0, 0.6, 0.15))
 	Tutorial.event("spotted")
 

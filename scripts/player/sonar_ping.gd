@@ -71,6 +71,7 @@ func ping() -> bool:
 	_wave_t = 0.0
 	get_tree().call_group("stealth_hud", "_flash", "PING SONAR: %d AMEAÇA(S)" % revealed.size(), CYAN)
 	pinged.emit(revealed.size())
+	Sfx.play("sonar", -4.0)
 	return true
 
 

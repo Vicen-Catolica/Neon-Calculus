@@ -27,6 +27,7 @@ LevelTransition="*res://scripts/ui/level_transition.gd"
 PauseMenu="*res://scripts/ui/pause_menu.gd"
 Dialogue="*res://scripts/ui/dialogue_box.gd"
 Tutorial="*res://scripts/ui/tutorial.gd"
+Sfx="*res://scripts/core/sfx.gd"
 
 [display]
 

@@ -214,6 +214,7 @@ func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 	
 	current_floor_level = floor_level
 	current_sub_topic = sub_topic
+	Sfx.play("hack_open", -6.0)
 	error_count = 0
 	_busy = false
 	if _feedback:
@@ -366,6 +367,7 @@ func _on_submit_pressed() -> void:
 		if input_line:
 			input_line.text = "x = %d" % user_val
 		_show_feedback("CORRETO! x = %d. ACESSO CONCEDIDO." % user_val, FEEDBACK_OK)
+		Sfx.play("hack_ok", -4.0)
 		_flash_input(FEEDBACK_OK)
 		if hack_timer:
 			hack_timer.paused = true
@@ -450,6 +452,7 @@ func _on_paradox_answer() -> void:
 
 func _trigger_error(wrong_value: int = 0) -> void:
 	error_count += 1
+	Sfx.play("hack_fail", -5.0)
 	GameManager.add_stat("hack_errors")
 	current_input_text = ""
 	_update_input_display()
@@ -669,6 +672,7 @@ func _on_numpad_key_pressed(digit: String) -> void:
 	if _busy:
 		return
 	if current_input_text.length() < 4:
+		Sfx.play("hack_key", -10.0, 0.06)
 		current_input_text += digit
 		_update_input_display()
 
@@ -722,6 +726,7 @@ func abort_hack(roll: float = -1.0) -> void:
 	if hack_timer:
 		hack_timer.paused = true
 	var alert := (randf() if roll < 0.0 else roll) < abort_alert_chance()
+	Sfx.play("hack_abort", -5.0)
 	if alert:
 		_show_feedback("HACK ABORTADO. A Axioma rastreou a conexão: ALERTA!", FEEDBACK_ERR)
 		_flash_input(FEEDBACK_ERR)
@@ -743,6 +748,7 @@ func _on_hack_timer_timeout() -> void:
 	if timer_label:
 		timer_label.text = "00:00"
 	_show_feedback("TEMPO ESGOTADO. A invasão falhou.", FEEDBACK_ERR)
+	Sfx.play("hack_fail", -5.0)
 	_flash_input(FEEDBACK_ERR)
 	await _wait_real(RESULT_HOLD)
 	_complete_hack(false)

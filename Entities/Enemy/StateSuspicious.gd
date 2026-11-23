@@ -5,6 +5,7 @@ var investigation_timer: float = 0.0
 
 func enter() -> void:
 	investigation_timer = 0.0
+	Sfx.play_at("suspicious", enemy.global_position + Vector2(0, -60), -6.0)
 	enemy.velocity.x = 0
 	# Vira para o que chamou a atenção (barulho ou vulto visto de relance).
 	var dx: float = enemy.target_noise_pos.x - enemy.global_position.x

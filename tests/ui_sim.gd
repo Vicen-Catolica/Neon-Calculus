@@ -236,6 +236,12 @@ func _ready() -> void:
 	check("diálogo abre e pausa o jogo", Dialogue.is_open() and tree.paused and Engine.time_scale == 1.0)
 	await real(0.3)
 	check("texto aparece aos poucos", not Dialogue.is_line_complete())
+	check("voice blip da SINE toca enquanto ela fala", Sfx.last_played_ms("blip_sine") > 0)
+	var missing: Array = []
+	for n in ["blip_sine", "blip_eduardo", "blip_axioma", "blip_vance", "taser", "detect", "radio", "step_1", "hide", "hack_ok", "hack_fail", "hack_key"]:
+		if Sfx.stream(n) == null:
+			missing.append(n)
+	check("efeitos sonoros carregam de assets/sfx", missing.is_empty(), str(missing))
 	await real(1.0)
 	check("digitação termina em tempo real", Dialogue.is_line_complete())
 	var esc := InputEventAction.new()

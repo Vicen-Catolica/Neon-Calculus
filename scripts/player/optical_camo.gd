@@ -53,6 +53,7 @@ func start() -> bool:
 	if not can_start():
 		return false
 	_set_active(true)
+	Sfx.play("camo", -6.0)
 	get_tree().call_group("stealth_hud", "_flash", "VARIÁVEL OCULTA ATIVA", CYAN)
 	return true
 

@@ -97,6 +97,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_update_state(dir)
 	_update_visuals(delta)
+	_footsteps(delta)
 
 
 func _process_ground_air(delta: float, dir: float) -> void:
@@ -114,6 +115,7 @@ func _process_ground_air(delta: float, dir: float) -> void:
 		_jump_buffer = maxf(_jump_buffer - delta, 0.0)
 	if _jump_buffer > 0.0 and _coyote > 0.0 and not _crouching:
 		velocity.y = jump_velocity
+		Sfx.play("jump", -10.0, 0.08)
 		_jump_buffer = 0.0
 		_coyote = 0.0
 	# Pulo variável: soltar o botão corta a subida.
@@ -145,6 +147,24 @@ func _process_climb(dir: float) -> void:
 			velocity.y = -160.0  # impulso para passar da borda da plataforma
 	elif is_on_floor() and v > 0.0:
 		_set_state(State.IDLE)
+
+
+## Passos: um som a cada STEP_DIST px andados no chão (correndo, mais alto e
+## com passada mais longa). Agachado não faz barulho.
+const STEP_DIST := 46.0
+const STEP_DIST_RUN := 62.0
+var _step_acc: float = 0.0
+
+
+func _footsteps(delta: float) -> void:
+	if not is_on_floor() or state not in [State.WALK, State.RUN] or is_silent():
+		_step_acc = STEP_DIST * 0.6  # o primeiro passo sai logo
+		return
+	_step_acc += absf(velocity.x) * delta
+	var run := state == State.RUN
+	if _step_acc >= (STEP_DIST_RUN if run else STEP_DIST):
+		_step_acc = 0.0
+		Sfx.play_any(["step_1", "step_2", "step_3", "step_4"], -9.0 if run else -14.0, 0.1)
 
 
 func _current_speed() -> float:
@@ -261,11 +281,13 @@ func _try_hide() -> bool:
 	sprite.modulate = HIDDEN_TINT
 	sprite.play(&"hide")
 	_set_state(State.CROUCH)
+	Sfx.play("hide", -6.0)
 	return true
 
 
 func _unhide() -> void:
 	_hidden = false
+	Sfx.play("unhide", -8.0)
 	z_index = 0
 	sprite.modulate = Color.WHITE
 
@@ -334,6 +356,7 @@ func _set_state(s: State) -> void:
 	if was_air and s == State.IDLE and is_on_floor():
 		_landing = true
 		sprite.play(&"land")
+		Sfx.play("land", -8.0, 0.08)
 	if s == State.CLIMB:
 		sprite.play(&"ladder_enter")
 	state_changed.emit(s)
@@ -468,6 +491,7 @@ func take_damage(amount: float) -> void:
 	if is_dead:
 		return
 	current_defense = maxf(0.0, current_defense - amount)
+	Sfx.play("hurt", -6.0, 0.05)
 	defense_changed.emit(current_defense, max_defense)
 	if current_defense <= 0.0:
 		die()
