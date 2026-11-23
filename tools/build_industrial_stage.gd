@@ -156,7 +156,9 @@ func _add_background(lvl: Node) -> void:
 func _add_tiles(lvl: Node) -> void:
 	_terrain_layer(lvl, "Buildings", GROUND_TS, WALL_RECTS, WALL_TINT)
 	_terrain_layer(lvl, "Ground", GROUND_TS, GROUND_RECTS)
-	# Sem a faixa de calçada da favela: aqui o topo é o friso + faixa de perigo do tile.
+	# Piso em profundidade (falso 3D) como o das favelas, em chapa de aço
+	# (tools/gen_floor_band.py industrial): os pés pisam "dentro" do chão.
+	_floor_band(lvl, _surface_runs(GROUND_RECTS), "res://assets/tilesets/industrial/floor_band.png")
 	_structures(lvl, CATWALKS)
 	_catwalk_band(lvl, CATWALKS)
 
