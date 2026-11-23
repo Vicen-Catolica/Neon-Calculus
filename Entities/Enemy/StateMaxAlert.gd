@@ -28,23 +28,17 @@ func physics_update(delta: float) -> void:
 			enemy.update_facing(sign(dist_x))
 
 		# Só dispara o taser se tiver linha de visão real
-		if dist_to_player <= enemy.attack_range and enemy.is_player_in_los():
+		if dist_to_player <= enemy.attack_range and enemy.is_player_in_los() and not enemy.is_climbing():
 			enemy.velocity.x = move_toward(enemy.velocity.x, 0, enemy.chase_speed)
 			enemy.try_fire_taser()
 		else:
-			var dir_x = sign(dist_x)
-			enemy.velocity.x = dir_x * enemy.chase_speed
+			# Persegue mudando de andar (pulo, escadas) em vez de só andar em x.
+			enemy.chase_move(target_player.global_position, enemy.chase_speed)
 	else:
 		lose_sight_timer += delta
 		
 		# Move até a última posição conhecida do player
-		var dist_to_last_pos = enemy.last_known_player_pos.x - enemy.global_position.x
-		if abs(dist_to_last_pos) > 10.0:
-			var dir_x = sign(dist_to_last_pos)
-			enemy.update_facing(dir_x)
-			enemy.velocity.x = dir_x * enemy.chase_speed
-		else:
-			enemy.velocity.x = move_toward(enemy.velocity.x, 0, enemy.chase_speed)
+		enemy.chase_move(enemy.last_known_player_pos, enemy.chase_speed)
 
 		# Passados os 3 segundos sem visão nem audição, vai para o estado de busca
 		if lose_sight_timer >= lose_interest_time:

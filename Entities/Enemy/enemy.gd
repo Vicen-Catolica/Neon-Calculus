@@ -34,6 +34,16 @@ signal alarm_triggered(last_position: Vector2)
 ## Unidade Lógica (ciborgue): segundos sem visão depois de hackeada (ponto cego).
 @export var blind_time: float = 6.0
 
+@export_category("Navegação")
+## Pulo da perseguição (degraus, caixas, beiradas baixas). ~90 px de altura.
+@export var jump_velocity: float = -420.0
+@export var climb_speed: float = 120.0
+## Sem caminho até o jogador em outro andar: espera a esta distância, mirando,
+## em vez de espelhar os passos dele por baixo.
+@export var hold_distance: float = 150.0
+## Até onde procura uma escada (px na horizontal).
+@export var ladder_search_range: float = 900.0
+
 @export_category("Debug Visual")
 @export var show_debug_vision: bool = true
 ## Desenha o cone de visão (laranja em patrulha, vermelho em alerta).
@@ -58,6 +68,11 @@ var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 var awareness: float = 0.0
 ## > 0: sistema visual hackeado (só ciborgue). Não vê nada até zerar.
 var blind_left: float = 0.0
+## Escada em uso pela navegação (null = andando) e sentido (-1 sobe, 1 desce).
+var _climb_ladder: Area2D = null
+var _climb_dir: int = 0
+var _saved_mask: int = 0
+var _jump_cooldown: float = 0.0
 const SUSPECT_AT: float = 0.35
 ## Nó filho que desenha a barra por cima do sprite (o _draw do próprio guarda
 ## fica atrás dos filhos e o sprite cobria a barra).
@@ -154,7 +169,8 @@ func _process(delta: float) -> void:
 		generate_lightning_beam(start_pos, end_pos)
 
 func _physics_process(delta: float) -> void:
-	if not is_on_floor():
+	_jump_cooldown = maxf(_jump_cooldown - delta, 0.0)
+	if _climb_ladder == null and not is_on_floor():
 		velocity.y += gravity * delta
 		
 	check_sensors(delta)
@@ -323,6 +339,10 @@ func is_player_in_los() -> bool:
 	# Se ultrapassar a distância máxima de visão, perde o contato visual imediatamente
 	if dist_to_player > vision_range:
 		return false
+	# Colado no jogador: o raio nasceria dentro do corpo dele e não "veria" nada
+	# (o guarda travava perseguindo sem atacar). Encostar é ver.
+	if _aim_point(target_player).distance_to(global_position + Vector2(0, -60)) <= 70.0:
+		return not VisionBlocker.line_blocked(get_tree(), ray_origin, player_center)
 
 	return has_line_of_sight_to(target_player, player_center)
 
@@ -600,3 +620,120 @@ func _draw_awareness_bar() -> void:
 	# marca do ponto em que ele começa a estranhar
 	var mx := pos.x + w * SUSPECT_AT
 	b.draw_line(Vector2(mx, pos.y - 1), Vector2(mx, pos.y + h + 1), Color(0, 0, 0, 0.8), 1.0)
+
+
+# --- Navegação de perseguição: pulo e escadas ---------------------------------
+
+## Move em direção a `target` (posição de pés, global) a `speed`, mudando de
+## andar quando preciso: pula degraus e obstáculos baixos, usa escadas para subir
+## e descer e sai pela ponta da plataforma. Sem caminho para cima, para a
+## `hold_distance` do alvo (mirando) em vez de espelhar os passos dele por baixo.
+## Só ajusta `velocity` e o lado; quem chama faz o move_and_slide().
+## Devolve true quando chegou (mesmo andar e perto em x).
+func chase_move(target: Vector2, speed: float) -> bool:
+	if _climb_ladder:
+		_do_climb()
+		return false
+	var dx := target.x - global_position.x
+	var dy := target.y - global_position.y
+	if absf(dy) > 64.0 and is_on_floor():
+		var lad := _ladder_toward(dy < 0.0, target)
+		if lad:
+			var lx := lad.global_position.x
+			if absf(lx - global_position.x) <= 6.0:
+				_start_climb(lad, -1 if dy < 0.0 else 1)
+				return false
+			_walk(signf(lx - global_position.x), speed)
+			return false
+		if dy < 0.0:
+			# Alvo num andar de cima sem escada: segura posição e mira.
+			var hold_x := target.x - signf(dx if dx != 0.0 else 1.0) * hold_distance
+			update_facing(signf(dx))
+			if absf(hold_x - global_position.x) > 10.0:
+				_walk(signf(hold_x - global_position.x), speed)
+				update_facing(signf(dx))
+			else:
+				velocity.x = move_toward(velocity.x, 0.0, speed)
+			return false
+		# Alvo embaixo sem escada: anda até sair pela ponta da plataforma.
+	if absf(dx) <= 8.0:
+		velocity.x = move_toward(velocity.x, 0.0, speed)
+		return absf(dy) <= 64.0
+	_walk(signf(dx), speed)
+	return false
+
+
+func _walk(dir: float, speed: float) -> void:
+	update_facing(dir)
+	velocity.x = dir * speed
+	# Degrau ou obstáculo baixo na frente: pula.
+	if is_on_floor() and is_on_wall() and _jump_cooldown <= 0.0:
+		velocity.y = jump_velocity
+		_jump_cooldown = 0.6
+
+
+## Escada que leva para cima (ou para baixo) a partir do andar atual, a mais
+## perto em x (preferindo as que vão para perto do alvo).
+func _ladder_toward(up: bool, target: Vector2) -> Area2D:
+	var best: Area2D = null
+	var best_score := INF
+	var feet := global_position.y
+	for lad in get_tree().get_nodes_in_group("ladder"):
+		var a := lad as Area2D
+		var top := _ladder_top(a)
+		var base := a.global_position.y
+		var ok := false
+		if up:
+			ok = absf(base - feet) < 28.0 and top < feet - 48.0 and top >= target.y - 48.0
+		else:
+			ok = absf(top - feet) < 28.0 and base > feet + 48.0
+		if not ok:
+			continue
+		var d := absf(a.global_position.x - global_position.x)
+		if d > ladder_search_range:
+			continue
+		var score := d + absf(a.global_position.x - target.x) * 0.5
+		if score < best_score:
+			best_score = score
+			best = a
+	return best
+
+
+## Superfície do topo da escada (onde se pisa ao sair dela).
+func _ladder_top(a: Area2D) -> float:
+	var cs := a.get_child(0) as CollisionShape2D
+	if cs and cs.shape is RectangleShape2D:
+		return a.global_position.y + cs.position.y - (cs.shape as RectangleShape2D).size.y / 2.0 + 4.0
+	return a.global_position.y
+
+
+func _start_climb(lad: Area2D, dir: int) -> void:
+	_climb_ladder = lad
+	_climb_dir = dir
+	global_position.x = lad.global_position.x
+	velocity = Vector2.ZERO
+	if dir > 0:
+		# Descendo: atravessa a passarela de mão única (sem colisão até a base).
+		_saved_mask = collision_mask
+		collision_mask = 0
+
+
+func _do_climb() -> void:
+	var lad := _climb_ladder
+	global_position.x = lad.global_position.x
+	velocity = Vector2(0.0, _climb_dir * climb_speed)
+	if _climb_dir < 0 and global_position.y <= _ladder_top(lad) + 2.0:
+		# Chegou em cima: impulso para passar da borda e pisar na plataforma.
+		velocity = Vector2(get_facing_direction().x * 40.0, -140.0)
+		_climb_ladder = null
+		_jump_cooldown = 0.4
+	elif _climb_dir > 0 and global_position.y >= lad.global_position.y - 2.0:
+		global_position.y = lad.global_position.y - 1.0
+		collision_mask = _saved_mask
+		velocity = Vector2.ZERO
+		_climb_ladder = null
+
+
+func is_climbing() -> bool:
+	return _climb_ladder != null
+
