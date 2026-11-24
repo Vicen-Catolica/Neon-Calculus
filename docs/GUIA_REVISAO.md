@@ -93,7 +93,7 @@ O save fica em `user://save.cfg` (no Linux, `~/.local/share/godot/app_userdata/<
 | **V** | Ping Sonar (novo) |
 | **C** | Variável Oculta, camuflagem (nova) |
 | Esc | pausa; durante o hack, aborta (não no lockdown nem no Duelo) |
-| N | no Paradoxo final, responde "∅ SEM SOLUÇÃO" |
+| N | no Paradoxo final, responde "⌀ SEM SOLUÇÃO" |
 
 ---
 
@@ -134,7 +134,7 @@ Nada disto foi jogado com teclado e mouse, só por simulação. Vale passar por 
 - [ ] Confronto com a Axioma antes de começar; não se repete após game over.
 - [ ] Cada ataque avisa antes. A brecha da varredura é alcançável; a varredura lateral passa agachado; o pulso tem um setor livre; a grade tem vãos.
 - [ ] Errar a equação de um nó só apaga o nó por 4 s.
-- [ ] O Paradoxo `x = x + 1`: um número é erro; ∅ (ou N) vence.
+- [ ] O Paradoxo `x = x + 1`: um número é erro; ⌀ (ou N) vence.
 - [ ] Vitória: falas finais, tela branca e encerramento com estatísticas e créditos.
 - [ ] Depois de zerar, "Continuar" leva ao encerramento.
 - [ ] **Dificuldade:** o Duelo está justo para quem joga de verdade? (O robô vence sem levar golpe porque reage no primeiro quadro do aviso.)
@@ -265,7 +265,7 @@ Não reproduzido: cones de visão atravessando o chão (headless e com janela, o
 | Fundo vazando sob a parede do Domo | Chão vai até a borda da fase | `build_core_stage.gd` |
 | Placas de saída como texto solto | Placa escura com borda neon (Setor 2, P&D, Domo) | `stage_builder_base.gd` (`_exit_sign`) |
 | Mancha no retrato da Axioma | Canto superior esquerdo refeito (espelho do canto direito) | `assets/ui/portraits/axioma.png` |
-| "Ø" parecido com "O" | Símbolo de conjunto vazio de verdade: "∅ SEM SOLUÇÃO" | `hacking_interface.gd`, `data/lore/core.json` |
+| "Ø" parecido com "O" | Símbolo de conjunto vazio: "⌀ SEM SOLUÇÃO" (ver oitavo playtest) | `hacking_interface.gd`, `data/lore/core.json` |
 
 ### Dicas de tecla durante o jogo (pedido seu)
 
@@ -288,4 +288,15 @@ Os avisos da HUD que tinham a tecla escrita fixa ("[F] ESCONDER", "SONAR [V]", "
 |---|---|---|
 | Porta da entrada de D (P&D) sem sentido, solta embaixo do patamar da escada | Porta de lockdown movida para x = 3696, dentro de uma divisória que desce do teto até ela (vira a porta dos laboratórios); o mezanino começa logo depois. A área do lockdown começa depois da porta | `tools/build_rnd_stage.gd` |
 | Agachado sob as passarelas do átrio (fim da Fase 3), não levantava | O teste de "dá para levantar?" ignora passarela de mão única (dá para atravessá-la de baixo); teto sólido (dutos) continua mantendo agachado | `scripts/player/eduardo.gd` (`_can_stand`, `_solid_over`) |
+
+### Oitavo playtest (rodada final do Gemini, validada)
+
+| Achado | O que mudou | Onde |
+|---|---|---|
+| "∅" aparecia como "?" num círculo | A Exo2 não tem o ∅ (U+2205). Troquei por ⌀ (U+2300), que a fonte tem e tem o mesmo desenho | `hacking_interface.gd`, `data/lore/core.json`, `paradox_duel.gd`, `tests/duel_sim.gd` |
+| Dica da SINE ficava presa no Menu ao sair da fase com ela aberta | `_run_hint` esconde o aviso quando o Eduardo sai da árvore (só não esconde quando um guia assumiu o aviso) | `scripts/ui/tutorial.gd`, teste novo em `tutorial_sim` |
+| HUD consultava o layout do teclado todo quadro (milhares de erros no headless) | Nome da tecla física fica em cache; no headless nem consulta o DisplayServer | `scripts/ui/tutorial.gd` (`_key_name`) |
+| `[A]`, `[Espaço]` em negrito caíam na fonte padrão | `bold_font` do aviso usa a mesma fonte da UI | `scripts/ui/tutorial.gd` |
+
+Não mexi: letras "apagando" nas placas (é o pisca-pisca proposital do neon) e `max_defense` (é o seu god mode, volte para 100.0 antes do build final).
 

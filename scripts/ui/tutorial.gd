@@ -322,6 +322,8 @@ func _run_hint(hint_name: String, origin: Vector2) -> void:
 		await get_tree().process_frame
 		if current_guide != "" or not is_instance_valid(p) or not p.is_inside_tree():
 			current_hint = ""
+			if current_guide == "":
+				_hide_banner()  # a fase trocou (ex.: Menu pela pausa): não deixa o aviso preso
 			return  # um guia tomou o aviso (ou a fase trocou)
 		for a in done:
 			if Input.is_action_pressed(a):
@@ -404,12 +406,25 @@ func keys_of(action: String) -> String:
 	return " ou ".join(names)
 
 
+## Cache tecla física → nome: a HUD pede o nome todo quadro, e consultar o
+## layout do teclado no DisplayServer a cada quadro custa (e no modo headless
+## só gera erro).
+var _physical_names: Dictionary = {}
+
+
 func _key_name(k: InputEventKey) -> String:
-	var code: Key = k.keycode
-	if code == KEY_NONE:
-		code = DisplayServer.keyboard_get_keycode_from_physical(k.physical_keycode)
-	if code == KEY_NONE:
-		code = k.physical_keycode
+	if k.keycode != KEY_NONE:
+		return _pretty(k.keycode)
+	var phys: Key = k.physical_keycode
+	if not _physical_names.has(phys):
+		var code: Key = KEY_NONE
+		if DisplayServer.get_name() != "headless":
+			code = DisplayServer.keyboard_get_keycode_from_physical(phys)
+		_physical_names[phys] = _pretty(code if code != KEY_NONE else phys)
+	return _physical_names[phys]
+
+
+func _pretty(code: Key) -> String:
 	var n := OS.get_keycode_string(code)
 	return KEY_NAMES.get(n, n)
 
@@ -458,6 +473,7 @@ func _build_banner() -> void:
 	var font = load("res://assets/fonts/ui_font.tres") if ResourceLoader.exists("res://assets/fonts/ui_font.tres") else null
 	if font:
 		_banner_label.add_theme_font_override("normal_font", font)
+		_banner_label.add_theme_font_override("bold_font", font)  # [b][A][/b] na mesma fonte
 	_banner.add_child(_banner_label)
 	_banner.visible = false
 

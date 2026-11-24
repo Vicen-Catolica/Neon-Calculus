@@ -168,5 +168,19 @@ func _ready() -> void:
 	for e in old_events:
 		InputMap.action_add_event("camo", e)
 
+	# Saiu da fase com a dica aberta (ex.: Menu pela pausa): o aviso não fica preso.
+	GameManager.dialogues_seen.erase("hint_crouch")
+	Tutorial.hint("crouch", p.global_position)
+	for i in 30:
+		await get_tree().process_frame
+		if Tutorial.current_hint == "crouch":
+			break
+	var holder := p.get_parent()
+	holder.remove_child(p)
+	await frames(3)
+	check("trocou de cena com a dica aberta: o aviso some", Tutorial.current_hint == "" and Tutorial.banner_text() == "",
+		Tutorial.banner_text())
+	holder.add_child(p)
+
 	print("TUDO OK — 0 falha(s)" if fails == 0 else "%d FALHA(S)" % fails)
 	get_tree().quit(1 if fails > 0 else 0)
