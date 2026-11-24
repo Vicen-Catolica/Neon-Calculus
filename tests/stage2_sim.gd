@@ -56,6 +56,8 @@ func pos() -> String:
 
 func _ready() -> void:
 	lvl = load(LEVEL).instantiate()
+	# A saída leva à Fase 3 de verdade: desligada para a simulação seguir nesta cena.
+	lvl.get_node("LevelExit").set("next_stage", "")
 	add_child(lvl)
 	p = lvl.get_node("Eduardo")
 	await step(30)

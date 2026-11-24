@@ -1,0 +1,103 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Entities/Enemy/enemy.gd" id="1_vt6as"]
+[ext_resource type="SpriteFrames" path="res://scenes/enemies/cyborg_frames.tres" id="2_6voff"]
+[ext_resource type="Script" path="res://Entities/Enemy/StateMachine.gd" id="3_d0xkc"]
+[ext_resource type="Script" path="res://Entities/Enemy/StatePatrol.gd" id="4_tncae"]
+[ext_resource type="Script" path="res://Entities/Enemy/StateSuspicious.gd" id="5_14c7j"]
+[ext_resource type="Script" path="res://Entities/Enemy/StateSearch.gd" id="6_qjnos"]
+[ext_resource type="Script" path="res://Entities/Enemy/StateMaxAlert.gd" id="7_oux3t"]
+[ext_resource type="Script" path="res://Entities/Enemy/StateDistracted.gd" id="8_vo8lh"]
+[ext_resource type="Script" path="res://Entities/Enemy/StateInvestigate.gd" id="9_4gnsn"]
+[ext_resource type="Script" path="res://scripts/hacking/hackable.gd" id="10_df60f"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_q1eld"]
+radius = 300.0
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_wrond"]
+radius = 14.0
+height = 118.0
+
+[node name="Cyborg" type="CharacterBody2D" unique_id=1588839503]
+script = ExtResource("1_vt6as")
+enemy_type = 1
+move_speed = 80.0
+chase_speed = 165.0
+vision_range = 340.0
+attack_range = 210.0
+vision_angle_deg = 55.0
+taser_defense_drain = 34.0
+eye_offset = Vector2(0, -102)
+detect_time_far = 0.9
+detect_time_near = 0.3
+show_debug_vision = false
+show_vision_cone = true
+
+[node name="Sensors" type="Node2D" parent="." unique_id=833744761]
+
+[node name="HearingArea" type="Area2D" parent="Sensors" unique_id=1356055322]
+visible = false
+
+[node name="HearingCollision" type="CollisionShape2D" parent="Sensors/HearingArea" unique_id=1316478184]
+position = Vector2(0, -60)
+shape = SubResource("CircleShape2D_q1eld")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2097209948]
+position = Vector2(-2, -62)
+sprite_frames = ExtResource("2_6voff")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1815820045]
+position = Vector2(0, -59)
+shape = SubResource("CapsuleShape2D_wrond")
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=1773408537]
+
+[node name="VisibleOnScreenEnabler2D" type="VisibleOnScreenEnabler2D" parent="." unique_id=38818996]
+rect = Rect2(-900, -500, 1800, 800)
+
+[node name="AttackTimer" type="Timer" parent="." unique_id=1563753723]
+wait_time = 0.7
+
+[node name="StateMachine" type="Node" parent="." unique_id=863923343 node_paths=PackedStringArray("initial_state")]
+script = ExtResource("3_d0xkc")
+initial_state = NodePath("Patrol")
+
+[node name="Patrol" type="Node" parent="StateMachine" unique_id=1292782805]
+script = ExtResource("4_tncae")
+
+[node name="Suspicious" type="Node" parent="StateMachine" unique_id=111047361]
+script = ExtResource("5_14c7j")
+
+[node name="Search" type="Node" parent="StateMachine" unique_id=550492860]
+script = ExtResource("6_qjnos")
+
+[node name="MaxAlert" type="Node" parent="StateMachine" unique_id=1448791687]
+script = ExtResource("7_oux3t")
+
+[node name="Distracted" type="Node" parent="StateMachine" unique_id=186416140]
+script = ExtResource("8_vo8lh")
+
+[node name="Investigate" type="Node" parent="StateMachine" unique_id=1783483202]
+script = ExtResource("9_4gnsn")
+
+[node name="StateIndicator" type="Label" parent="." unique_id=1538158393]
+custom_minimum_size = Vector2(40, 30)
+offset_left = -20.0
+offset_top = -160.0
+offset_right = 20.0
+offset_bottom = -130.0
+pivot_offset = Vector2(20, 15)
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TaserLine" type="Line2D" parent="." unique_id=353273449]
+visible = false
+width = 3.0
+default_color = Color(0, 0.94, 1, 1)
+
+[node name="Hackable" type="Node2D" parent="." unique_id=126478389]
+position = Vector2(0, -90)
+script = ExtResource("10_df60f")
+display_name = "UNIDADE LÓGICA"

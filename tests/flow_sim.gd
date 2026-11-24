@@ -92,10 +92,47 @@ func _run() -> void:
 	p = get_tree().get_first_node_in_group("Player")
 	check("Eduardo vivo depois de reiniciar", p != null and not p.is_dead)
 
+	# Saída da Fase 2 (elevador de carga) -> Fase 3.
+	var l3: String = GameManager.LEVELS[3]["scene"]
+	exit = lvl.get_node("LevelExit") as LevelExit
+	check("saída da Fase 2 aponta para a Fase 3", exit.next_stage == l3, exit.next_stage)
+	check("título da Fase 3 na transição", GameManager.level_title(l3) == "Setor de P&D")
+	exit._on_body_entered(p)
+	dt = await wait_transition()
+	lvl = get_tree().current_scene as Level
+	check("elevador leva à Fase 3", lvl != null and lvl.floor_number == 3)
+	check("transição para a Fase 3 em menos de 2 s", dt < 2.0, "%.2f s" % dt)
+	check("andar 3 no GameManager e no save", GameManager.current_floor == 3 and int(SaveGame.load_checkpoint()["floor"]) == 3)
+	for i in 10:
+		await get_tree().process_frame
+	check("diálogo de elevador abre ao chegar", Dialogue.is_open() and Dialogue.current_speaker() == "SINE")
+	check("diálogo pausa o jogo", get_tree().paused)
+	Dialogue.skip()
+	check("diálogo visto vai para o save", "rnd_elevator" in SaveGame.load_checkpoint().get("dialogues_seen", []))
+	check("jogo volta depois do diálogo", not get_tree().paused and GameManager.state == GameManager.State.PLAYING)
+	GameManager.set_flag("vance_rescued")
+	check("resgate do Vance vai para o save na hora", "vance_rescued" in SaveGame.load_checkpoint().get("story_flags", []))
+	GameManager.reset_progress()
+	check("continuar aponta para a Fase 3", SaveGame.restore() == l3 and GameManager.current_floor == 3)
+	check("continuar lembra o diálogo visto", "rnd_elevator" in GameManager.dialogues_seen)
+	check("continuar lembra o resgate", GameManager.has_flag("vance_rescued"))
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	p = get_tree().get_first_node_in_group("Player")
+	check("Eduardo nasce no chão da Fase 3", p != null and p.is_on_floor(), str(p.global_position) if p else "")
+	var exit3 := lvl.get_node("LevelExit") as LevelExit
+	check("saída da Fase 3 desligada até existir a Fase 4", exit3.next_stage == "")
+
 	# Restaura o save do jogador.
 	SaveGame.clear()
 	if not backup.is_empty():
 		GameManager.lore_read.clear()
+		GameManager.dialogues_seen.clear()
+		GameManager.story_flags.clear()
+		for id in backup.get("story_flags", []):
+			GameManager.story_flags.append(String(id))
+		for id in backup.get("dialogues_seen", []):
+			GameManager.dialogues_seen.append(String(id))
 		for id in backup.get("lore_read", []):
 			GameManager.lore_read.append(String(id))
 		SaveGame.save_checkpoint(int(backup["floor"]), String(backup["scene"]))

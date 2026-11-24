@@ -16,8 +16,7 @@ extends "res://tools/stage_builder_base.gd"
 
 const GROUND_TS := "res://assets/tilesets/industrial/industrial_ground.tres"
 const OUT_LEVEL := "res://scenes/levels/industrial/industrial_stage2.tscn"
-## Fase 3 (P&D) ainda não existe: a saída fica desligada até lá.
-const NEXT_STAGE := ""
+const NEXT_STAGE := "res://scenes/levels/rnd/rnd_stage3.tscn"
 
 ## Chão em cor cheia; paredes/teto escurecidos para não lerem como piso.
 const WALL_TINT := Color(0.5, 0.46, 0.46)
@@ -336,7 +335,7 @@ func _add_exit(lvl: Node) -> void:
 	exit.name = "LevelExit"
 	var sign := Label.new()
 	sign.name = "ElevatorSign"
-	sign.text = "ELEVADOR DE CARGA  ->  P&D\n(fase 3 em construção)"
+	sign.text = "ELEVADOR DE CARGA  ->  P&D"
 	sign.position = Vector2(4900, -1240)
 	sign.add_theme_font_size_override("font_size", 16)
 	sign.add_theme_color_override("font_color", Color("FF6A1A"))

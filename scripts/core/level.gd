@@ -9,6 +9,10 @@ extends Node2D
 @export var limit_right: int = 4096
 @export var limit_top: int = -420
 @export var limit_bottom: int = 320
+## Área de segurança máxima (GDD §2 / WDD §10: o tempo dos hacks cai nos níveis
+## médios). Alvos dentro dela usam `max_security_time_mult`. Vazia = nenhuma.
+@export var max_security_rect: Rect2 = Rect2()
+@export var max_security_time_mult: float = 0.8
 
 
 func _ready() -> void:

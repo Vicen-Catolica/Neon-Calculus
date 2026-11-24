@@ -15,6 +15,7 @@ func _ready() -> void:
 func _build_object_scenes() -> void:
 	_build_guard("v1", "res://scenes/enemies/guard_v1.tscn")
 	_build_guard("v2", "res://scenes/enemies/guard_v2.tscn")
+	_build_guard("v2", "res://scenes/enemies/cyborg.tscn", true)
 	_build_camera(SecurityCamera.Model.WALL, "res://scenes/objects/security_camera_wall.tscn")
 	_build_camera(SecurityCamera.Model.DOME, "res://scenes/objects/security_camera_dome.tscn")
 	_build_door()
@@ -23,10 +24,15 @@ func _build_object_scenes() -> void:
 	_build_steam_valve()
 	_build_conveyor()
 	_build_drone()
+	_build_laser()
+	_build_holding_cell()
 	_build_ui()
 
 
-func _build_guard(variant: String, path: String) -> void:
+## `cyborg`: Unidade Lógica (Fase 3) — sem ouvido, não cai em distração, barra
+## de detecção bem mais rápida, hack = ponto cego. Arte provisória: guarda v2
+## recolorido (tools/gen_rnd_art.py): armadura branca, visor vermelho da Axioma.
+func _build_guard(variant: String, path: String, cyborg: bool = false) -> void:
 	var g := CharacterBody2D.new()
 	g.name = "Guard"
 	g.set_script(load("res://Entities/Enemy/enemy.gd"))
@@ -39,6 +45,13 @@ func _build_guard(variant: String, path: String) -> void:
 	g.set("eye_offset", Vector2(0, -102))
 	g.set("show_debug_vision", false)
 	g.set("show_vision_cone", true)
+	if cyborg:
+		g.name = "Cyborg"
+		g.set("enemy_type", Enemy.EnemyType.CYBORG)
+		g.set("move_speed", 80.0)
+		g.set("vision_range", 340.0)
+		g.set("detect_time_far", 0.9)
+		g.set("detect_time_near", 0.3)
 
 	var sensors := Node2D.new()
 	sensors.name = "Sensors"
@@ -57,7 +70,8 @@ func _build_guard(variant: String, path: String) -> void:
 
 	var spr := AnimatedSprite2D.new()
 	spr.name = "AnimatedSprite2D"
-	spr.sprite_frames = load("res://scenes/enemies/guard_%s_frames.tres" % variant)
+	spr.sprite_frames = load("res://scenes/enemies/cyborg_frames.tres" if cyborg \
+		else "res://scenes/enemies/guard_%s_frames.tres" % variant)
 	spr.position = Vector2(-2, -62)
 	spr.animation = &"idle"
 	spr.autoplay = "idle"
@@ -118,7 +132,7 @@ func _build_guard(variant: String, path: String) -> void:
 	line.default_color = Color(0, 0.94, 1, 1)
 	g.add_child(line)
 
-	g.add_child(_hackable("AGENTE", Vector2(0, -90)))
+	g.add_child(_hackable("UNIDADE LÓGICA" if cyborg else "AGENTE", Vector2(0, -90)))
 	_save(g, path)
 
 
@@ -190,6 +204,34 @@ func _build_steam_valve() -> void:
 	# Hackable no volante (nozzle_height padrão 210 + 46).
 	v.add_child(_hackable("VÁLVULA DE VAPOR", Vector2(0, -256)))
 	_save(v, "res://scenes/objects/steam_valve.tscn")
+
+
+func _build_laser() -> void:
+	var l := Node2D.new()
+	l.name = "LaserBarrier"
+	l.set_script(load("res://scripts/objects/laser_barrier.gd"))
+	l.add_child(_hackable("BARREIRA LASER", Vector2(0, -182)))
+	var beam := Area2D.new()
+	beam.name = "Beam"
+	beam.monitorable = false
+	var cs := CollisionShape2D.new()
+	cs.name = "Shape"
+	beam.add_child(cs)
+	l.add_child(beam)
+	_save(l, "res://scenes/objects/laser_barrier.tscn")
+
+
+func _build_holding_cell() -> void:
+	var c := Node2D.new()
+	c.name = "HoldingCell"
+	c.set_script(load("res://scripts/objects/holding_cell.gd"))
+	c.add_child(_hackable("CELA — LAB 07", Vector2(89, -97)))
+	var spr := Sprite2D.new()
+	spr.name = "Prisoner"
+	spr.texture = load("res://assets/props/rnd/vance.png")
+	spr.position = Vector2(0, -62 - 4)
+	c.add_child(spr)
+	_save(c, "res://scenes/objects/holding_cell.tscn")
 
 
 func _build_conveyor() -> void:

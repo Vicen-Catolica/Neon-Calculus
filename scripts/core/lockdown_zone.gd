@@ -80,6 +80,7 @@ func start() -> void:
 			h.enabled = true
 			h.difficulty_bonus = exit_difficulty_bonus
 			h.time_limit_mult = exit_time_mult
+			h.abortable = false
 		if not exit.opened.is_connected(_on_exit_opened):
 			exit.opened.connect(_on_exit_opened, CONNECT_ONE_SHOT)
 	_msg.text = axioma_message
@@ -114,6 +115,7 @@ func _on_exit_opened() -> void:
 		if h:
 			h.difficulty_bonus = 0
 			h.time_limit_mult = 1.0
+			h.abortable = true
 	_ui.visible = false
 	_tint.visible = false
 	get_tree().call_group("stealth_hud", "_flash", "LOCKDOWN ANULADO", Color(0.35, 0.95, 1.0))

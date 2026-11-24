@@ -17,6 +17,7 @@ Você é [color=#00f0ff]Eduardo[/color], ex-analista da OmniCorp. Suba a mega-to
 
 [color=#00f0ff][font_size=26]CADA ANDAR[/font_size][/color]
 • Chegue à saída do andar (uma escada, um elevador...).
+• Opcional: há prisioneiros da OmniCorp atrás de campos de força. Resgatar o [color=#39ff14]Dr. Vance[/color] (Lab 07, P&D) ativa o Protocolo Vance: +15% de tempo nos hacks e a SINE ajuda já no 1º erro.
 • Os guardas atiram com taser: se a sua [b]Defesa Neural[/b] zerar, a infiltração falha e você volta ao início do andar (o jogo salva sozinho em cada andar).
 
 [color=#00f0ff][font_size=26]CONTROLES[/font_size][/color]
@@ -30,6 +31,9 @@ Você é [color=#00f0ff]Eduardo[/color], ex-analista da OmniCorp. Suba a mega-to
 [cell][color=#39ff14]Q ou botão direito[/color]   [/cell][cell]segurar para a visão hacker[/cell]
 [cell][color=#39ff14]Mouse ou Tab[/color]   [/cell][cell]escolher o alvo (na visão hacker)[/cell]
 [cell][color=#39ff14]E ou clique[/color]   [/cell][cell]hackear o alvo escolhido[/cell]
+[cell][color=#39ff14]V[/color]   [/cell][cell]Ping Sonar: revela inimigos, cones de visão e alvos através das paredes (recarrega em 12 s)[/cell]
+[cell][color=#39ff14]C[/color]   [/cell][cell]Variável Oculta: camuflagem de até 5 s; câmeras, drones e guardas não te veem (os passos ainda fazem barulho e os lasers ainda disparam)[/cell]
+[cell][color=#39ff14]E, F ou clique[/color]   [/cell][cell]avançar diálogo (Esc pula)[/cell]
 [cell][color=#39ff14]Esc[/color]   [/cell][cell]pausa[/cell]
 [/table]
 
@@ -37,12 +41,16 @@ Você é [color=#00f0ff]Eduardo[/color], ex-analista da OmniCorp. Suba a mega-to
 Na visão hacker o tempo desacelera e tudo que pode ser hackeado fica em [color=#00f0ff]ciano[/color]. Ao hackear, resolva a equação: digite o valor de [b]x[/b] e confirme com [color=#39ff14]Enter[/color]. O relógio no canto mostra quanto tempo resta.
 • Resposta certa: o hack funciona.
 • Resposta errada: aparece o aviso em vermelho e você perde 3 segundos. Depois de 2 erros, a [color=#00f0ff]SINE[/color] mostra o passo a passo ao lado.
-• Câmera: desliga  •  Porta: abre  •  Agente: distração no implante  •  Luz neon: apaga  •  Quiosque: alarme falso que atrai guardas  •  Válvula: vapor que tapa a visão  •  Esteira: para  •  Drone: reinicia
+• [color=#39ff14]Esc[/color] aborta o hack, mas a Axioma pode rastrear a conexão e soar o alarme (mais chance quanto mais cedo você desiste). No lockdown não dá para abortar.
+• Câmera: desliga  •  Porta: abre  •  Agente: distração no implante  •  Unidade Lógica: fica cega por 6 s  •  Luz neon: apaga  •  Quiosque: alarme falso que atrai guardas  •  Válvula: vapor que tapa a visão  •  Esteira: para  •  Drone: reinicia  •  Laser: desliga por alguns segundos
 
 [color=#00f0ff][font_size=26]FURTIVIDADE[/font_size][/color]
 • A barra sobre um guarda mostra o quanto ele já te viu; cheia, ele te persegue.
 • Esconda-se atrás de caixotes, armários e racks ([color=#39ff14]F[/color]). Sob luz neon não dá: apague a luz antes.
 • [color=#ff6a1a]Variância[/color] (barra no canto superior direito): cada hack e cada alarme aumentam. Se encher, a Axioma manda a [b]Varredura de Rotina[/b], um laser que percorre a área.
+• [color=#ff2d55]Unidades Lógicas[/color] (ciborgues): não ouvem passos, não caem em distração e disparam o alerta quase na hora em que te veem. Só o hack as engana: o sistema visual apaga por alguns segundos.
+• [color=#ff2d55]Barreiras a laser[/color]: cruzar o feixe aceso dispara o alarme. Hackeie o emissor ou passe quando ele apagar (alguns ligam e desligam no ritmo; o feixe pisca antes de religar).
+• [color=#ff2d55]Segurança máxima[/color]: nos laboratórios e áreas restritas os hacks têm menos tempo (o rodapé da tela de hack avisa).
 • [color=#ff2d55]Lockdown[/color]: um alarme em certas salas fecha as portas. Hackeie a porta de saída antes de o tempo acabar.
 • Terminais de dados ([color=#39ff14]F[/color]) contam a história de Nova Gödel."""
 

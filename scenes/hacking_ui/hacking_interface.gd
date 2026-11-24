@@ -2,6 +2,8 @@ extends CanvasLayer
 
 signal hacking_succeeded
 signal hacking_failed
+## Esc no meio do hack (GDD §4). `alert`: o abandono deixou rastro e soou um alarme.
+signal hacking_aborted(alert: bool)
 
 @onready var equation_label: Label = find_child("EquationLabel", true, false)
 @onready var subtitle_label: Label = find_child("SubtitleLabel", true, false)
@@ -41,6 +43,8 @@ var _blink_timer: float = 0.0
 ## Multiplicador do tempo limite do próximo hack (definido por quem abre a
 ## interface; volta a 1 depois de usado). < 1 = desafio rápido (lockdown).
 var time_limit_mult: float = 1.0
+## Alvo numa área de segurança máxima (tempo reduzido): aviso no rodapé.
+var max_security: bool = false
 
 ## Penalidade de tempo por resposta errada (segundos).
 const ERROR_PENALTY := 3.0
@@ -54,6 +58,14 @@ const FEEDBACK_WARN := Color("#ffd23f")
 var _feedback: Label
 ## Fechando a tela (acerto/tempo esgotado): ignora teclado e botões.
 var _busy: bool = false
+## Falso sob lockdown: o hack da saída não pode ser abandonado (GDD §4).
+var can_abort: bool = true
+var _time_total: float = 0.0
+## Chance máxima de alerta ao abortar com o relógio cheio (cai com o tempo gasto).
+## Protocolo Vance (resgate do Dr. Vance na Fase 3): tempo extra e SINE mais cedo.
+const VANCE_FLAG := "vance_rescued"
+const VANCE_TIME_MULT := 1.15
+const ABORT_ALERT_MAX := 0.6
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -195,7 +207,7 @@ func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 	error_count = 0
 	_busy = false
 	if _feedback:
-		_feedback.text = "Digite o valor de x e confirme (Enter)."
+		_feedback.text = "Digite o valor de x e confirme (Enter)." + ("   [Esc] abortar" if can_abort else "   Lockdown: não há como abortar.")
 		_feedback.add_theme_color_override("font_color", Color(0.6, 0.8, 0.85))
 	
 	if ai_assistant_panel:
@@ -225,6 +237,7 @@ func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 		math_visualizer.setup_visual(floor_level, sub_topic, eq_data)
 	
 	var time_limit = _calculate_dynamic_time_limit()
+	_time_total = time_limit
 	if hack_timer:
 		hack_timer.start(time_limit)
 
@@ -269,6 +282,8 @@ func _calculate_dynamic_time_limit() -> float:
 			time_calculated += 5.2
 
 	time_calculated *= 2.0
+	if vance_protocol():
+		time_calculated *= VANCE_TIME_MULT
 	var mult := time_limit_mult
 	time_limit_mult = 1.0
 	if mult < 1.0:
@@ -345,13 +360,22 @@ func _trigger_error(wrong_value: int = 0) -> void:
 		hack_timer.start(max(0.1, hack_timer.time_left - ERROR_PENALTY))
 
 	var msg := "INCORRETO: x = %d não resolve a equação. -%d s. Tente de novo." % [wrong_value, int(ERROR_PENALTY)]
-	if error_count >= 2:
+	if error_count >= sine_after_errors():
 		msg += "\nA SINE abriu o passo a passo ao lado."
 	_show_feedback(msg, FEEDBACK_ERR)
 	_flash_input(FEEDBACK_ERR)
 
-	if error_count >= 2:
+	if error_count >= sine_after_errors():
 		_activate_ai_assistant()
+
+func vance_protocol() -> bool:
+	return GameManager.has_flag(VANCE_FLAG)
+
+
+## Erros até a SINE abrir o passo a passo: 2, ou 1 com o Protocolo Vance.
+func sine_after_errors() -> int:
+	return 1 if vance_protocol() else 2
+
 
 func _activate_ai_assistant() -> void:
 	if not ai_assistant_panel:
@@ -484,7 +508,9 @@ func _process(delta: float) -> void:
 	var footer_label: Label = find_child("FooterStatusLabel", true, false)
 	if footer_label:
 		var cursor = "_" if fmod(_blink_timer, 0.8) < 0.4 else " "
-		footer_label.text = "SYS_STATUS // AGUARDANDO ENTRADA" + cursor
+		footer_label.text = "SYS_STATUS // AGUARDANDO ENTRADA" + cursor \
+			+ ("   //   SEGURANÇA MÁXIMA: TEMPO REDUZIDO" if max_security else "") \
+			+ ("   //   PROTOCOLO VANCE: +15% TEMPO, SINE NO 1º ERRO" if vance_protocol() else "")
 
 func _on_numpad_key_pressed(digit: String) -> void:
 	if _busy:
@@ -497,6 +523,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not visible:
 		return
 		
+	if event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		abort_hack()
+		return
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_BACKSPACE:
 			_delete_last_digit()
@@ -514,6 +544,41 @@ func _update_input_display() -> void:
 		else:
 			input_line.text = "x = [ " + current_input_text + " ]"
 
+## Chance de o abandono soar um alarme: proporcional ao tempo que ainda restava
+## (GDD §4: "chance essa que escala com o tempo restante do hacking").
+func abort_alert_chance() -> float:
+	if hack_timer == null or _time_total <= 0.0:
+		return 0.0
+	return ABORT_ALERT_MAX * clampf(hack_timer.time_left / _time_total, 0.0, 1.0)
+
+
+## Esc: fecha o hack sem resolver (conta como falha). `roll` < 0 sorteia; os
+## testes passam um valor fixo. Sob lockdown só avisa e continua.
+func abort_hack(roll: float = -1.0) -> void:
+	if not visible or _busy:
+		return
+	if not can_abort:
+		_show_feedback("LOCKDOWN: a saída precisa ser hackeada. Não há como abortar.", FEEDBACK_WARN)
+		_flash_input(FEEDBACK_WARN)
+		return
+	_busy = true
+	if hack_timer:
+		hack_timer.paused = true
+	var alert := (randf() if roll < 0.0 else roll) < abort_alert_chance()
+	if alert:
+		_show_feedback("HACK ABORTADO. A Axioma rastreou a conexão: ALERTA!", FEEDBACK_ERR)
+		_flash_input(FEEDBACK_ERR)
+	else:
+		_show_feedback("HACK ABORTADO. Conexão encerrada sem rastro.", FEEDBACK_WARN)
+	await _wait_real(0.6)
+	_complete_hack(false)
+	hacking_aborted.emit(alert)
+	if alert:
+		var p := get_tree().get_first_node_in_group("Player") as Node2D
+		if p:
+			GameManager.raise_alarm(p.global_position)
+
+
 func _on_hack_timer_timeout() -> void:
 	if _busy:
 		return
@@ -527,6 +592,7 @@ func _on_hack_timer_timeout() -> void:
 
 func _complete_hack(success: bool) -> void:
 	_busy = false
+	max_security = false
 	if hack_timer:
 		hack_timer.stop()
 		hack_timer.paused = false

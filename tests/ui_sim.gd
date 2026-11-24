@@ -28,6 +28,13 @@ func feedback() -> String:
 	return (ui.find_child("FeedbackLabel", true, false) as Label).text
 
 
+func _key_event(action: String) -> InputEventAction:
+	var e := InputEventAction.new()
+	e.action = action
+	e.pressed = true
+	return e
+
+
 func type_answer(v: int) -> void:
 	ui.current_input_text = str(v)
 	ui._update_input_display()
@@ -125,6 +132,75 @@ func _ready() -> void:
 	await frames(2)
 	check("Como jogar fecha", not is_instance_valid(how))
 
+	# Protocolo Vance (resgate na Fase 3): +15% de tempo e SINE já no 1º erro.
+	GameManager.story_flags.clear()
+	ui.start_hacking(2, 1)
+	await frames(3)
+	var t_normal: float = ui._calculate_dynamic_time_limit()
+	check("sem resgate a SINE espera 2 erros", ui.sine_after_errors() == 2)
+	GameManager.set_flag("vance_rescued")
+	var t_vance: float = ui._calculate_dynamic_time_limit()
+	check("Protocolo Vance: +15% de tempo", absf(t_vance / t_normal - 1.15) < 0.02 or t_vance == 240.0, "%.1f -> %.1f" % [t_normal, t_vance])
+	type_answer(int(ui.final_target_solution) + 1)
+	ui._on_submit_pressed()
+	await frames(2)
+	check("Protocolo Vance: SINE abre no 1º erro", ui.ai_assistant_panel.visible and "SINE abriu" in feedback())
+	ui._complete_hack(false)
+	GameManager.story_flags.clear()
+	await frames(2)
+
+	# --- Leitor de lore: dica matemática da SINE (WDD) ---
+	var reader := tree.get_first_node_in_group("lore_reader") as LoreReader
+	reader.show_entry(LoreDatabase.get_entry("rnd_01_sine"))
+	await frames(2)
+	var tip_box := reader.find_child("Tip", true, false).get_parent() as Control
+	check("dica só aparece depois do texto", not tip_box.visible)
+	reader._unhandled_input(_key_event("interact_world"))  # F completa o texto
+	await frames(2)
+	check("dica da SINE aparece com o texto completo", tip_box.visible and "DICA DA SINE" in (reader.find_child("Tip", true, false) as Label).text)
+	reader._close()
+	reader.show_entry(LoreDatabase.get_entry("slums_01_sine"))
+	reader._unhandled_input(_key_event("interact_world"))
+	await frames(2)
+	check("entrada sem dica não mostra o quadro", not tip_box.visible)
+	reader._close()
+	var tips := []
+	for id in ["rnd_01_sine", "rnd_02_memo", "rnd_03_trials", "rnd_04_kessler"]:
+		if String(LoreDatabase.get_entry(id).get("hint", "")) == "":
+			tips.append(id)
+	check("terminais do P&D trazem dica", tips.is_empty(), str(tips))
+	await frames(2)
+
+	# --- Caixa de diálogo ---
+	var script_lines: Array = Dialogue.lines_for("rnd_elevator")
+	var unknown := script_lines.filter(func(l): return not Dialogue.SPEAKERS.has(String(l["who"])))
+	check("roteiro do elevador carrega do JSON", script_lines.size() >= 4 and unknown.is_empty(), "%d falas" % script_lines.size())
+	var ended: Array = []
+	Dialogue.finished.connect(func(id: String) -> void: ended.append(id), CONNECT_ONE_SHOT)
+	GameManager.set_state(GameManager.State.HACK_VISION)  # mundo a 25%
+	Dialogue.play("teste_ui", [{"who": "SINE", "text": "Linha um com bastante texto para digitar."}, {"who": "EDUARDO", "text": "Linha dois."}, {"who": "AXIOMA", "text": "Três."}])
+	check("diálogo abre e pausa o jogo", Dialogue.is_open() and tree.paused and Engine.time_scale == 1.0)
+	await real(0.3)
+	check("texto aparece aos poucos", not Dialogue.is_line_complete())
+	await real(1.0)
+	check("digitação termina em tempo real", Dialogue.is_line_complete())
+	var esc := InputEventAction.new()
+	esc.action = "ui_cancel"
+	esc.pressed = true
+	Input.parse_input_event(esc)  # Esc com diálogo aberto não abre a pausa
+	await frames(2)
+	check("Esc pula o diálogo (sem abrir a pausa)", not Dialogue.is_open() and not PauseMenu.is_open() and ended == ["teste_ui"])
+	check("fim do diálogo devolve o jogo", not tree.paused and GameManager.state == GameManager.State.PLAYING)
+	check("diálogo marcado como visto", "teste_ui" in GameManager.dialogues_seen)
+	Dialogue.play("teste_ui2", [{"who": "SINE", "text": "Primeira fala."}, {"who": "VANCE", "text": "Segunda."}])
+	Dialogue.advance()
+	check("primeiro E completa a fala", Dialogue.is_line_complete() and Dialogue.current_speaker() == "SINE")
+	Dialogue.advance()
+	check("segundo E passa para a próxima fala", Dialogue.current_speaker() == "VANCE")
+	Dialogue.advance(); Dialogue.advance()
+	check("última fala fecha o diálogo", not Dialogue.is_open() and not tree.paused)
+	GameManager.dialogues_seen.clear()
+
 	# --- Menu de pausa ---
 	var ev := InputEventAction.new()
 	ev.action = "ui_cancel"
@@ -145,7 +221,38 @@ func _ready() -> void:
 	Input.parse_input_event(ev)
 	await frames(3)
 	check("Esc não abre a pausa durante o hack", not PauseMenu.is_open())
+	check("Esc durante o hack aborta", "ABORTADO" in feedback(), feedback())
+	await real(0.8)
+	check("hack abortado fecha como falha", not ui.visible and results.back() == "fail")
+
+	# Abortar (GDD §4): chance de alerta cresce com o tempo restante; lockdown não deixa.
+	var aborted: Array = []
+	ui.hacking_aborted.connect(func(alert: bool) -> void: aborted.append(alert))
+	var alarms := [0]
+	GameManager.alarm_raised.connect(func(_pp: Vector2) -> void: alarms[0] += 1)
+	ui.start_hacking(1, 0)
+	await frames(3)
+	var c_full: float = ui.abort_alert_chance()
+	ui.hack_timer.start(ui._time_total * 0.25)
+	var c_late: float = ui.abort_alert_chance()
+	check("abortar cedo arrisca mais que abortar no fim", c_full > c_late and c_full <= 0.6, "%.2f > %.2f" % [c_full, c_late])
+	ui.abort_hack(0.0)  # sorteio garantido: alerta
+	await real(0.8)
+	check("abortar com rastro soa o alarme", aborted.back() == true and alarms[0] == 1)
+	ui.start_hacking(1, 0)
+	await frames(3)
+	ui.abort_hack(0.99)  # sorteio acima da chance: sem alerta
+	await real(0.8)
+	check("abortar sem rastro não soa alarme", aborted.back() == false and alarms[0] == 1)
+	ui.can_abort = false
+	ui.start_hacking(1, 0)
+	await frames(3)
+	check("lockdown avisa que não dá para abortar", "não há como abortar" in feedback(), feedback())
+	ui.abort_hack(0.99)
+	await real(0.8)
+	check("lockdown: Esc não fecha o hack", ui.visible and "LOCKDOWN" in feedback())
 	ui._complete_hack(false)
+	ui.can_abort = true
 
 	print("TUDO OK — 0 falha(s)" if fails == 0 else "%d FALHA(S)" % fails)
 	tree.quit(1 if fails > 0 else 0)

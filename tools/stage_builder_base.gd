@@ -398,14 +398,15 @@ func _camera(parent: Node, dome: bool, node_name: String, pos: Vector2, props: D
 
 
 ## Guardas patrulhando entre dois pontos:
-## list = [[variante "v1"/"v2", x inicial, chão, waypoint A, waypoint B], ...]
+## list = [[variante "v1"/"v2"/"cyborg", x inicial, chão, waypoint A, waypoint B], ...]
 func _guards(lvl: Node, list: Array) -> void:
 	var holder := _holder(lvl, "Guards")
 	var wps := _holder(lvl, "Waypoints")
 	var i := 0
 	for g in list:
 		i += 1
-		var guard := _instance("res://scenes/enemies/guard_%s.tscn" % g[0], "Guard%d" % i, Vector2(g[1], g[2]))
+		var scene := "res://scenes/enemies/cyborg.tscn" if g[0] == "cyborg" else "res://scenes/enemies/guard_%s.tscn" % g[0]
+		var guard := _instance(scene, "Guard%d" % i, Vector2(g[1], g[2]))
 		holder.add_child(guard)
 		var arr: Array[Node2D] = []
 		for k in 2:
@@ -427,6 +428,18 @@ func _exit(lvl: Node, next_stage: String, pos: Vector2, size: Vector2 = Vector2(
 	exit.add_child(_rect_shape(size, Vector2(0, -size.y / 2.0)))
 	lvl.add_child(exit)
 	return exit
+
+
+## Gatilho de diálogo (data/dialogue/*.json): área apoiada no chão em `pos`.
+func _dialogue_trigger(lvl: Node, dialogue_id: String, pos: Vector2, size: Vector2 = Vector2(160, 128)) -> Area2D:
+	var t := Area2D.new()
+	t.name = "Dialogue_" + dialogue_id
+	t.set_script(load("res://scripts/core/dialogue_trigger.gd"))
+	t.set("dialogue_id", dialogue_id)
+	t.position = pos
+	t.add_child(_rect_shape(size, Vector2(0, -size.y / 2.0)))
+	lvl.add_child(t)
+	return t
 
 
 ## Varredura de Rotina, Eduardo e toda a interface (HUD, furtividade, hacking, lore).

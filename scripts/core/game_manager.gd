@@ -9,6 +9,8 @@ signal sweep_triggered
 ## Câmera/varredura detectou o jogador: guardas próximos vão até a posição.
 signal alarm_raised(world_position: Vector2)
 signal lore_unlocked(entry_id: String)
+signal dialogue_seen(dialogue_id: String)
+signal flag_set(flag_id: String)
 
 enum State { PLAYING, HACK_VISION, HACKING, PAUSED, GAME_OVER }
 
@@ -16,6 +18,7 @@ enum State { PLAYING, HACK_VISION, HACKING, PAUSED, GAME_OVER }
 const LEVELS := {
 	1: {"scene": "res://scenes/levels/slums/slums_stage1.tscn", "title": "Submundo de Neon"},
 	2: {"scene": "res://scenes/levels/industrial/industrial_stage2.tscn", "title": "Setor Industrial"},
+	3: {"scene": "res://scenes/levels/rnd/rnd_stage3.tscn", "title": "Setor de P&D"},
 }
 const MAIN_MENU_SCENE := "res://scenes/main_menu/main_menu.tscn"
 
@@ -31,6 +34,10 @@ var variance_limit: float = 100.0
 var current_floor: int = 1
 ## Logs de lore já lidos (ids do JSON), persistem entre fases.
 var lore_read: Array[String] = []
+## Diálogos já vistos (ids de data/dialogue/*.json): não repetem no mesmo save.
+var dialogues_seen: Array[String] = []
+## Marcos da história (ex.: "vance_rescued"); vão para o save na hora.
+var story_flags: Array[String] = []
 ## Variância somada por cada alarme disparado.
 const ALARM_VARIANCE: float = 20.0
 ## Segundos sem hack/alarme até a variância começar a cair.
@@ -105,6 +112,24 @@ func mark_lore_read(entry_id: String) -> void:
 	lore_unlocked.emit(entry_id)
 
 
+func mark_dialogue_seen(dialogue_id: String) -> void:
+	if dialogue_id in dialogues_seen:
+		return
+	dialogues_seen.append(dialogue_id)
+	dialogue_seen.emit(dialogue_id)
+
+
+func set_flag(flag_id: String) -> void:
+	if flag_id in story_flags:
+		return
+	story_flags.append(flag_id)
+	flag_set.emit(flag_id)
+
+
+func has_flag(flag_id: String) -> bool:
+	return flag_id in story_flags
+
+
 ## Nome do andar de uma cena (para a tela de transição); "" se não for um andar.
 func level_title(scene_path: String) -> String:
 	for n in LEVELS:
@@ -113,9 +138,11 @@ func level_title(scene_path: String) -> String:
 	return ""
 
 
-## Novo jogo: esquece lore lida e variância (o save é apagado pelo SaveGame).
+## Novo jogo: esquece lore lida, diálogos vistos, marcos da história e variância (o save é apagado pelo SaveGame).
 func reset_progress() -> void:
 	lore_read.clear()
+	dialogues_seen.clear()
+	story_flags.clear()
 	current_floor = 1
 	reset_variance()
 
