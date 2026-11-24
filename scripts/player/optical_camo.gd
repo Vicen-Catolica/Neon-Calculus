@@ -25,9 +25,11 @@ var battery: float = CAPACITY
 var _idle: float = 99.0
 var _bar: ColorRect
 var _label: Label
+var _ui: CanvasLayer
 
 
 func _ready() -> void:
+	add_to_group("hud")  # some com o resto do HUD durante o hack
 	_build_ui()
 
 
@@ -51,6 +53,7 @@ func start() -> bool:
 	if not can_start():
 		return false
 	_set_active(true)
+	Sfx.play("camo", -6.0)
 	get_tree().call_group("stealth_hud", "_flash", "VARIÁVEL OCULTA ATIVA", CYAN)
 	return true
 
@@ -106,6 +109,7 @@ func _build_ui() -> void:
 	var ui := CanvasLayer.new()
 	ui.layer = 6
 	add_child(ui)
+	_ui = ui
 	var font: Font = load("res://assets/fonts/ui_font.tres")
 	var bg := ColorRect.new()
 	bg.color = Color(0.0, 0.05, 0.08, 0.8)
@@ -115,10 +119,21 @@ func _build_ui() -> void:
 	_bar = ColorRect.new()
 	_bar.position = bg.position
 	_bar.size = bg.size
+	_bar.color = CYAN  # estado inicial (antes do 1º _process)
 	ui.add_child(_bar)
 	_label = Label.new()
 	_label.position = Vector2(28, 1032)
 	_label.add_theme_font_override("font", font)
 	_label.add_theme_font_size_override("font_size", 18)
 	_label.add_theme_color_override("font_color", CYAN)
+	_label.text = "CAMUFLAGEM [C]  PRONTA"
 	ui.add_child(_label)
+
+
+## Grupo "hud": a tela de hack esconde e mostra o HUD inteiro.
+func hide_hud() -> void:
+	_ui.visible = false
+
+
+func show_hud() -> void:
+	_ui.visible = true

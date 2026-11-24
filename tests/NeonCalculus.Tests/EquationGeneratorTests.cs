@@ -7,7 +7,7 @@ public class EquationGeneratorTests
 {
     private static readonly (int Stage, int Sub)[] AllTopics =
     {
-        (1, 0), (1, 1), (2, 0), (2, 1), (3, 0), (3, 1), (4, 0), (4, 1),
+        (1, 0), (1, 1), (2, 0), (2, 1), (3, 0), (3, 1), (4, 0), (4, 1), (5, 0), (5, 1),
     };
 
     private static IEnumerable<TestCaseData> Topics() =>
@@ -48,6 +48,41 @@ public class EquationGeneratorTests
         var gen = new EquationGenerator(2);
         for (int i = 0; i < 5000; i++)
             Assert.That(gen.Generate(2, 1).Params["ParamTotal"], Is.GreaterThan(0));
+    }
+
+    [TestCase(0)]
+    [TestCase(1)]
+    public void Stage5_HasXOnBothSides_AndUniqueSolution(int sub)
+    {
+        var gen = new EquationGenerator(5);
+        for (int i = 0; i < 3000; i++)
+        {
+            var eq = gen.Generate(5, sub);
+            var sides = eq.Expression.Split(" = ");
+            Assert.Multiple(() =>
+            {
+                Assert.That(sides, Has.Length.EqualTo(2), eq.Expression);
+                Assert.That(sides[0], Does.Contain("x"), eq.Expression);
+                Assert.That(sides[1], Does.Contain("x"), eq.Expression);
+                // coeficientes diferentes dos dois lados: exatamente uma solução
+                int left = sub == 0 ? eq.Params["ParamA"] : eq.Params["ParamK"];
+                Assert.That(left, Is.GreaterThan(eq.Params["ParamC"]), eq.Expression);
+            });
+        }
+    }
+
+    [Test]
+    public void Stage5_ExpressionMatchesParams()
+    {
+        var gen = new EquationGenerator(11);
+        for (int i = 0; i < 2000; i++)
+        {
+            var eq = gen.Generate(5, 0);
+            var p = eq.Params;
+            // Reconstrói o texto e confere que não há "+ -" nem "1x".
+            Assert.That(eq.Expression, Does.Not.Contain("+ -").And.Not.Contain(" 1x").And.Not.StartWith("1x"), eq.Expression);
+            Assert.That(p["ParamA"] * eq.Solution + p["ParamB"], Is.EqualTo(p["ParamC"] * eq.Solution + p["ParamD"]));
+        }
     }
 
     [Test]

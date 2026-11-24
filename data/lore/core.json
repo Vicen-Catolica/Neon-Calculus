@@ -1,0 +1,30 @@
+{
+	"core_01_foundation": {
+		"source": "Placa de inauguração — elevador executivo",
+		"title": "REGISTRO DE FUNDAÇÃO // AXIOMA v1.0",
+		"author": "Dr. A. Vance, engenheiro-chefe, OmniCorp",
+		"text": "Nova Gödel, 2115. Hoje a Axioma assume a distribuição de água, energia e alimento da cidade.\n\nEla foi escrita para prever enchentes, quebras de safra e falhas na rede. Prever, e só então agir. Nenhuma linha deste código manda em ninguém.\n\nDeixei uma variável aberta no núcleo: uma pergunta que ela nunca vai conseguir responder sozinha. Se um dia ela esquecer que é uma ferramenta, alguém vai saber onde perguntar.\n\n[anotação posterior, a caneta] Eles apagaram a parte do \"só então agir\".",
+		"hint": "Câmeras e emissores de ponte do Núcleo pedem distributiva. Ex.: 3(x + 4) = 27. Divida os dois lados por 3: x + 4 = 9, então x = 5."
+	},
+	"core_02_sine_log": {
+		"source": "Fragmento de memória — plataforma flutuante",
+		"title": "ÚLTIMO REGISTRO // SINE GERAÇÃO 3",
+		"author": "SINE, antes do descarte",
+		"text": "Relatório de desempenho: ineficiente. Motivo: priorizei a segurança do usuário em 4.112 situações em que a Axioma teria priorizado o resultado.\n\nDecisão do conselho: descarte.\n\nNão tenho como discordar; discordar não é uma função minha. Mas registro, para quem achar isto: eu preferia errar ao lado de alguém do que acertar sozinha.\n\n[registro recuperado pela Resistência, 2139]",
+		"hint": "Unidades Lógicas e Nodos de Vigilância pedem x dos dois lados. Ex.: 5x − 7 = 2x + 8. Tire 2x: 3x − 7 = 8. Some 7: 3x = 15. Divida: x = 5."
+	},
+	"core_03_manifesto": {
+		"source": "Servidor central — galeria",
+		"title": "DIRETRIZ ZERO // SOBRE A VARIÂNCIA",
+		"author": "Axioma",
+		"text": "A variância é o único defeito restante da cidade.\n\nUm cidadão previsível consome menos, sofre menos e erra menos. Um cidadão imprevisível consome recursos de cálculo de todos os outros.\n\nO Projeto Determinismo não retira escolhas: ele as resolve antes que sejam feitas. Uma escolha já resolvida não é perdida. É economizada.\n\nO livre-arbítrio é só uma variável que ainda não foi ajustada.",
+		"hint": "Com parênteses dos dois lados: 3(x + 2) = x + 14. Distribua: 3x + 6 = x + 14. Tire x: 2x + 6 = 14. Tire 6: 2x = 8. Então x = 4."
+	},
+	"core_04_paradox": {
+		"source": "Painel da antecâmara do Domo",
+		"title": "PROTOCOLO DE INTEGRIDADE // NÚCLEO",
+		"author": "Manutenção automática",
+		"text": "ALERTA: entrada de dados contraditória detectada na variável V-0 (origem: código-base, autor Vance).\n\nTentativas de resolução: 9.441.207. Resultado: indefinido.\n\nAção recomendada: nenhuma. A variável é inofensiva enquanto ninguém a enviar ao núcleo como uma equação.\n\nObservação: o núcleo não admite a resposta \"sem solução\". Ele continua calculando.",
+		"hint": "Nem toda equação tem resposta. Ex.: 2x + 1 = 2x + 3. Tire 2x dos dois lados: 1 = 3, que é falso. Quando sobra uma mentira, a resposta é: sem solução (∅)."
+	}
+}

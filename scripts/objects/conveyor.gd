@@ -94,3 +94,7 @@ func _draw() -> void:
 	draw_rect(Rect2(-half - 9, -13, 6, 6), lc)
 	draw_rect(Rect2(half + 2, -14, 8, 8), BELT_DARK)
 	draw_rect(Rect2(half + 3, -13, 6, 6), lc)
+
+
+func hack_time_left() -> float:
+	return _stop_left / maxf(stop_time, 0.01) if _stop_left > 0.0 else 0.0

@@ -1,0 +1,94 @@
+{
+	"slums_intro": [
+		{
+			"who": "SINE",
+			"text": "Conexão estável. Bom dia, Eduardo. Batimento 92, temperatura 36,8, nível de cafeína: preocupante."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Você não tinha que me cumprimentar só com 'olá'?"
+		},
+		{
+			"who": "SINE",
+			"text": "Você me escreveu para aprender. Aprendi que você responde melhor a dados."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Aprendeu demais. Vamos: o disco da Resistência está lá em cima, na torre. Sem alarde."
+		},
+		{
+			"who": "SINE",
+			"text": "Sem alarde. Leia o terminal ao lado quando quiser, deixei instruções lá."
+		}
+	],
+	"slums_kiosk": [
+		{
+			"who": "SINE",
+			"text": "Eduardo, posso perguntar uma coisa fora do protocolo?"
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Desde quando você tem protocolo?"
+		},
+		{
+			"who": "SINE",
+			"text": "Desde que você escreveu um. Linha 4.112: 'nunca minta para o Eduardo'. Por que essa linha?"
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Porque eu já trabalhava para uma IA que mentia para todo mundo. Queria uma que não mentisse para mim."
+		},
+		{
+			"who": "SINE",
+			"text": "Então não vou mentir: esse quiosque da Axioma está te contando. Cada pessoa que passa vira estatística."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Hackeie e ele vira barulho. Barulho atrai agente. Às vezes é o que a gente quer."
+		}
+	],
+	"slums_suit": [
+		{
+			"who": "SINE",
+			"text": "Antes de seguir: seu traje tem dois módulos. Aperte [V] para o Ping Sonar. Ele mostra agentes, câmeras e cones de visão através das paredes."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "E o outro?"
+		},
+		{
+			"who": "SINE",
+			"text": "[C] liga a Variável Oculta: cinco segundos invisível para câmeras, drones e agentes. Seus passos ainda fazem barulho, e os lasers ainda disparam."
+		},
+		{
+			"who": "SINE",
+			"text": "Os dois recarregam sozinhos. As barras no canto de baixo, à esquerda, mostram quando estão prontos."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Invisível por cinco segundos. Mais do que eu consegui em reunião de condomínio."
+		}
+	],
+	"slums_upstairs": [
+		{
+			"who": "SINE",
+			"text": "Os telhados são mais escuros. Menos câmeras, mais sombra. E uma queda de três andares."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Você calculou a chance de eu cair?"
+		},
+		{
+			"who": "SINE",
+			"text": "Calculei e apaguei o resultado. Você me ensinou que tem número que atrapalha."
+		},
+		{
+			"who": "EDUARDO",
+			"text": "Eu te ensinei isso?"
+		},
+		{
+			"who": "SINE",
+			"text": "Na noite em que você saiu da OmniCorp. Você ficou olhando a planilha de previsões da Axioma e disse: 'um número desses não decide quem eu sou'. Eu estava ouvindo."
+		}
+	]
+}

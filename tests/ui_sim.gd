@@ -74,6 +74,12 @@ func _ready() -> void:
 	check("confirmar vazio só avisa", "Digite um número" in feedback() and ui.error_count == 0, feedback())
 	check("confirmar vazio não tira tempo", ui.hack_timer.time_left > t0 - 0.5)
 
+	# Clicar 1 e 0 no teclado da tela digita "10" (o 0 estava ligado duas vezes).
+	(ui.numpad_grid.get_node("Btn1") as Button).pressed.emit()
+	ui.btn_0.pressed.emit()
+	check("clicar 1 e 0 no teclado da tela digita 10", ui.current_input_text == "10", ui.current_input_text)
+	ui._clear_input()
+
 	type_answer(sol + 1)
 	t0 = ui.hack_timer.time_left
 	ui._on_submit_pressed()
@@ -89,6 +95,8 @@ func _ready() -> void:
 	check("2º erro abre o passo a passo da SINE", ui.ai_assistant_panel.visible and "SINE abriu" in feedback())
 	var hint: String = ui.ai_hint_label.text
 	check("passo a passo chega na resposta certa", hint.contains("x = %d / %d" % [sol * int(ui.eq_data["ParamMult"]), int(ui.eq_data["ParamMult"])]), hint.replace("\n", " | "))
+	check("SINE monta a conta mas não dá o resultado", not hint.contains("x = %d\n" % sol) and not hint.ends_with("x = %d" % sol) and hint.contains("faça a conta"), hint.replace("\n", " | "))
+	check("fórmula do tipo de equação aparece na tela", ui.formula_text().contains("x = (c − b) ÷ a"), ui.formula_text())
 	await real(1.4)
 	check("texto da SINE aparece todo em tempo real", ui.ai_hint_label.visible_ratio >= 0.99, "%.2f" % ui.ai_hint_label.visible_ratio)
 
@@ -112,7 +120,7 @@ func _ready() -> void:
 
 	# Dicas de cada tipo de equação usam o x minúsculo da equação.
 	var bad := []
-	for d in [Vector2i(1, 0), Vector2i(1, 1), Vector2i(2, 0), Vector2i(2, 1), Vector2i(3, 0), Vector2i(3, 1), Vector2i(4, 0), Vector2i(4, 1)]:
+	for d in [Vector2i(1, 0), Vector2i(1, 1), Vector2i(2, 0), Vector2i(2, 1), Vector2i(3, 0), Vector2i(3, 1), Vector2i(4, 0), Vector2i(4, 1), Vector2i(5, 0), Vector2i(5, 1)]:
 		ui.current_floor_level = d.x
 		ui.current_sub_topic = d.y
 		ui.eq_data = ui.math_generator.GenerateValidEquation(d.x, d.y)
@@ -120,6 +128,60 @@ func _ready() -> void:
 		if "X" in h.replace("SINE", "").replace("PASSO", ""):
 			bad.append(d)
 	check("passo a passo sem X maiúsculo em todos os tipos", bad.is_empty(), str(bad))
+
+	# Balança: os dois pratos têm o mesmo valor com o x certo (a figura bate
+	# com a equação) em todos os tipos de equação.
+	var mv = ui.math_visualizer
+	var unbalanced := []
+	var re_num_x := RegEx.create_from_string("(\\d)(x|\\()")
+	for t in [[1, 0], [1, 1], [2, 0], [2, 1], [4, 0], [5, 0], [5, 1]]:
+		for i in 20:
+			var data: Dictionary = ui.math_generator.GenerateValidEquation(t[0], t[1])
+			mv.setup_visual(t[0], t[1], data)
+			var sides: Array = mv.scale_sides()
+			var vals := []
+			for sd in sides:
+				var ex := Expression.new()
+				ex.parse(re_num_x.sub(mv.side_label(sd), "$1*$2", true), ["x"])
+				vals.append(ex.execute([float(data["Solution"])]))
+			if sides.size() != 2 or absf(float(vals[0]) - float(vals[1])) > 0.001:
+				unbalanced.append(str(data["Expression"]) + " -> " + mv.side_label(sides[0]) + " = " + mv.side_label(sides[1]))
+	check("balança: os dois pratos se equilibram com o x certo (140 equações)", unbalanced.is_empty(), str(unbalanced.slice(0, 3)))
+
+	# Nível 5 (Núcleo): x dos dois lados; o passo a passo termina na resposta.
+	var wrong5 := []
+	for i in 40:
+		var sub5 := i % 2
+		ui.current_floor_level = 5
+		ui.current_sub_topic = sub5
+		ui.eq_data = ui.math_generator.GenerateValidEquation(5, sub5)
+		var sol5 := int(ui.eq_data["Solution"])
+		var h5: String = ui._generate_step_by_step_hint()
+		var lines5 := h5.strip_edges().split("\n")
+		var last: String = lines5[-2]  # a última é "faça a conta"
+		var ok5 := false
+		var rhs5 := last.split("=")[-1].strip_edges()
+		if "/" in last:
+			var parts := rhs5.split("/")
+			ok5 = int(parts[1].strip_edges()) != 0 and int(parts[0].strip_edges()) == sol5 * int(parts[1].strip_edges())
+		elif " - " in rhs5:
+			ok5 = int(rhs5.split(" - ")[0]) - int(rhs5.split(" - ")[1]) == sol5
+		elif " + " in rhs5:
+			ok5 = int(rhs5.split(" + ")[0]) + int(rhs5.split(" + ")[1]) == sol5
+		# e nunca entrega o número pronto
+		ok5 = ok5 and not h5.contains("x = %d\n" % sol5)
+		if not ok5 or not ("dos dois lados" in h5):
+			wrong5.append(str(ui.eq_data["Expression"]) + " -> " + last)
+	check("nível 5: passo a passo chega na resposta (40 equações)", wrong5.is_empty(), str(wrong5.slice(0, 3)))
+	ui.start_hacking(5, 0)
+	await frames(3)
+	check("nível 5: equação com x dos dois lados na tela", (ui.equation_label.text as String).count("x") >= 2, ui.equation_label.text)
+	check("nível 5: mais passos que o nível 4 no cálculo de tempo", ui.max_steps == 3)
+	var suit := tree.get_first_node_in_group("Player").get_node("SonarPing") as SonarPing
+	check("módulos do traje somem durante o hack", not suit._ui.visible)
+	ui._complete_hack(false)
+	await frames(2)
+	check("módulos do traje voltam depois do hack", suit._ui.visible)
 
 	# --- Como jogar ---
 	var how := HowToPlay.new()
@@ -171,6 +233,31 @@ func _ready() -> void:
 	check("terminais do P&D trazem dica", tips.is_empty(), str(tips))
 	await frames(2)
 
+	# --- Estatísticas e tela de encerramento ---
+	var st0: Dictionary = GameManager.stats.duplicate()
+	var al0 := int(st0.get("alarms", 0))
+	GameManager.raise_alarm(Vector2.ZERO)
+	check("estatística: alarme conta", int(GameManager.stats["alarms"]) == al0 + 1)
+	check("estatística: tempo de jogo corre dentro da fase", float(GameManager.stats["time"]) > 0.0, "%.1f s" % float(GameManager.stats["time"]))
+	check("estatística: erros de cálculo contados nos hacks acima", int(GameManager.stats["hack_errors"]) >= 3, str(GameManager.stats["hack_errors"]))
+	GameManager.stats = {"time": 3725.0, "hacks": 31, "hack_errors": 4, "alarms": 2}
+	GameManager.set_flag("vance_rescued")
+	var ending := (load("res://scenes/ui/ending.tscn") as PackedScene).instantiate() as EndingScreen
+	tree.root.add_child(ending)
+	await frames(3)
+	var stats_text: String = (ending.find_child("Stats", true, false) as Label).text
+	check("encerramento: Nova Gödel livre", (ending.find_child("Title", true, false) as Label).text == "NOVA GÖDEL LIVRE")
+	check("encerramento: tempo, hacks, erros e alarmes", "01:02:05" in stats_text and "Hacks bem-sucedidos: 31" in stats_text
+		and "Erros de cálculo: 4" in stats_text and "Alarmes disparados: 2" in stats_text, stats_text.replace("\n", " | "))
+	check("encerramento: lore lida de um total e o Vance", ("de %d" % LoreDatabase.count()) in stats_text and "resgatado" in stats_text and LoreDatabase.count() >= 13)
+	check("encerramento: créditos com os 5 autores", (ending.find_child("Authors", true, false) as Label).text.count("\n") == 4)
+	ending.queue_free()
+	GameManager.story_flags.clear()
+	await frames(2)
+
+	# A tela de hack fica por cima do HUD do mundo (aviso de lockdown, alarme).
+	check("tela de hack acima do aviso de lockdown e do HUD de furtividade", ui.layer > 9 and ui.layer < Dialogue.layer)
+
 	# --- Caixa de diálogo ---
 	var script_lines: Array = Dialogue.lines_for("rnd_elevator")
 	var unknown := script_lines.filter(func(l): return not Dialogue.SPEAKERS.has(String(l["who"])))
@@ -182,6 +269,12 @@ func _ready() -> void:
 	check("diálogo abre e pausa o jogo", Dialogue.is_open() and tree.paused and Engine.time_scale == 1.0)
 	await real(0.3)
 	check("texto aparece aos poucos", not Dialogue.is_line_complete())
+	check("voice blip da SINE toca enquanto ela fala", Sfx.last_played_ms("blip_sine") > 0)
+	var missing: Array = []
+	for n in ["blip_sine", "blip_eduardo", "blip_axioma", "blip_vance", "taser", "detect", "radio", "step_1", "hide", "hack_ok", "hack_fail", "hack_key"]:
+		if Sfx.stream(n) == null:
+			missing.append(n)
+	check("efeitos sonoros carregam de assets/sfx", missing.is_empty(), str(missing))
 	await real(1.0)
 	check("digitação termina em tempo real", Dialogue.is_line_complete())
 	var esc := InputEventAction.new()

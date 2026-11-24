@@ -442,6 +442,39 @@ func _dialogue_trigger(lvl: Node, dialogue_id: String, pos: Vector2, size: Vecto
 	return t
 
 
+## Guia passo a passo da SINE (Tutorial.guide) ao entrar na área.
+func _tutorial_trigger(lvl: Node, guide_name: String, pos: Vector2, size: Vector2 = Vector2(96, 400)) -> Area2D:
+	var t := _dialogue_trigger(lvl, "", pos, size)
+	t.name = "Tutorial_" + guide_name
+	t.set("guide", guide_name)
+	return t
+
+
+## Placa de saída: texto numa placa escura com borda neon (antes era texto solto
+## no ar). `pos` é o canto de cima à esquerda, como no Label.
+func _exit_sign(lvl: Node, sign_name: String, text: String, pos: Vector2, color: Color) -> Label:
+	var sign := Label.new()
+	sign.name = sign_name
+	sign.text = text
+	sign.position = pos
+	sign.add_theme_font_size_override("font_size", 16)
+	sign.add_theme_color_override("font_color", color)
+	var plate := StyleBoxFlat.new()
+	plate.bg_color = Color(0.03, 0.035, 0.05, 0.92)
+	plate.border_color = Color(color, 0.8)
+	plate.set_border_width_all(2)
+	plate.set_corner_radius_all(2)
+	plate.content_margin_left = 12
+	plate.content_margin_right = 12
+	plate.content_margin_top = 5
+	plate.content_margin_bottom = 5
+	plate.shadow_color = Color(color, 0.25)
+	plate.shadow_size = 6
+	sign.add_theme_stylebox_override("normal", plate)
+	lvl.add_child(sign)
+	return sign
+
+
 ## Varredura de Rotina, Eduardo e toda a interface (HUD, furtividade, hacking, lore).
 func _player_and_ui(lvl: Node, spawn: Vector2) -> void:
 	var sweep := Node2D.new()

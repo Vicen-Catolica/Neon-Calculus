@@ -14,6 +14,13 @@ static func get_entry(entry_id: String) -> Dictionary:
 	return _cache.get(entry_id, {})
 
 
+## Quantas entradas de lore existem no jogo (tela de encerramento).
+static func count() -> int:
+	if _cache.is_empty():
+		_load_all()
+	return _cache.size()
+
+
 static func _load_all() -> void:
 	var dir := DirAccess.open(LORE_DIR)
 	if dir == null:

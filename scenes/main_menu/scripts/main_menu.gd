@@ -511,7 +511,10 @@ func _on_btn_pressed(btn: Button) -> void:
 			_change_scene_with_fade(start_scene)
 		"BtnContinue":
 			var scene := SaveGame.restore()
-			if scene != "":
+			# Jogo já zerado: "Continuar" mostra o encerramento (decisão 5 do plano da Fase 4).
+			if GameManager.has_flag(ParadoxDuel.WIN_FLAG):
+				_change_scene_with_fade(ParadoxDuel.ENDING_SCENE)
+			elif scene != "":
 				_change_scene_with_fade(scene)
 		"BtnHowTo":
 			var how := HowToPlay.new()

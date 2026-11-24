@@ -17,8 +17,7 @@ extends "res://tools/stage_builder_base.gd"
 
 const GROUND_TS := "res://assets/tilesets/rnd/rnd_ground.tres"
 const OUT_LEVEL := "res://scenes/levels/rnd/rnd_stage3.tscn"
-## Fase 4 (Núcleo Quântico) ainda não existe: a saída fica desligada até lá.
-const NEXT_STAGE := ""
+const NEXT_STAGE := "res://scenes/levels/core/core_stage4.tscn"
 
 const GROUND_TINT := Color.WHITE
 ## Paredes/teto um pouco mais escuros que o chão, para não lerem como piso.
@@ -35,8 +34,10 @@ const GROUND_RECTS := [
 const WALL_RECTS := [
 	[-12, -16, -7, -1],    # parede esquerda (doca do elevador de carga)
 	[-8, -16, 78, -12],    # teto principal (face de baixo em -368)...
-	[81, -16, 155, -12],   # ...com uma chaminé nas colunas 79–80 (boca do duto)
+	[81, -16, 110, -12],   # ...com uma chaminé nas colunas 79–80 (boca do duto)
 	[78, -21, 81, -17],    # tampa da chaminé: dá para ficar em pé no topo da escada
+	[113, -16, 155, -12],  # chaminé nas colunas 111–112: a escada de D sobe até o duto
+	[110, -21, 113, -17],  # (playtest: sem ela, subir por D batia a cabeça no teto)
 	[80, -9, 110, -6],     # C: teto do corredor; em cima dele, o duto (96 px)
 	[151, -11, 155, -5],   # verga da porta D -> E (vão de 160 px)
 	[151, -30, 155, -17],  # parede esquerda do átrio, acima do teto
@@ -49,6 +50,7 @@ const CATWALKS := [
 	[40, 74, -5, false],     # B: mezanino dos escritórios (y = -144)
 	[116, 146, -5, false],   # D: mezanino dos laboratórios (Lab 07)
 	[78, 79, -9, false],     # C: patamar da escada na boca do duto (y = -272)
+	[111, 112, -9, false],   # C/D: patamar da escada do outro lado do duto
 	# E: átrio, um andar a cada 128 px
 	[156, 169, -4, false],
 	[156, 169, -8, false],
@@ -159,6 +161,8 @@ func _add_background(lvl: Node) -> void:
 func _add_tiles(lvl: Node) -> void:
 	_terrain_layer(lvl, "Buildings", GROUND_TS, WALL_RECTS, WALL_TINT)
 	_terrain_layer(lvl, "Ground", GROUND_TS, GROUND_RECTS, GROUND_TINT)
+	# Piso em profundidade (falso 3D) como nas outras fases (tools/gen_floor_band.py rnd).
+	_floor_band(lvl, _surface_runs(GROUND_RECTS), "res://assets/tilesets/rnd/floor_band.png")
 	_structures(lvl, CATWALKS)
 	_catwalk_band(lvl, CATWALKS)
 
@@ -180,13 +184,13 @@ func _add_props(lvl: Node) -> void:
 		["monitor_stand", 1560.0, -144.0, false, 0],    # B: mezanino
 		["filing_cabinet", 2000.0, -144.0, true, 44],   # B: mezanino
 		["plant", 2420.0, 16.0, false, 0],
-		["server_white", 3680.0, -144.0, false, 0],     # D: mezanino
+		["server_white", 3770.0, -144.0, false, 0],     # D: mezanino
 		["lab_bench", 3800.0, 16.0, true, 72],          # D: bancada no escuro
 		["sample_tank", 4050.0, 16.0, false, 0],
 		["lab_bench", 4420.0, 16.0, true, 72],          # D: sob a luz
 		["sample_tank", 4620.0, 16.0, false, 0],
 		["filing_cabinet", 3900.0, -144.0, true, 44],   # D: mezanino
-		["server_white", 4720.0, -144.0, false, 0],
+		["server_white", 4650.0, -144.0, false, 0],
 		["filing_cabinet", 5100.0, -240.0, true, 44],   # E: no meio do átrio
 		["water_cooler", 5360.0, -496.0, false, 0],
 	]
@@ -326,15 +330,11 @@ func _add_guards(lvl: Node) -> void:
 
 
 func _add_exit(lvl: Node) -> void:
-	var exit := _exit(lvl, NEXT_STAGE, EXIT_POS)
+	# Só vale em pé dentro do elevador (não encostando por baixo da passarela).
+	var exit := _exit(lvl, NEXT_STAGE, EXIT_POS, Vector2(80, 120))
 	exit.name = "LevelExit"
-	var sign := Label.new()
-	sign.name = "ElevatorSign"
-	sign.text = "ELEVADOR EXECUTIVO  ->  NÚCLEO\n(fase 4 em construção)"
-	sign.position = Vector2(5150, -968)
-	sign.add_theme_font_size_override("font_size", 16)
-	sign.add_theme_color_override("font_color", Color("00F0FF"))
-	lvl.add_child(sign)
+	exit.set("require_standing", true)
+	_exit_sign(lvl, "ElevatorSign", "ELEVADOR EXECUTIVO  ->  NÚCLEO", Vector2(5150, -968), Color("00F0FF"))
 
 
 ## Placas de greybox com o nome de cada trecho (saem na troca pela arte final).

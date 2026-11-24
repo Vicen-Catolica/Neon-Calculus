@@ -5,6 +5,9 @@ extends Area2D
 ## Espera a tela de transição sumir e o jogo estar livre (sem hack, leitura ou pausa).
 
 @export var dialogue_id: String = ""
+## Se preenchido, dispara um guia do Tutorial (passo a passo da SINE) em vez
+## de um roteiro simples. Ex.: "hack".
+@export var guide: String = ""
 
 var _waiting: bool = false
 
@@ -15,7 +18,13 @@ func _ready() -> void:
 
 
 func _on_body_entered(body: Node2D) -> void:
-	if _waiting or dialogue_id == "" or not body.is_in_group("Player"):
+	if not body.is_in_group("Player"):
+		return
+	if guide != "":
+		if not ("guide_" + guide in GameManager.dialogues_seen):
+			Tutorial.guide(guide, global_position)
+		return
+	if _waiting or dialogue_id == "" or Tutorial.muted_in_tests(dialogue_id):
 		return
 	if dialogue_id in GameManager.dialogues_seen:
 		return

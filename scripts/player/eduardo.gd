@@ -70,6 +70,8 @@ func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
 	if _hacking:
+		if state == State.CLIMB:
+			return  # parado na escada durante o hack
 		velocity.x = move_toward(velocity.x, 0.0, friction * delta)
 		if not is_on_floor():
 			velocity.y += _gravity * delta
@@ -95,6 +97,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_update_state(dir)
 	_update_visuals(delta)
+	_footsteps(delta)
 
 
 func _process_ground_air(delta: float, dir: float) -> void:
@@ -112,6 +115,7 @@ func _process_ground_air(delta: float, dir: float) -> void:
 		_jump_buffer = maxf(_jump_buffer - delta, 0.0)
 	if _jump_buffer > 0.0 and _coyote > 0.0 and not _crouching:
 		velocity.y = jump_velocity
+		Sfx.play("jump", -10.0, 0.08)
 		_jump_buffer = 0.0
 		_coyote = 0.0
 	# Pulo variável: soltar o botão corta a subida.
@@ -126,6 +130,11 @@ func _process_ground_air(delta: float, dir: float) -> void:
 	_climb_cooldown = maxf(_climb_cooldown - delta, 0.0)
 	if _climb_cooldown <= 0.0 and _ladder_available() and (Input.is_action_pressed("climb_up") or (Input.is_action_pressed("climb_down") and not is_on_floor())):
 		_enter_climb()
+	elif _climb_cooldown <= 0.0 and Input.is_action_pressed("climb_down") and is_on_floor() and _ladder_below():
+		# Em pé no patamar do topo: S começa a descida. Entra uns px na grade de
+		# mão única (mais fundo que a margem dela) para atravessá-la.
+		_enter_climb()
+		global_position.y += 6.0
 
 
 func _process_climb(dir: float) -> void:
@@ -143,6 +152,24 @@ func _process_climb(dir: float) -> void:
 			velocity.y = -160.0  # impulso para passar da borda da plataforma
 	elif is_on_floor() and v > 0.0:
 		_set_state(State.IDLE)
+
+
+## Passos: um som a cada STEP_DIST px andados no chão (correndo, mais alto e
+## com passada mais longa). Agachado não faz barulho.
+const STEP_DIST := 46.0
+const STEP_DIST_RUN := 62.0
+var _step_acc: float = 0.0
+
+
+func _footsteps(delta: float) -> void:
+	if not is_on_floor() or state not in [State.WALK, State.RUN] or is_silent():
+		_step_acc = STEP_DIST * 0.6  # o primeiro passo sai logo
+		return
+	_step_acc += absf(velocity.x) * delta
+	var run := state == State.RUN
+	if _step_acc >= (STEP_DIST_RUN if run else STEP_DIST):
+		_step_acc = 0.0
+		Sfx.play_any(["step_1", "step_2", "step_3", "step_4"], -9.0 if run else -14.0, 0.1)
 
 
 func _current_speed() -> float:
@@ -259,13 +286,28 @@ func _try_hide() -> bool:
 	sprite.modulate = HIDDEN_TINT
 	sprite.play(&"hide")
 	_set_state(State.CROUCH)
+	Sfx.play("hide", -6.0)
 	return true
 
 
 func _unhide() -> void:
 	_hidden = false
+	Sfx.play("unhide", -8.0)
 	z_index = 0
 	sprite.modulate = Color.WHITE
+
+
+## Um agente viu o Eduardo se esconder e o puxou para fora.
+func pulled_from_hiding(from: Vector2) -> void:
+	if not _hidden:
+		return
+	_unhide()
+	_crouching = false
+	_apply_crouch_shape(false)
+	velocity = Vector2(signf(from.x - global_position.x) * 160.0, -140.0)
+	_set_state(State.FALL)
+	Sfx.play("detect", -4.0)
+	get_tree().call_group("stealth_hud", "_flash", "UM AGENTE TE VIU SE ESCONDER E TE PUXOU PARA FORA", Color(1.0, 0.35, 0.3))
 
 
 func _process_hidden(delta: float, dir: float) -> void:
@@ -295,6 +337,15 @@ func unregister_ladder(area: Area2D) -> void:
 
 func _ladder_available() -> bool:
 	return not _ladders.is_empty()
+
+
+## Há escada descendo a partir dos pés (topo de escada, não a base dela)?
+func _ladder_below() -> bool:
+	for l in _ladders:
+		# a área da escada fica com a origem na base (y da base)
+		if l.global_position.y > global_position.y + 24.0:
+			return true
+	return false
 
 
 func _enter_climb() -> void:
@@ -332,6 +383,7 @@ func _set_state(s: State) -> void:
 	if was_air and s == State.IDLE and is_on_floor():
 		_landing = true
 		sprite.play(&"land")
+		Sfx.play("land", -8.0, 0.08)
 	if s == State.CLIMB:
 		sprite.play(&"ladder_enter")
 	state_changed.emit(s)
@@ -421,6 +473,12 @@ func _on_game_state_changed(new_state: GameManager.State) -> void:
 	if hacking_now == _hacking:
 		return
 	_hacking = hacking_now
+	if state == State.CLIMB:
+		# Hackeando da escada: continua agarrado (antes virava IDLE no ar e caía).
+		velocity = Vector2.ZERO
+		if hacking_now:
+			sprite.pause()
+		return
 	if _hidden or (_crouching and not _can_stand()):
 		# Hackeando escondido ou embaixo de um teto baixo (túnel, puxadinho):
 		# continua agachado (levantar aqui prendia o Eduardo no teto) e usa a
@@ -460,6 +518,7 @@ func take_damage(amount: float) -> void:
 	if is_dead:
 		return
 	current_defense = maxf(0.0, current_defense - amount)
+	Sfx.play("hurt", -6.0, 0.05)
 	defense_changed.emit(current_defense, max_defense)
 	if current_defense <= 0.0:
 		die()
@@ -470,6 +529,8 @@ func die() -> void:
 		return
 	is_dead = true
 	get_tree().call_group("hud", "hide_hud")
+	# Estado de game over já na queda: some o HUD de furtividade e a pausa não abre.
+	GameManager.set_state(GameManager.State.GAME_OVER)
 	# Atingido pelo taser: cai no chão ("caught") e só então a tela de game over.
 	if _hidden:
 		_unhide()

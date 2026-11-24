@@ -109,6 +109,9 @@ func build() -> Node:
 	_add_exit(lvl)
 	if SHOW_ZONE_LABELS:
 		_add_zone_labels(lvl)
+	_dialogue_trigger(lvl, "ind_arrival", Vector2(64, 16))
+	_dialogue_trigger(lvl, "ind_drones", Vector2(2250, 16), Vector2(120, 400))
+	_dialogue_trigger(lvl, "ind_top", Vector2(4860, -1008), Vector2(120, 300))
 	_player_and_ui(lvl, Vector2(64, 16))
 	return lvl
 
@@ -156,7 +159,9 @@ func _add_background(lvl: Node) -> void:
 func _add_tiles(lvl: Node) -> void:
 	_terrain_layer(lvl, "Buildings", GROUND_TS, WALL_RECTS, WALL_TINT)
 	_terrain_layer(lvl, "Ground", GROUND_TS, GROUND_RECTS)
-	# Sem a faixa de calçada da favela: aqui o topo é o friso + faixa de perigo do tile.
+	# Piso em profundidade (falso 3D) como o das favelas, em chapa de aço
+	# (tools/gen_floor_band.py industrial): os pés pisam "dentro" do chão.
+	_floor_band(lvl, _surface_runs(GROUND_RECTS), "res://assets/tilesets/industrial/floor_band.png")
 	_structures(lvl, CATWALKS)
 	_catwalk_band(lvl, CATWALKS)
 
@@ -171,7 +176,19 @@ func _add_machinery(lvl: Node) -> void:
 		var arm := _wall_prop(m, PROP_DIR + "robot_arm.png", Vector2(x, CEILING_Y + 75), "Arm%d" % int(x))
 		arm.flip_h = x > 3000.0
 	# E: elevador de carga no topo do poço (o jogador entra nele = saída da fase)
-	_prop(m, PROP_DIR + "elevator.png", 5230.0, -1008.0 + 12.0, "ElevatorCage")
+	# A base em perspectiva afunda na grade (senão parece flutuar) e os cabos
+	# sobem até a tampa do poço.
+	var cage := _prop(m, PROP_DIR + "elevator.png", 5230.0, -1008.0 + 10.0, "ElevatorCage")
+	cage.z_index = 3  # na frente da grade: a base fica apoiada nela
+	var cage_top := cage.position.y - cage.texture.get_height() / 2.0
+	for cx in [5226.0, 5236.0, 5262.0, 5284.0]:
+		var cable := Line2D.new()
+		cable.name = "ElevatorCable%d" % int(cx)
+		cable.width = 2.0
+		cable.default_color = Color(0.55, 0.58, 0.62)
+		cable.points = PackedVector2Array([Vector2(cx, _y(-41) - 16.0), Vector2(cx, cage_top + 6.0)])
+		cable.z_index = -1
+		m.add_child(cable)
 
 
 # --- Props e esconderijos ----------------------------------------------------
@@ -331,15 +348,11 @@ func _add_guards(lvl: Node) -> void:
 
 
 func _add_exit(lvl: Node) -> void:
-	var exit := _exit(lvl, NEXT_STAGE, Vector2(5230, -1008))
+	# Dentro da cabine: só vale em pé lá dentro (não ao subir a escada de baixo).
+	var exit := _exit(lvl, NEXT_STAGE, Vector2(5236, -1008), Vector2(64, 120))
 	exit.name = "LevelExit"
-	var sign := Label.new()
-	sign.name = "ElevatorSign"
-	sign.text = "ELEVADOR DE CARGA  ->  P&D"
-	sign.position = Vector2(4900, -1240)
-	sign.add_theme_font_size_override("font_size", 16)
-	sign.add_theme_color_override("font_color", Color("FF6A1A"))
-	lvl.add_child(sign)
+	exit.set("require_standing", true)
+	_exit_sign(lvl, "ElevatorSign", "ELEVADOR DE CARGA  ->  P&D", Vector2(4900, -1240), Color("FF6A1A"))
 
 
 ## Placas de greybox com o nome de cada trecho (saem na troca pela arte final).

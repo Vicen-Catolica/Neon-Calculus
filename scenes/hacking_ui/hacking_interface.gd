@@ -45,6 +45,13 @@ var _blink_timer: float = 0.0
 var time_limit_mult: float = 1.0
 ## Alvo numa área de segurança máxima (tempo reduzido): aviso no rodapé.
 var max_security: bool = false
+## Abre o passo a passo da SINE já no começo (Protocolo Vance na última camada do Duelo).
+var sine_at_start: bool = false
+## Paradoxo final do Duelo (GDD §1/§9: a "Variável Infinita"): x = x + 1 não tem
+## solução; a resposta é o botão "∅ SEM SOLUÇÃO" (ou a tecla N).
+var paradox_mode: bool = false
+var _paradox_btn: Button
+const PARADOX_TIME := 60.0
 
 ## Penalidade de tempo por resposta errada (segundos).
 const ERROR_PENALTY := 3.0
@@ -69,6 +76,9 @@ const ABORT_ALERT_MAX := 0.6
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Por cima de todo o HUD do mundo (furtividade 8, lockdown 9, lore 20); abaixo
+	# só de diálogo (40), pausa (50) e game over/transição.
+	layer = 30
 	add_to_group("hacking_ui")
 	hide()
 	
@@ -95,13 +105,16 @@ func _ready() -> void:
 			if btn is Button and (btn as Button).text.is_valid_int():
 				btn.pressed.connect(func(): _on_numpad_key_pressed(btn.text))
 				
-	if btn_0:
+	# O 0 normalmente está no numpad_grid e já foi ligado acima; ligar de novo
+	# fazia um clique no 0 digitar "00" (10 virava 100).
+	if btn_0 and not (numpad_grid and btn_0.get_parent() == numpad_grid):
 		btn_0.pressed.connect(func(): _on_numpad_key_pressed("0"))
 		
 	if input_line and input_line is LineEdit:
 		input_line.text_submitted.connect(func(_text): _on_submit_pressed())
 
 	_build_feedback()
+	_build_formula()
 	_update_accessibility_equation_size()
 	if SettingsManager.has_signal("accessibility_settings_changed"):
 		SettingsManager.accessibility_settings_changed.connect(_update_accessibility_equation_size)
@@ -204,6 +217,7 @@ func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 	
 	current_floor_level = floor_level
 	current_sub_topic = sub_topic
+	Sfx.play("hack_open", -6.0)
 	error_count = 0
 	_busy = false
 	if _feedback:
@@ -228,6 +242,7 @@ func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 		subtitle_label.text = str(eq_data.get("Topic", "DESAFIO MATEMÁTICO"))
 
 	_setup_equation_steps(floor_level, sub_topic)
+	_show_formula(formula_for(floor_level, sub_topic))
 	current_input_text = ""
 	_update_input_display()
 	show()
@@ -240,6 +255,10 @@ func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 	_time_total = time_limit
 	if hack_timer:
 		hack_timer.start(time_limit)
+
+	if sine_at_start:
+		sine_at_start = false
+		_activate_ai_assistant()
 
 	if equation_label:
 		equation_label.text = str(eq_data.get("Expression", ""))
@@ -262,6 +281,9 @@ func _calculate_dynamic_time_limit() -> float:
 			time_calculated += 12.25 if current_sub_topic == 0 else 8.75
 		4:
 			time_calculated += 14.0 if current_sub_topic == 0 else 10.5
+		5:
+			# x dos dois lados (Núcleo): 3 passos; com parênteses, 4.
+			time_calculated += 10.5 if current_sub_topic == 0 else 14.0
 			
 	var param_total = abs(int(eq_data.get("ParamTotal", eq_data.get("ParamRes", 0))))
 	var param_b = int(eq_data.get("ParamB", eq_data.get("ParamA", 0)))
@@ -297,7 +319,7 @@ func _setup_equation_steps(stage: int, subtopic: int) -> void:
 		step1_target_solution = final_target_solution
 		return
 		
-	max_steps = 2
+	max_steps = 3 if stage == 5 else 2
 	current_step = 0
 	
 	match stage:
@@ -319,6 +341,12 @@ func _setup_equation_steps(stage: int, subtopic: int) -> void:
 				var offset_val = int(eq_data.get("ParamOffset", 0))
 				var total = int(eq_data.get("ParamTotal", 0))
 				step1_target_solution = total - (k * offset_val)
+		5:
+			# 1º passo: juntar os x num lado só (coeficiente que sobra).
+			if subtopic == 1:
+				step1_target_solution = int(eq_data.get("ParamK", 1)) - int(eq_data.get("ParamC", 0))
+			else:
+				step1_target_solution = int(eq_data.get("ParamA", 1)) - int(eq_data.get("ParamC", 0))
 
 func _get_current_user_value() -> String:
 	if current_input_text != "":
@@ -343,6 +371,7 @@ func _on_submit_pressed() -> void:
 		if input_line:
 			input_line.text = "x = %d" % user_val
 		_show_feedback("CORRETO! x = %d. ACESSO CONCEDIDO." % user_val, FEEDBACK_OK)
+		Sfx.play("hack_ok", -4.0)
 		_flash_input(FEEDBACK_OK)
 		if hack_timer:
 			hack_timer.paused = true
@@ -351,8 +380,85 @@ func _on_submit_pressed() -> void:
 	else:
 		_trigger_error(user_val)
 
+## Paradoxo final: a "equação" x = x + 1, sem gerador. Nenhum número serve.
+func start_paradox() -> void:
+	_show_formula("")  # a descoberta é do jogador; a SINE explica depois do 1º erro
+	paradox_mode = true
+	get_tree().paused = true
+	get_tree().call_group("hud", "hide_hud")
+	current_floor_level = 5
+	current_sub_topic = 0
+	error_count = 0
+	_busy = false
+	max_steps = 1
+	eq_data = {"Expression": "x = x + 1", "Topic": "PARADOXO // VARIÁVEL INFINITA"}
+	final_target_solution = -999999  # nenhum número digitável
+	if equation_label:
+		equation_label.text = "x = x + 1"
+	if subtitle_label:
+		subtitle_label.text = "PARADOXO // VARIÁVEL INFINITA"
+	if ai_assistant_panel:
+		ai_assistant_panel.hide()
+	if math_visualizer:
+		math_visualizer.visible = false
+	_ensure_paradox_button()
+	_paradox_btn.visible = true
+	current_input_text = ""
+	_update_input_display()
+	_show_feedback("Encontre x... ou prove que ele não existe. Número + Enter, ou [∅ SEM SOLUÇÃO] (tecla N).", Color(0.6, 0.8, 0.85))
+	show()
+	_time_total = PARADOX_TIME
+	if hack_timer:
+		hack_timer.start(PARADOX_TIME)
+
+
+func _ensure_paradox_button() -> void:
+	if _paradox_btn or submit_button == null:
+		return
+	_paradox_btn = Button.new()
+	_paradox_btn.name = "ParadoxButton"
+	_paradox_btn.text = "∅ SEM SOLUÇÃO  [N]"
+	_paradox_btn.custom_minimum_size = Vector2(submit_button.custom_minimum_size.x, 44)
+	_paradox_btn.size_flags_horizontal = submit_button.size_flags_horizontal
+	_paradox_btn.add_theme_font_override("font", load("res://assets/fonts/ui_font.tres"))
+	_paradox_btn.add_theme_font_size_override("font_size", 20)
+	_paradox_btn.add_theme_color_override("font_color", FEEDBACK_WARN)
+	_paradox_btn.focus_mode = Control.FOCUS_NONE
+	# Mesmo visual do "Confirmar", em amarelo (antes ficava no cinza padrão do Godot).
+	for st in ["normal", "hover", "pressed"]:
+		var base := submit_button.get_theme_stylebox(st)
+		if base is StyleBoxFlat:
+			var sb := base.duplicate() as StyleBoxFlat
+			sb.border_color = FEEDBACK_WARN
+			if st != "normal":
+				sb.bg_color = FEEDBACK_WARN
+			_paradox_btn.add_theme_stylebox_override(st, sb)
+	for c in ["font_hover_color", "font_focus_color", "font_hover_pressed_color", "font_pressed_color"]:
+		_paradox_btn.add_theme_color_override(c, Color(0.02, 0.055, 0.094))
+	_paradox_btn.pressed.connect(_on_paradox_answer)
+	submit_button.get_parent().add_child(_paradox_btn)
+	submit_button.get_parent().move_child(_paradox_btn, submit_button.get_index() + 1)
+
+
+## Resposta certa do Paradoxo: nenhum número satisfaz a equação.
+func _on_paradox_answer() -> void:
+	if not paradox_mode or _busy or not visible:
+		return
+	_busy = true
+	if hack_timer:
+		hack_timer.paused = true
+	if input_line:
+		input_line.text = "x = ∅"
+	_show_feedback("PARADOXO ACEITO: nenhum x satisfaz x = x + 1.\nA AXIOMA NÃO CONSEGUE COMPUTAR A VARIÁVEL INFINITA.", FEEDBACK_OK)
+	_flash_input(FEEDBACK_OK)
+	await _wait_real(RESULT_HOLD * 2.0)
+	_complete_hack(true)
+
+
 func _trigger_error(wrong_value: int = 0) -> void:
 	error_count += 1
+	Sfx.play("hack_fail", -5.0)
+	GameManager.add_stat("hack_errors")
 	current_input_text = ""
 	_update_input_display()
 
@@ -360,6 +466,8 @@ func _trigger_error(wrong_value: int = 0) -> void:
 		hack_timer.start(max(0.1, hack_timer.time_left - ERROR_PENALTY))
 
 	var msg := "INCORRETO: x = %d não resolve a equação. -%d s. Tente de novo." % [wrong_value, int(ERROR_PENALTY)]
+	if paradox_mode:
+		msg = "x = %d? Então %d = %d. Falso: nenhum número funciona aqui. -%d s." % [wrong_value, wrong_value, wrong_value + 1, int(ERROR_PENALTY)]
 	if error_count >= sine_after_errors():
 		msg += "\nA SINE abriu o passo a passo ao lado."
 	_show_feedback(msg, FEEDBACK_ERR)
@@ -367,6 +475,103 @@ func _trigger_error(wrong_value: int = 0) -> void:
 
 	if error_count >= sine_after_errors():
 		_activate_ai_assistant()
+
+## Passo a passo do nível 5 (x dos dois lados): juntar os x num lado, os
+## números no outro, dividir. Com parênteses, distribuir antes.
+func _hint_both_sides() -> String:
+	var c := int(eq_data.get("ParamC", 1))
+	var cx := "x" if c == 1 else str(c) + "x"
+	var text := ""
+	var coef := 0
+	var num := 0
+	var rhs := 0
+	var n := 1
+	if current_sub_topic == 1:
+		var k := int(eq_data.get("ParamK", 2))
+		var m := int(eq_data.get("ParamM", 1))
+		rhs = int(eq_data.get("ParamN", 0))
+		coef = k - c
+		num = k * m
+		text += "[!] x DOS DOIS LADOS (PARÊNTESES):\n"
+		text += " %d. Distribua o %d:\n" % [n, k]
+		text += "    %dx + %d = %s + %d\n" % [k, num, cx, rhs]
+		n += 1
+	else:
+		coef = int(eq_data.get("ParamA", 2)) - c
+		num = int(eq_data.get("ParamB", 0))
+		rhs = int(eq_data.get("ParamD", 0))
+		text += "[!] x DOS DOIS LADOS:\n"
+	var coef_x := "x" if coef == 1 else str(coef) + "x"
+	text += " %d. Tire %s dos dois lados (os x ficam juntos):\n" % [n, cx]
+	text += "    %s %s %d = %d\n" % [coef_x, "+" if num >= 0 else "-", absi(num), rhs]
+	n += 1
+	var diff := rhs - num
+	if num >= 0:
+		text += " %d. Tire %d dos dois lados:\n" % [n, num]
+	else:
+		text += " %d. Some %d aos dois lados:\n" % [n, -num]
+	if coef == 1:
+		# Aqui já seria o resultado: mostra só a conta a fazer.
+		text += "    x = %d %s %d\n" % [rhs, "-" if num >= 0 else "+", absi(num)]
+		return text.trim_suffix("\n")
+	text += "    %s = %d\n" % [coef_x, diff]
+	n += 1
+	if coef != 1:
+		text += " %d. Divida por %d:\n" % [n, coef]
+		text += "    x = %d / %d" % [diff, coef]
+	return text.trim_suffix("\n")
+
+
+# --- Fórmula na tela ----------------------------------------------------
+# Quem joga tem 10–12 anos: a regra geral do tipo de equação fica sempre à
+# vista, embaixo da equação (em letras, sem os números da conta). O passo a
+# passo da SINE aplica a regra aos números, mas para antes do resultado.
+
+var _formula_label: Label
+
+
+func _build_formula() -> void:
+	var eq_panel := find_child("EquationPanel", true, false) as Control
+	if eq_panel == null:
+		return
+	_formula_label = Label.new()
+	_formula_label.name = "FormulaLabel"
+	_formula_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_formula_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_formula_label.add_theme_font_size_override("font_size", 20)
+	_formula_label.add_theme_color_override("font_color", Color(1.0, 0.78, 0.35))
+	var parent := eq_panel.get_parent()
+	parent.add_child(_formula_label)
+	parent.move_child(_formula_label, eq_panel.get_index() + 1)
+
+
+func _show_formula(text: String) -> void:
+	if _formula_label:
+		_formula_label.text = ("FÓRMULA:  " + text) if text != "" else ""
+		_formula_label.visible = text != ""
+
+
+func formula_text() -> String:
+	return _formula_label.text if _formula_label else ""
+
+
+## Regra geral de cada tipo de equação (mesmos tipos do EquationGenerator.cs).
+func formula_for(floor_level: int, sub_topic: int) -> String:
+	match floor_level:
+		1:
+			return "x + a = b   →   x = b − a" if sub_topic == 0 else "a · x = b   →   x = b ÷ a"
+		2:
+			return "a · x + b = c   →   x = (c − b) ÷ a"
+		3:
+			return "x ÷ a = b ÷ c   →   x = a · b ÷ c" if sub_topic == 0 else "Área = base · altura   →   base = Área ÷ altura"
+		4:
+			return "k · (x + a) = c   →   x = (c − k · a) ÷ k" if sub_topic == 0 else "A + B + x = 180°   →   x = 180° − (A + B)"
+		5:
+			if sub_topic == 1:
+				return "k · (x + m) = c · x + n   →   distribua o k primeiro"
+			return "a · x + b = c · x + d   →   x = (d − b) ÷ (a − c)"
+	return ""
+
 
 func vance_protocol() -> bool:
 	return GameManager.has_flag(VANCE_FLAG)
@@ -411,6 +616,15 @@ func _flash_ai_assistant() -> void:
 func _generate_step_by_step_hint() -> String:
 	var text = ">>> SINE // PASSO A PASSO\n"
 	text += "---------------------------\n"
+	if paradox_mode:
+		text += "[!] PARADOXO:\n"
+		text += " 1. Tire x dos dois lados:\n"
+		text += "    0 = 1\n"
+		text += " 2. Isso é sempre falso.\n"
+		text += " > Nenhum número satisfaz a equação.\n"
+		text += " > Responda: ∅ SEM SOLUÇÃO (tecla N).\n"
+		text += " > A Axioma vai tentar calcular para sempre."
+		return text
 
 	match current_floor_level:
 		1:
@@ -489,7 +703,11 @@ func _generate_step_by_step_hint() -> String:
 				text += " > Os três ângulos somam 180°.\n"
 				text += " > " + str(a) + "° + " + str(b) + "° = " + str(soma) + "°\n"
 				text += " > x = 180° - " + str(soma) + "°"
+		5:
+			text += _hint_both_sides()
 
+	# A SINE monta a conta, mas quem calcula é o jogador.
+	text += "\n > Agora faça a conta e digite o x."
 	return text
 
 func _process(delta: float) -> void:
@@ -516,6 +734,7 @@ func _on_numpad_key_pressed(digit: String) -> void:
 	if _busy:
 		return
 	if current_input_text.length() < 4:
+		Sfx.play("hack_key", -10.0, 0.06)
 		current_input_text += digit
 		_update_input_display()
 
@@ -526,6 +745,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()
 		abort_hack()
+		return
+	if paradox_mode and event is InputEventKey and event.pressed and event.keycode == KEY_N:
+		get_viewport().set_input_as_handled()
+		_on_paradox_answer()
 		return
 	if event is InputEventKey and event.pressed:
 		if event.keycode == KEY_BACKSPACE:
@@ -565,6 +788,7 @@ func abort_hack(roll: float = -1.0) -> void:
 	if hack_timer:
 		hack_timer.paused = true
 	var alert := (randf() if roll < 0.0 else roll) < abort_alert_chance()
+	Sfx.play("hack_abort", -5.0)
 	if alert:
 		_show_feedback("HACK ABORTADO. A Axioma rastreou a conexão: ALERTA!", FEEDBACK_ERR)
 		_flash_input(FEEDBACK_ERR)
@@ -586,6 +810,7 @@ func _on_hack_timer_timeout() -> void:
 	if timer_label:
 		timer_label.text = "00:00"
 	_show_feedback("TEMPO ESGOTADO. A invasão falhou.", FEEDBACK_ERR)
+	Sfx.play("hack_fail", -5.0)
 	_flash_input(FEEDBACK_ERR)
 	await _wait_real(RESULT_HOLD)
 	_complete_hack(false)
@@ -593,6 +818,12 @@ func _on_hack_timer_timeout() -> void:
 func _complete_hack(success: bool) -> void:
 	_busy = false
 	max_security = false
+	if paradox_mode:
+		paradox_mode = false
+		if _paradox_btn:
+			_paradox_btn.visible = false
+		if math_visualizer:
+			math_visualizer.visible = true
 	if hack_timer:
 		hack_timer.stop()
 		hack_timer.paused = false

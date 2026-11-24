@@ -16,11 +16,19 @@ enum Mode { PATROL, ALERT, REBOOT }
 @export var speed: float = 70.0
 @export var end_pause: float = 1.2
 @export var vision_range: float = 260.0
-@export var fov_deg: float = 50.0
+## Cone do sensor: de (tilt - fov/2) a (tilt + fov/2) graus abaixo do horizonte.
+## 40/70 cobre de 5° a 75°: vê o chão à frente até o alcance (com 55/50 só via
+## quem estava logo embaixo, e no chão quase ninguém).
+@export var fov_deg: float = 70.0
 ## Ângulo do sensor abaixo da horizontal, no sentido em que o drone voa.
-@export var sensor_tilt_deg: float = 55.0
+@export var sensor_tilt_deg: float = 40.0
 @export var exposure_to_alarm: float = 1.2
 @export var reboot_time: float = 8.0
+## Em alerta, persegue o Eduardo pelo ar (sem sair da faixa de patrulha mais
+## esta folga), mantendo-se um pouco atrás para o sensor apontar para ele.
+@export var chase_speed: float = 120.0
+@export var chase_margin: float = 160.0
+@export var chase_offset: float = 90.0
 @export var world_mask: int = 1
 
 ## Sprites (PixelLab, ver tools/gen_industrial_art.py): só a cor do olho muda.
@@ -116,20 +124,36 @@ func _fly(delta: float) -> void:
 		global_position += to.normalized() * step
 
 
+var _last_seen_x: float = 0.0
+
+
 func _do_alert(delta: float) -> void:
-	# Para no ar e encara o jogador enquanto a barra enche.
+	# Segue o jogador enquanto a barra enche (e depois, até perdê-lo de vista).
 	var player := _player()
 	if sees_player() and player:
+		_last_seen_x = player.global_position.x
+		_chase(player.global_position.x, delta)
 		_lost = 0.0
 		_exposure += delta
 		if _exposure >= exposure_to_alarm and _alarm_cooldown <= 0.0:
 			_alarm_cooldown = 4.0
 			GameManager.raise_alarm(player.global_position)
 	else:
+		_chase(_last_seen_x, delta)
 		_lost += delta
 		_exposure = maxf(_exposure - delta, 0.0)
 		if _lost >= 1.5:
 			mode = Mode.PATROL
+
+
+func _chase(target_x: float, delta: float) -> void:
+	var dx := target_x - global_position.x
+	if absf(dx) > 6.0:
+		facing = signf(dx)
+	var lo := minf(point_a.x, point_b.x) - chase_margin
+	var hi := maxf(point_a.x, point_b.x) + chase_margin
+	var want := clampf(target_x - facing * chase_offset, lo, hi)
+	global_position.x = move_toward(global_position.x, want, chase_speed * delta)
 
 
 func _player() -> Node2D:
@@ -145,7 +169,17 @@ func sees_player() -> bool:
 	if player.has_method("is_detectable") and not player.is_detectable():
 		return false
 	var origin := lens_global()
-	var target: Vector2 = player.get_aim_point()
+	# Pés, centro e cabeça: o sensor vê qualquer parte do corpo no cone (só o
+	# centro deixava de fora quem estava na mesma altura do drone).
+	var aim: Vector2 = player.get_aim_point()
+	var feet: Vector2 = player.global_position + Vector2(0, -6)
+	for target in [feet, aim, aim.lerp(feet, -0.4)]:
+		if _sees_point(origin, target, player):
+			return true
+	return false
+
+
+func _sees_point(origin: Vector2, target: Vector2, player: Node2D) -> bool:
 	var to := target - origin
 	if to.length() > vision_range:
 		return false
@@ -207,3 +241,8 @@ func _draw_exposure_bar(o: Vector2) -> void:
 	var pos := o + Vector2(-15, -32)
 	draw_rect(Rect2(pos - Vector2(1, 1), Vector2(32, 6)), Color(0, 0, 0, 0.75))
 	draw_rect(Rect2(pos, Vector2(30 * ratio, 4)), Color(1.0, 0.8, 0.15).lerp(Color(1.0, 0.1, 0.25), ratio))
+
+
+## Reiniciando depois do hack: fração do tempo que falta até voltar.
+func hack_time_left() -> float:
+	return _reboot_left / maxf(reboot_time, 0.01) if mode == Mode.REBOOT else 0.0

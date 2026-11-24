@@ -33,6 +33,7 @@ var _label: Label
 
 
 func _ready() -> void:
+	add_to_group("hud")  # some com o resto do HUD durante o hack
 	top_level = true
 	z_index = 60
 	global_position = Vector2.ZERO
@@ -70,6 +71,7 @@ func ping() -> bool:
 	_wave_t = 0.0
 	get_tree().call_group("stealth_hud", "_flash", "PING SONAR: %d AMEAÇA(S)" % revealed.size(), CYAN)
 	pinged.emit(revealed.size())
+	Sfx.play("sonar", -4.0)
 	return true
 
 
@@ -191,12 +193,14 @@ func _build_ui() -> void:
 	_bar = ColorRect.new()
 	_bar.position = bg.position
 	_bar.size = bg.size
+	_bar.color = CYAN  # estado inicial (antes do 1º _process, ex.: começa pausado num diálogo)
 	_ui.add_child(_bar)
 	_label = Label.new()
 	_label.position = Vector2(28, 992)
 	_label.add_theme_font_override("font", font)
 	_label.add_theme_font_size_override("font_size", 18)
 	_label.add_theme_color_override("font_color", CYAN)
+	_label.text = "SONAR [V]  PRONTO"
 	_ui.add_child(_label)
 
 
@@ -216,3 +220,12 @@ func _draw_arrows() -> void:
 		var side := dir.orthogonal() * 10.0
 		_arrows.draw_colored_polygon(PackedVector2Array([p + dir * 16.0, p - dir * 8.0 + side, p - dir * 8.0 - side]),
 			Color(RED, 0.9 * a))
+
+
+## Grupo "hud": a tela de hack esconde e mostra o HUD inteiro.
+func hide_hud() -> void:
+	_ui.visible = false
+
+
+func show_hud() -> void:
+	_ui.visible = true

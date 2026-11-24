@@ -3,6 +3,8 @@ extends StaticBody2D
 ## Porta biométrica. Bloqueia a passagem até ser hackeada; então sobe e libera.
 ## Origem = base da porta (chão), centro horizontal.
 
+const Supports := preload("res://scripts/core/supports.gd")
+
 signal opened
 
 @export var start_open: bool = false
@@ -28,6 +30,22 @@ func _ready() -> void:
 		is_open = true
 		sprite.frame = 6
 		shape.set_deferred("disabled", true)
+	_add_header.call_deferred()
+
+
+## Porta mais baixa que o teto: verga de aço até ele (não fica solta no ar).
+const DOOR_H := 144.0
+const MAX_HEADER := 340.0
+
+
+func _add_header() -> void:
+	await get_tree().physics_frame
+	if not is_inside_tree():
+		return
+	var top := global_position.y - DOOR_H
+	var ceiling = Supports.hit(self, Vector2(global_position.x, top - 1.0), Vector2(global_position.x, top - MAX_HEADER), [get_rid()])
+	if ceiling != null and top - (ceiling as Vector2).y > 1.0:
+		Supports.header(self, global_position.x, top, (ceiling as Vector2).y)
 
 
 func can_be_hacked() -> bool:

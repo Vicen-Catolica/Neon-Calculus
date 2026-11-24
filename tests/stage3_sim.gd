@@ -63,6 +63,9 @@ func pos() -> String:
 
 func _ready() -> void:
 	lvl = load(LEVEL).instantiate()
+	# A saída leva à Fase 4 de verdade: guardada e desligada para a simulação seguir aqui.
+	var exit_target: String = lvl.get_node("LevelExit").get("next_stage")
+	lvl.get_node("LevelExit").set("next_stage", "")
 	add_child(lvl)
 	p = lvl.get_node("Eduardo")
 	await step(30)
@@ -162,6 +165,15 @@ func _ready() -> void:
 	release_all()
 	await step(60)
 	check("C: agachado atravessa o duto e desce para D", p.global_position.x > 3540.0, pos())
+	# Volta: a escada de D sobe até o duto (chaminé em cima dela, como na 79).
+	await climb(111 * 32 + 16, 16.0, 420)
+	check("D: escada de volta sobe até a boca do duto (y≈-272)", absf(p.global_position.y + 272.0) < 6.0, pos())
+	# Em pé no patamar do topo, S desce pela escada (atravessa a grade).
+	Input.action_press("climb_down")
+	await step(60)
+	release_all()
+	check("D: S no topo da escada começa a descida", p.global_position.y > -250.0 and p.state == Eduardo.State.CLIMB, pos())
+	tp(3600, 16); await step(20)
 	var corridor_cam := lvl.get_node("Cameras/CorridorCamera") as Node2D
 	check("C: a câmera do corredor fica abaixo do duto", corridor_cam.global_position.y > -272.0)
 
@@ -196,7 +208,7 @@ func _ready() -> void:
 	tp(5300, -752); await step(10)
 	var exit := lvl.get_node("LevelExit") as LevelExit
 	check("E: elevador (saída) alcançável no topo", exit.overlaps_body(p))
-	check("E: saída desligada até existir a Fase 4", exit.next_stage == "")
+	check("E: elevador executivo leva à Fase 4", exit_target == GameManager.LEVELS[4]["scene"], exit_target)
 
 	# Lore: todo terminal aponta para uma entrada existente.
 	var missing := []

@@ -34,8 +34,7 @@ shape = SubResource("CapsuleShape2D_kgtat")
 [node name="NavigationAgent2D" type="NavigationAgent2D" parent="." unique_id=29633788]
 
 [node name="VisibleOnScreenEnabler2D" type="VisibleOnScreenEnabler2D" parent="." unique_id=1298091270]
-position = Vector2(-284, 255)
-rect = Rect2(269, -277, 30, 44)
+rect = Rect2(-460, -220, 920, 280)
 
 [node name="AttackTimer" type="Timer" parent="." unique_id=616725901]
 

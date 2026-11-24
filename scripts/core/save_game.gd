@@ -31,6 +31,7 @@ func save_checkpoint(floor_number: int, scene_path: String) -> void:
 		"lore_read": GameManager.lore_read.duplicate(),
 		"dialogues_seen": GameManager.dialogues_seen.duplicate(),
 		"story_flags": GameManager.story_flags.duplicate(),
+		"stats": GameManager.stats.duplicate(),
 		"saved_at": Time.get_datetime_string_from_system(),
 	})
 
@@ -54,6 +55,12 @@ func restore() -> String:
 	GameManager.story_flags.clear()
 	for id in data.get("story_flags", []):
 		GameManager.story_flags.append(String(id))
+	# Estatísticas: só ao reabrir o jogo ("Continuar"). Recomeçar depois de um
+	# game over mantém as da sessão (tempo e erros não voltam no tempo).
+	if float(GameManager.stats.get("time", 0.0)) <= 0.0:
+		var st: Dictionary = data.get("stats", {})
+		for k in st:
+			GameManager.stats[k] = st[k]
 	GameManager.current_floor = int(data.get("floor", 1))
 	return String(data.get("scene", ""))
 
@@ -71,6 +78,7 @@ func _update_progress() -> void:
 	data["lore_read"] = GameManager.lore_read.duplicate()
 	data["dialogues_seen"] = GameManager.dialogues_seen.duplicate()
 	data["story_flags"] = GameManager.story_flags.duplicate()
+	data["stats"] = GameManager.stats.duplicate()
 	_write(data)
 
 

@@ -108,9 +108,10 @@ func _refresh_candidates() -> void:
 		var h := node as Hackable
 		if h == null or not h.is_visible_in_tree() or not h.can_be_hacked():
 			continue
-		if eye.distance_to(h.global_position) > vision_range:
+		var reach := h.hack_range if h.hack_range > 0.0 else vision_range
+		if eye.distance_to(h.global_position) > reach:
 			continue
-		if not _has_line_of_sight(eye, h):
+		if not h.ignore_line_of_sight and not _has_line_of_sight(eye, h):
 			continue
 		candidates.append(h)
 
@@ -182,7 +183,11 @@ func _start_hack(h: Hackable) -> void:
 	_hacking_ui.set("time_limit_mult", h.get_time_mult())
 	_hacking_ui.set("max_security", h.in_max_security())
 	_hacking_ui.set("can_abort", h.abortable)
-	_hacking_ui.start_hacking(d.x, d.y)
+	_hacking_ui.set("sine_at_start", h.sine_at_start)
+	if h.paradox and _hacking_ui.has_method("start_paradox"):
+		_hacking_ui.start_paradox()
+	else:
+		_hacking_ui.start_hacking(d.x, d.y)
 
 
 func _find_hacking_ui() -> Node:

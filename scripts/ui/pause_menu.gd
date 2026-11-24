@@ -1,6 +1,6 @@
 extends CanvasLayer
 ## Autoload. Menu de pausa (GDD §8): Esc durante uma fase.
-## Retomar • Como jogar • Reiniciar andar (volta ao checkpoint) • Menu principal.
+## Retomar • Como jogar • Opções • Reiniciar andar (volta ao checkpoint) • Menu principal.
 ## Só abre quando nada mais está pausando o jogo (hack, leitura de lore,
 ## transição de andar, game over).
 
@@ -11,6 +11,9 @@ const RED := Color("ff2d55")
 var _root: Control
 var _buttons: VBoxContainer
 var _how_to: HowToPlay
+## Tela de Opções (a mesma do menu principal) aberta por cima da pausa.
+var _options: Control
+const OPTIONS_SCENE := "res://scenes/options/OptionsMenu.tscn"
 
 
 func _ready() -> void:
@@ -28,7 +31,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not event.is_action_pressed("ui_cancel"):
 		return
 	if visible:
-		if _how_to == null:
+		if _options != null:
+			get_viewport().set_input_as_handled()
+			_options.call("_on_back_button_pressed")
+		elif _how_to == null:
 			get_viewport().set_input_as_handled()
 			resume()
 	elif _can_open():
@@ -39,6 +45,10 @@ func _unhandled_input(event: InputEvent) -> void:
 func _can_open() -> bool:
 	var scene := get_tree().current_scene
 	if not (scene is Level) or get_tree().paused or LevelTransition.is_busy():
+		return false
+	# Cenas de encerramento (vitória no Duelo → tela branca) não abrem a pausa:
+	# ela ficaria escondida atrás do branco.
+	if get_tree().get_first_node_in_group("blocks_pause") != null:
 		return false
 	if GameManager.state != GameManager.State.PLAYING and GameManager.state != GameManager.State.HACK_VISION:
 		return false
@@ -67,6 +77,18 @@ func _show_how_to() -> void:
 		(_buttons.get_child(1) as Button).grab_focus())
 	_root.visible = false
 	add_child(_how_to)
+
+
+func _show_options() -> void:
+	_options = (load(OPTIONS_SCENE) as PackedScene).instantiate() as Control
+	_options.menu_closed.connect(func() -> void:
+		_options.queue_free()
+		_options = null
+		_root.visible = true
+		(_buttons.get_child(2) as Button).grab_focus())
+	_root.visible = false
+	add_child(_options)
+	_options.show()
 
 
 func _restart_floor() -> void:
@@ -120,7 +142,7 @@ func _build() -> void:
 	_buttons.add_theme_constant_override("separation", 14)
 	vb.add_child(_buttons)
 	for b in [["Retomar infiltração", GREEN, resume], ["Como jogar", CYAN, _show_how_to],
-			["Reiniciar andar", CYAN, _restart_floor], ["Menu principal", RED, _main_menu]]:
+			["Opções", CYAN, _show_options], ["Reiniciar andar", CYAN, _restart_floor], ["Menu principal", RED, _main_menu]]:
 		_buttons.add_child(_button(font, b[0], b[1], b[2]))
 
 

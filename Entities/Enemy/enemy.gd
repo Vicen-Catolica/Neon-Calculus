@@ -20,10 +20,17 @@ signal alarm_triggered(last_position: Vector2)
 @export_flags_2d_physics var vision_mask: int = 3 # Camada 1 (Mundo) + Camada 2 (Player)
 ## Altura dos olhos em relação à origem do nó (guardas com sprite de 128 px usam ~-100).
 @export var eye_offset: Vector2 = Vector2(0, -20)
+## Ponta da arma (olhando para a direita; espelha com o lado). O raio do
+## taser sai daqui, não do meio do corpo.
+@export var muzzle_offset: Vector2 = Vector2(30, -74)
 ## Andar normal (não agachado) só é ouvido dentro deste raio; correr usa a HearingArea inteira.
 @export var walk_hearing_radius: float = 140.0
 ## Raio em que o guarda responde a um alarme de câmera/varredura.
 @export var alarm_response_radius: float = 900.0
+## Ao avistar o Eduardo, chama pelo rádio os agentes neste raio (eles chegam
+## depois de `radio_delay` s). Quem atende ao rádio não repassa o chamado.
+@export var radio_radius: float = 700.0
+@export var radio_delay: float = 0.5
 
 ## Segundos para encher a barra de detecção com o jogador no limite do cone
 ## (de perto enche em `detect_time_near`).
@@ -33,6 +40,16 @@ signal alarm_triggered(last_position: Vector2)
 @export var detect_decay: float = 0.4
 ## Unidade Lógica (ciborgue): segundos sem visão depois de hackeada (ponto cego).
 @export var blind_time: float = 6.0
+
+@export_category("Navegação")
+## Pulo da perseguição (degraus, caixas, beiradas baixas). ~90 px de altura.
+@export var jump_velocity: float = -420.0
+@export var climb_speed: float = 120.0
+## Sem caminho até o jogador em outro andar: espera a esta distância, mirando,
+## em vez de espelhar os passos dele por baixo.
+@export var hold_distance: float = 150.0
+## Até onde procura uma escada (px na horizontal).
+@export var ladder_search_range: float = 900.0
 
 @export_category("Debug Visual")
 @export var show_debug_vision: bool = true
@@ -58,6 +75,13 @@ var gravity: float = ProjectSettings.get_setting("physics/2d/default_gravity")
 var awareness: float = 0.0
 ## > 0: sistema visual hackeado (só ciborgue). Não vê nada até zerar.
 var blind_left: float = 0.0
+## Escada em uso pela navegação (null = andando) e sentido (-1 sobe, 1 desce).
+var _climb_ladder: Area2D = null
+var _climb_dir: int = 0
+var _saved_mask: int = 0
+var _jump_cooldown: float = 0.0
+## true quando o alerta veio do rádio de outro agente (não repassa).
+var _by_radio: bool = false
 const SUSPECT_AT: float = 0.35
 ## Nó filho que desenha a barra por cima do sprite (o _draw do próprio guarda
 ## fica atrás dos filhos e o sprite cobria a barra).
@@ -149,12 +173,13 @@ func _process(delta: float) -> void:
 	_update_animation()
 
 	if is_firing_taser and is_instance_valid(taser_target_ref):
-		var start_pos = global_position + eye_offset + Vector2(0, 30)
+		var start_pos = muzzle_position()
 		var end_pos = _aim_point(taser_target_ref)
 		generate_lightning_beam(start_pos, end_pos)
 
 func _physics_process(delta: float) -> void:
-	if not is_on_floor():
+	_jump_cooldown = maxf(_jump_cooldown - delta, 0.0)
+	if _climb_ladder == null and not is_on_floor():
 		velocity.y += gravity * delta
 		
 	check_sensors(delta)
@@ -323,6 +348,10 @@ func is_player_in_los() -> bool:
 	# Se ultrapassar a distância máxima de visão, perde o contato visual imediatamente
 	if dist_to_player > vision_range:
 		return false
+	# Colado no jogador: o raio nasceria dentro do corpo dele e não "veria" nada
+	# (o guarda travava perseguindo sem atacar). Encostar é ver.
+	if _aim_point(target_player).distance_to(global_position + Vector2(0, -60)) <= 70.0:
+		return not VisionBlocker.line_blocked(get_tree(), ray_origin, player_center)
 
 	return has_line_of_sight_to(target_player, player_center)
 
@@ -388,6 +417,7 @@ func _on_attack_timer_timeout() -> void:
 		if target_player.has_method("take_damage"):
 			target_player.take_damage(taser_defense_drain)
 		fire_taser_effect()
+		Sfx.play_at("taser", global_position + Vector2(0, -40), 0.0, 0.08)
 
 func update_state_indicator(state_name: String) -> void:
 	if not state_indicator:
@@ -500,22 +530,83 @@ func investigate(world_point: Vector2) -> void:
 		state_machine.transition_to("Investigate")
 
 
+## Chamado pelo StateMaxAlert ao entrar em alerta máximo. Se foi ele quem viu o
+## Eduardo (não veio do rádio nem de um alarme), chama os vizinhos.
+func on_max_alert(by_alarm: bool) -> void:
+	if _by_radio or by_alarm:
+		_by_radio = false
+		return
+	Sfx.play_at("detect", global_position + Vector2(0, -60))
+	var called := 0
+	for g in get_tree().get_nodes_in_group("guards"):
+		if g == self or not (g is Enemy):
+			continue
+		var e := g as Enemy
+		if e._current_state_name() in ["maxalert", "stunned", "distracted"] or e.is_blind():
+			continue
+		if e.global_position.distance_to(global_position) > radio_radius:
+			continue
+		e._answer_radio(last_known_player_pos, radio_delay)
+		called += 1
+	if called > 0:
+		Sfx.play_at("radio", global_position + Vector2(0, -60), -4.0)
+		get_tree().call_group("stealth_hud", "_flash", "AGENTE CHAMOU REFORÇOS PELO RÁDIO", Color(1.0, 0.6, 0.15))
+	Tutorial.event("spotted")
+
+
+func _answer_radio(pos: Vector2, delay: float) -> void:
+	await get_tree().create_timer(delay, false).timeout
+	if not is_inside_tree() or _current_state_name() in ["maxalert", "stunned"]:
+		return
+	_by_radio = true
+	last_known_player_pos = pos
+	state_machine.transition_to("MaxAlert")
+
+
+var _alarm_entering: bool = false
+
+
+func entered_by_alarm() -> bool:
+	var v := _alarm_entering
+	_alarm_entering = false
+	return v
+
+
 func _on_alarm_raised(world_position: Vector2) -> void:
 	if _current_state_name() in ["stunned"]:
 		return
 	if global_position.distance_to(world_position) > alarm_response_radius:
 		return
 	last_known_player_pos = world_position
+	_alarm_entering = true
 	state_machine.transition_to("MaxAlert")
 
 
 # --- Animação --------------------------------------------------------------
+
+func muzzle_position() -> Vector2:
+	return global_position + Vector2(muzzle_offset.x * get_facing_direction().x, muzzle_offset.y)
+
+
+var _anim_backwards: bool = false
+
 
 func _update_animation() -> void:
 	var spr := get_node_or_null("AnimatedSprite2D") as AnimatedSprite2D
 	if spr == null or spr.sprite_frames == null or spr.sprite_frames.get_animation_names().is_empty():
 		return
 	var moving := absf(velocity.x) > 8.0
+	# Recuando (anda para um lado olhando para o outro): passos ao contrário.
+	var backing := moving and is_on_floor() and signf(velocity.x) != signf(get_facing_direction().x)
+	if backing:
+		var walk: StringName = &"patrol"
+		if spr.sprite_frames.has_animation(walk) and (spr.animation != walk or not _anim_backwards):
+			spr.play_backwards(walk)
+			_anim_backwards = true
+		return
+	if _anim_backwards:
+		_anim_backwards = false
+		spr.play(spr.animation)
 	var anim: StringName = &"idle"
 	match _current_state_name():
 		"patrol":
@@ -578,8 +669,34 @@ func _draw_vision_cone() -> void:
 
 # --- Barra de detecção -----------------------------------------------------
 
+## Hackeado (implante tocando / visão apagada): barra ciano que esvazia até ele
+## voltar ao normal.
+func hack_time_left() -> float:
+	if _current_state_name() == "distracted":
+		var s: Node = state_machine.current_state
+		return clampf(1.0 - float(s.get("timer")) / maxf(float(s.get("duration")), 0.01), 0.0, 1.0)
+	if is_blind():
+		return clampf(blind_left / maxf(blind_time, 0.01), 0.0, 1.0)
+	return 0.0
+
+
 func _draw_awareness_bar() -> void:
 	var st := _current_state_name()
+	var hack_left := hack_time_left()
+	if hack_left > 0.0:
+		var hb := _awareness_bar
+		var hw := 46.0
+		var htop := eye_offset.y - 32.0
+		if state_indicator:
+			htop = state_indicator.position.y + state_indicator.size.y + 1.0
+		var hp := Vector2(-hw * 0.5, htop)
+		var cyan := Color(0.2, 0.95, 1.0)
+		if hack_left < 0.25 and int(Time.get_ticks_msec() / 150) % 2 == 0:
+			cyan = Color(1, 1, 1)
+		hb.draw_rect(Rect2(hp - Vector2(2, 2), Vector2(hw + 4, 10)), Color(0, 0, 0, 0.85))
+		hb.draw_rect(Rect2(hp, Vector2(hw * hack_left, 6)), cyan)
+		hb.draw_rect(Rect2(hp - Vector2(1, 1), Vector2(hw + 2, 8)), Color(cyan.r, cyan.g, cyan.b, 0.9), false, 1.0)
+		return
 	var alert := st == "maxalert"
 	if st in ["distracted", "stunned"] or (awareness <= 0.01 and not alert):
 		return
@@ -600,3 +717,173 @@ func _draw_awareness_bar() -> void:
 	# marca do ponto em que ele começa a estranhar
 	var mx := pos.x + w * SUSPECT_AT
 	b.draw_line(Vector2(mx, pos.y - 1), Vector2(mx, pos.y + h + 1), Color(0, 0, 0, 0.8), 1.0)
+
+
+# --- Navegação de perseguição: pulo e escadas ---------------------------------
+
+## Move em direção a `target` (posição de pés, global) a `speed`, mudando de
+## andar quando preciso: pula degraus e obstáculos baixos, usa escadas para subir
+## e descer e sai pela ponta da plataforma. Sem caminho para cima, para a
+## `hold_distance` do alvo (mirando) em vez de espelhar os passos dele por baixo.
+## Só ajusta `velocity` e o lado; quem chama faz o move_and_slide().
+## Devolve true quando chegou (mesmo andar e perto em x).
+func chase_move(target: Vector2, speed: float) -> bool:
+	if _climb_ladder:
+		_do_climb()
+		return false
+	var dx := target.x - global_position.x
+	var dy := target.y - global_position.y
+	if absf(dy) > 64.0 and is_on_floor():
+		var lad := _ladder_toward(dy < 0.0, target)
+		if lad:
+			var lx := lad.global_position.x
+			if absf(lx - global_position.x) <= 6.0:
+				_start_climb(lad, -1 if dy < 0.0 else 1)
+				return false
+			_walk(signf(lx - global_position.x), speed)
+			return false
+		if dy < 0.0:
+			# Alvo num andar de cima sem escada: segura posição e mira.
+			var hold_x := target.x - signf(dx if dx != 0.0 else 1.0) * hold_distance
+			update_facing(signf(dx))
+			if absf(hold_x - global_position.x) > 10.0:
+				_walk(signf(hold_x - global_position.x), speed)
+				update_facing(signf(dx))
+			else:
+				velocity.x = move_toward(velocity.x, 0.0, speed)
+			return false
+		# Alvo embaixo sem escada: chega até a beirada e espera mirando
+		# (_walk não deixa cair de plataformas).
+	if absf(dx) <= 8.0:
+		velocity.x = move_toward(velocity.x, 0.0, speed)
+		return absf(dy) <= 64.0
+	_walk(signf(dx), speed)
+	return false
+
+
+## Maior queda que o agente encara andando (degraus, caixas). Mais que isso é
+## beirada: ele para e espera (desce só por escada).
+@export var max_step_down: float = 72.0
+
+
+func _walk(dir: float, speed: float) -> void:
+	update_facing(dir)
+	if is_on_floor() and _ledge_ahead(dir):
+		velocity.x = move_toward(velocity.x, 0.0, speed)
+		return
+	velocity.x = dir * speed
+	if is_on_floor() and is_on_wall():
+		# Obstáculo baixo na frente: pula. Parede alta (ou teto baixo em cima):
+		# pular não adianta, então para em vez de ficar quicando.
+		if _can_jump_over(dir):
+			if _jump_cooldown <= 0.0:
+				velocity.y = jump_velocity
+				_jump_cooldown = 0.6
+		else:
+			velocity.x = 0.0
+
+
+## Perto demais para o taser: recua (de frente para o alvo) se houver chão e
+## espaço atrás. Devolve a velocidade x desejada (0 = fica parado).
+@export var back_off_distance: float = 110.0
+
+
+func back_off_velocity(target: Vector2) -> float:
+	var dx := target.x - global_position.x
+	if absf(dx) >= back_off_distance or not is_on_floor():
+		return 0.0
+	var away := -signf(dx) if dx != 0.0 else -get_facing_direction().x
+	if _ledge_ahead(away) or test_move(global_transform, Vector2(away * 10.0, 0)):
+		return 0.0
+	return away * move_speed * 0.8
+
+
+## Altura máxima do pulo (v²/2g).
+func _jump_height() -> float:
+	return jump_velocity * jump_velocity / (2.0 * maxf(gravity, 1.0))
+
+
+## Testa se, no alto do pulo, o caminho à frente está livre (e se há espaço
+## em cima para subir até lá).
+func _can_jump_over(dir: float) -> bool:
+	var h := _jump_height() - 6.0
+	if test_move(global_transform, Vector2(0, -h)):
+		return false  # teto baixo: bate a cabeça
+	return not test_move(global_transform.translated(Vector2(0, -h)), Vector2(dir * 14.0, 0))
+
+
+## Há chão logo à frente, até `max_step_down` abaixo dos pés?
+func _ledge_ahead(dir: float) -> bool:
+	var space := get_world_2d().direct_space_state
+	var from := global_position + Vector2(dir * 26.0, -8.0)
+	var q := PhysicsRayQueryParameters2D.create(from, from + Vector2(0, max_step_down + 8.0), collision_mask)
+	q.exclude = [get_rid()]
+	q.hit_from_inside = true
+	return space.intersect_ray(q).is_empty()
+
+
+## Escada que leva para cima (ou para baixo) a partir do andar atual, a mais
+## perto em x (preferindo as que vão para perto do alvo).
+func _ladder_toward(up: bool, target: Vector2) -> Area2D:
+	var best: Area2D = null
+	var best_score := INF
+	var feet := global_position.y
+	for lad in get_tree().get_nodes_in_group("ladder"):
+		var a := lad as Area2D
+		var top := _ladder_top(a)
+		var base := a.global_position.y
+		var ok := false
+		if up:
+			ok = absf(base - feet) < 28.0 and top < feet - 48.0 and top >= target.y - 48.0
+		else:
+			ok = absf(top - feet) < 28.0 and base > feet + 48.0
+		if not ok:
+			continue
+		var d := absf(a.global_position.x - global_position.x)
+		if d > ladder_search_range:
+			continue
+		var score := d + absf(a.global_position.x - target.x) * 0.5
+		if score < best_score:
+			best_score = score
+			best = a
+	return best
+
+
+## Superfície do topo da escada (onde se pisa ao sair dela).
+func _ladder_top(a: Area2D) -> float:
+	var cs := a.get_child(0) as CollisionShape2D
+	if cs and cs.shape is RectangleShape2D:
+		return a.global_position.y + cs.position.y - (cs.shape as RectangleShape2D).size.y / 2.0 + 4.0
+	return a.global_position.y
+
+
+func _start_climb(lad: Area2D, dir: int) -> void:
+	_climb_ladder = lad
+	_climb_dir = dir
+	global_position.x = lad.global_position.x
+	velocity = Vector2.ZERO
+	if dir > 0:
+		# Descendo: atravessa a passarela de mão única (sem colisão até a base).
+		_saved_mask = collision_mask
+		collision_mask = 0
+
+
+func _do_climb() -> void:
+	var lad := _climb_ladder
+	global_position.x = lad.global_position.x
+	velocity = Vector2(0.0, _climb_dir * climb_speed)
+	if _climb_dir < 0 and global_position.y <= _ladder_top(lad) + 2.0:
+		# Chegou em cima: impulso para passar da borda e pisar na plataforma.
+		velocity = Vector2(get_facing_direction().x * 40.0, -140.0)
+		_climb_ladder = null
+		_jump_cooldown = 0.4
+	elif _climb_dir > 0 and global_position.y >= lad.global_position.y - 2.0:
+		global_position.y = lad.global_position.y - 1.0
+		collision_mask = _saved_mask
+		velocity = Vector2.ZERO
+		_climb_ladder = null
+
+
+func is_climbing() -> bool:
+	return _climb_ladder != null
+

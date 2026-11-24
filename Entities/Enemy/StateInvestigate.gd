@@ -19,7 +19,8 @@ func enter() -> void:
 func physics_update(delta: float) -> void:
 	elapsed += delta
 	var dist_x: float = enemy.target_noise_pos.x - enemy.global_position.x
-	if looking > 0.0 or absf(dist_x) < 24.0 or elapsed >= give_up_time:
+	var dist_y: float = enemy.target_noise_pos.y - enemy.global_position.y
+	if (looking > 0.0 or (absf(dist_x) < 24.0 and absf(dist_y) < 64.0) or elapsed >= give_up_time) and not enemy.is_climbing():
 		looking += delta
 		enemy.velocity.x = move_toward(enemy.velocity.x, 0, enemy.move_speed)
 		# Olha para um lado e para o outro.
@@ -31,7 +32,5 @@ func physics_update(delta: float) -> void:
 		if looking >= look_time:
 			state_machine.transition_to("Patrol")
 	else:
-		var dir_x := signf(dist_x)
-		enemy.update_facing(dir_x)
-		enemy.velocity.x = dir_x * enemy.move_speed
+		enemy.chase_move(enemy.target_noise_pos, enemy.move_speed)
 	enemy.move_and_slide()

@@ -69,12 +69,12 @@ func _setup_cyberpunk_styles() -> void:
 		label_values.add_theme_font_override("font", custom_font)
 
 	label_title.add_theme_color_override("font_color", Color("#00f0ff"))
-	label_title.add_theme_font_size_override("font_size", 11)
+	label_title.add_theme_font_size_override("font_size", 18)  # legível em 1080p (antes 11)
 
-	label_status.add_theme_font_size_override("font_size", 10)
+	label_status.add_theme_font_size_override("font_size", 16)
 	
 	label_values.add_theme_color_override("font_color", Color("#8a93b0"))
-	label_values.add_theme_font_size_override("font_size", 10)
+	label_values.add_theme_font_size_override("font_size", 16)
 
 func _on_defense_changed(current: float, max_val: float) -> void:
 	update_defense_bar(current, max_val, true)

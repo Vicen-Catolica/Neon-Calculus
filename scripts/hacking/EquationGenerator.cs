@@ -20,7 +20,7 @@ public sealed record Equation(
 public sealed class EquationGenerator
 {
     public const int MinStage = 1;
-    public const int MaxStage = 4;
+    public const int MaxStage = 5;
     private const int MaxAttempts = 50;
 
     private readonly Random _rng;
@@ -31,7 +31,7 @@ public sealed class EquationGenerator
 
     public EquationGenerator(Random rng) => _rng = rng;
 
-    /// <summary>Gera uma equação válida. Stage fora de 1..4 é ajustado; subTopic != 0 vira 1.</summary>
+    /// <summary>Gera uma equação válida. Stage fora de 1..5 é ajustado; subTopic != 0 vira 1.</summary>
     public Equation Generate(int stage, int subTopic)
     {
         stage = Math.Clamp(stage, MinStage, MaxStage);
@@ -54,7 +54,9 @@ public sealed class EquationGenerator
         (3, 0) => RuleOfThree(),
         (3, _) => RectangleArea(),
         (4, 0) => Distributive(),
-        _ => TriangleAngles(),
+        (4, _) => TriangleAngles(),
+        (5, 0) => BothSides(),
+        _ => BothSidesWithParentheses(),
     };
 
     private Equation AddSub()
@@ -129,6 +131,38 @@ public sealed class EquationGenerator
             P(("ParamAngA", angA), ("ParamAngB", angB)));
     }
 
+    /// <summary>Nível 5 (Núcleo, "lógica circular"): x dos dois lados. ax + b = cx + d, a &gt; c.</summary>
+    private Equation BothSides()
+    {
+        int a = _rng.Next(3, 8);
+        int c = _rng.Next(1, a);
+        int solution = _rng.Next(2, 11);
+        int b = _rng.Next(1, 10) * (_rng.Next(2) == 0 ? 1 : -1);
+        int d = (a - c) * solution + b;
+        return new Equation(5, 0, "x DOS DOIS LADOS", $"{Side(a, b)} = {Side(c, d)}", solution,
+            P(("ParamA", a), ("ParamB", b), ("ParamC", c), ("ParamD", d)));
+    }
+
+    /// <summary>Nível 5 com parênteses: k(x + m) = cx + n, k &gt; c.</summary>
+    private Equation BothSidesWithParentheses()
+    {
+        int k = _rng.Next(2, 5);
+        int m = _rng.Next(1, 7);
+        int c = _rng.Next(1, k);
+        int solution = _rng.Next(2, 11);
+        int n = (k - c) * solution + k * m;
+        return new Equation(5, 1, "x DOS DOIS LADOS (COM PARÊNTESES)", $"{k}(x + {m}) = {Side(c, n)}", solution,
+            P(("ParamK", k), ("ParamM", m), ("ParamC", c), ("ParamN", n)));
+    }
+
+    /// <summary>"coef·x ± num" escrito como na lousa: "x" para 1, sem "+ 0".</summary>
+    private static string Side(int coef, int num)
+    {
+        string x = coef == 1 ? "x" : $"{coef}x";
+        if (num == 0) return x;
+        return num > 0 ? $"{x} + {num}" : $"{x} - {-num}";
+    }
+
     private static IReadOnlyDictionary<string, int> P(params (string Key, int Value)[] items) =>
         items.ToDictionary(i => i.Key, i => i.Value);
 }
@@ -158,6 +192,10 @@ public static class EquationValidator
                 (3, 1) => p["ParamAltura"] > 0 && p["ParamAltura"] * x == p["ParamArea"],
                 (4, 0) => p["ParamK"] >= 2 && p["ParamK"] * (x + p["ParamOffset"]) == p["ParamTotal"],
                 (4, 1) => p["ParamAngA"] > 0 && p["ParamAngB"] > 0 && p["ParamAngA"] + p["ParamAngB"] + x == 180,
+                (5, 0) => p["ParamA"] > p["ParamC"] && p["ParamC"] >= 1 && p["ParamB"] != 0
+                          && p["ParamA"] * x + p["ParamB"] == p["ParamC"] * x + p["ParamD"],
+                (5, 1) => p["ParamK"] > p["ParamC"] && p["ParamC"] >= 1 && p["ParamM"] > 0
+                          && p["ParamK"] * (x + p["ParamM"]) == p["ParamC"] * x + p["ParamN"],
                 _ => false,
             };
         }

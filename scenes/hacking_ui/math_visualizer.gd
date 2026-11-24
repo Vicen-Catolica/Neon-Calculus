@@ -38,24 +38,20 @@ func _draw() -> void:
 	
 	_draw_cyberpunk_hud_frame(draw_size)
 	
+	# Equações (níveis 1, 2, 4.0 e 5): balança em equilíbrio. Geometria e
+	# proporção (3 e 4.1) continuam com o desenho da figura.
+	var sides := scale_sides()
+	if not sides.is_empty():
+		_draw_balance(draw_size, font, sides[0], sides[1])
+		return
 	match current_stage:
-		1:
-			if current_subtopic == 0:
-				_draw_clean_number_line(center, font)
-			else:
-				_draw_clean_algebra_blocks(center, font)
-		2:
-			_draw_clean_equation_balance(center, font)
 		3:
 			if current_subtopic == 0:
 				_draw_clean_ratio_cross(center, font)
 			else:
 				_draw_clean_geometry_rectangle(center, font)
 		4:
-			if current_subtopic == 0:
-				_draw_clean_distributive_blocks(center, font)
-			else:
-				_draw_clean_triangle(center, font)
+			_draw_clean_triangle(center, font)
 
 # --- ELEMENTOS VISUAIS DE HUD CYBERPUNK ---
 func _draw_cyberpunk_hud_frame(draw_size: Vector2) -> void:
@@ -80,81 +76,6 @@ func _draw_cyberpunk_hud_frame(draw_size: Vector2) -> void:
 	
 	draw_line(Vector2(draw_size.x, draw_size.y), Vector2(draw_size.x - bracket_size, draw_size.y), corner_color, thick)
 	draw_line(Vector2(draw_size.x, draw_size.y), Vector2(draw_size.x, draw_size.y - bracket_size), corner_color, thick)
-
-# --- STAGE 1 (TEMA 0): RETA NUMÉRICA ---
-func _draw_clean_number_line(center: Vector2, font: Font) -> void:
-	var a: int = int(eq_data.get("ParamA", 3))
-	var res: int = int(eq_data.get("ParamRes", 10))
-	var line_y: float = center.y
-	
-	draw_line(Vector2(center.x - 100, line_y), Vector2(center.x + 100, line_y), COLOR_CYAN, 2.0, true)
-	
-	var step_px: float = clamp(float(a) * 8.0, -70.0, 70.0)
-	if abs(step_px) < 15.0: step_px = 25.0 * (1.0 if a >= 0 else -1.0)
-	
-	var start_x: float = center.x - (step_px / 2.0)
-	var end_x: float = center.x + (step_px / 2.0)
-	
-	draw_line(Vector2(start_x, line_y - 12), Vector2(end_x, line_y - 12), COLOR_YELLOW, 2.0, true)
-	var dir: float = 1.0 if step_px >= 0 else -1.0
-	draw_line(Vector2(end_x, line_y - 12), Vector2(end_x - (6 * dir), line_y - 16), COLOR_YELLOW, 2.0, true)
-	draw_line(Vector2(end_x, line_y - 12), Vector2(end_x - (6 * dir), line_y - 8), COLOR_YELLOW, 2.0, true)
-	
-	# rótulo do salto: "+a" ou "-|a|"
-	var jump := ("+" if a >= 0 else "-") + str(abs(a))
-	draw_string(font, Vector2(minf(start_x, end_x) - 10, line_y - 20), jump, HORIZONTAL_ALIGNMENT_CENTER, absf(end_x - start_x) + 20, 13, COLOR_YELLOW)
-	draw_string(font, Vector2(start_x - 10, line_y + 18), "x", HORIZONTAL_ALIGNMENT_CENTER, 20, 13, COLOR_YELLOW)
-	draw_string(font, Vector2(end_x - 10, line_y + 18), str(res), HORIZONTAL_ALIGNMENT_CENTER, 20, 13, COLOR_GREEN)
-
-# --- STAGE 1 (TEMA 1): BLOCOS DE ÁLGEBRA ---
-func _draw_clean_algebra_blocks(center: Vector2, font: Font) -> void:
-	var count: int = int(clamp(float(eq_data.get("ParamA", 3)), 2.0, 5.0))
-	var res: int = int(eq_data.get("ParamRes", 15))
-	
-	var box_w: float = 32.0
-	var total_w: float = count * (box_w + 6.0)
-	var start_x: float = center.x - (total_w / 2.0) - 20.0
-	
-	for i in range(count):
-		var box_rect := Rect2(start_x + (i * (box_w + 6.0)), center.y - 14, box_w, 28)
-		draw_rect(box_rect, COLOR_CYAN, false, 2.0)
-		draw_string(font, box_rect.position + Vector2(11, 19), "x", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, COLOR_CYAN)
-	
-	draw_string(font, Vector2(start_x + total_w + 10, center.y + 4), "=  " + str(res), HORIZONTAL_ALIGNMENT_LEFT, -1, 16, COLOR_GREEN)
-
-# --- STAGE 2: EQUAÇÃO DO 1º GRAU (MODELO DE BARRAS / TAPE MODEL) ---
-# Duas barras do mesmo tamanho = os dois lados da equação.
-#  ax + b = c  ->  [   c   ]  sobre  [ ax ][ b ]
-#  ax - b = c  ->  [  ax   ]  sobre  [ c ][ b ]   (ax é o maior: c + b)
-func _draw_clean_equation_balance(center: Vector2, font: Font) -> void:
-	var mult: int = int(eq_data.get("ParamMult", 2))
-	var b_val: int = int(eq_data.get("ParamB", 0))
-	var total: int = int(eq_data.get("ParamTotal", 0))
-	var abs_b: int = abs(b_val)
-
-	var total_w: float = 220.0
-	var bar_h: float = 28.0
-	var start_x: float = center.x - (total_w / 2.0)
-	var top_y: float = center.y - 28.0
-	var bot_y: float = center.y + 6.0
-
-	var whole: float = float(total if b_val >= 0 else total + abs_b)
-	var w_b: float = clamp(total_w * float(abs_b) / maxf(1.0, whole), 40.0, 90.0)
-	var w_rest: float = total_w - w_b
-
-	if b_val >= 0:
-		_bar(font, Rect2(start_x, top_y, total_w, bar_h), str(total), COLOR_GREEN)
-		_bar(font, Rect2(start_x, bot_y, w_rest, bar_h), str(mult) + "x", COLOR_CYAN)
-		_bar(font, Rect2(start_x + w_rest, bot_y, w_b, bar_h), "+" + str(abs_b), COLOR_YELLOW)
-	else:
-		_bar(font, Rect2(start_x, top_y, total_w, bar_h), str(mult) + "x", COLOR_CYAN)
-		_bar(font, Rect2(start_x, bot_y, w_rest, bar_h), str(total), COLOR_GREEN)
-		_bar(font, Rect2(start_x + w_rest, bot_y, w_b, bar_h), str(abs_b), COLOR_YELLOW)
-
-
-func _bar(font: Font, r: Rect2, label: String, color: Color) -> void:
-	draw_rect(r, color, false, 2.0)
-	draw_string(font, Vector2(r.position.x, r.position.y + 19), label, HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 14, color)
 
 # --- STAGE 3 (TEMA 0): REGRA DE TRÊS ---
 # x / base = num / den, desenhado como duas frações (a multiplicação cruzada
@@ -211,28 +132,6 @@ func _draw_clean_geometry_rectangle(center: Vector2, font: Font) -> void:
 	var alt_x: float = rect.position.x - 105.0
 	draw_string(font, Vector2(alt_x, center.y + 5.0), alt_text, HORIZONTAL_ALIGNMENT_RIGHT, 95.0, 12, COLOR_YELLOW)
 
-# --- STAGE 4 (TEMA 0): PROPRIEDADE DISTRIBUTIVA ---
-func _draw_clean_distributive_blocks(center: Vector2, font: Font) -> void:
-	var k: int = int(eq_data.get("ParamK", 3))
-	var offset_val: int = int(eq_data.get("ParamOffset", 4))
-	var total: int = int(eq_data.get("ParamTotal", 24))
-	var mult_offset: int = k * offset_val
-	
-	var ratio: float = float(offset_val) / float(max(1, offset_val + 5))
-	var total_w: float = 140.0
-	var w_a: float = clamp(total_w * (1.0 - ratio), 45.0, 95.0)
-	var w_b: float = total_w - w_a
-	
-	var rect_a := Rect2(center.x - (total_w / 2.0), center.y - 18, w_a, 36)
-	var rect_b := Rect2(center.x - (total_w / 2.0) + w_a, center.y - 18, w_b, 36)
-	
-	draw_rect(rect_a, COLOR_CYAN, false, 2.0)
-	draw_rect(rect_b, COLOR_GREEN, false, 2.0)
-	
-	draw_string(font, rect_a.position + Vector2(10, 22), str(k) + "·x", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, COLOR_CYAN)
-	draw_string(font, rect_b.position + Vector2(8, 22), "+" + str(mult_offset), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, COLOR_GREEN)
-	draw_string(font, Vector2(center.x - 50, center.y + 32), "= " + str(total), HORIZONTAL_ALIGNMENT_CENTER, 100, 13, COLOR_YELLOW)
-
 # --- STAGE 4 (TEMA 1): ÂNGULOS DO TRIÂNGULO ---
 func _draw_clean_triangle(center: Vector2, font: Font) -> void:
 	var ang_a: float = float(eq_data.get("ParamAngA", 50))
@@ -282,3 +181,175 @@ func _draw_clean_triangle(center: Vector2, font: Font) -> void:
 	draw_string(font, tri_left + Vector2(-38, 4), str(int(ang_a)) + "°", HORIZONTAL_ALIGNMENT_RIGHT, 32, 12, COLOR_YELLOW)
 	draw_string(font, tri_right + Vector2(6, 4), str(int(ang_b)) + "°", HORIZONTAL_ALIGNMENT_LEFT, 32, 12, COLOR_YELLOW)
 	draw_string(font, tri_top + Vector2(-20, -8), "x°", HORIZONTAL_ALIGNMENT_CENTER, 40, 13, COLOR_GREEN)
+
+
+# --- BALANÇA EM EQUILÍBRIO (equações) -----------------------------------------
+# Cada prato é um lado da equação: caixas "x" (ciano) e pesos com número
+# (amarelo; vermelho quando é para tirar). k(x + a) vira k grupos [x a].
+# A ideia que a criança precisa ver: a balança está equilibrada, e tirar (ou
+# pôr) o mesmo dos dois pratos mantém o equilíbrio.
+
+const COLOR_RED := Color("#ff4d6d")
+const MAX_BOXES := 6
+
+## Itens de cada prato: [esquerdo, direito]; vazio se o tipo não usa balança.
+## Item: {"t": "x", "n": quantas caixas} | {"t": "n", "v": número} |
+##       {"t": "g", "k": vezes, "a": número}  (k grupos de x + a)
+func scale_sides() -> Array:
+	match current_stage:
+		1:
+			var a := int(eq_data.get("ParamA", 0))
+			var res := int(eq_data.get("ParamRes", 0))
+			if current_subtopic == 0:
+				return [[{"t": "x", "n": 1}, {"t": "n", "v": a}], [{"t": "n", "v": res}]]
+			return [[{"t": "x", "n": a}], [{"t": "n", "v": res}]]
+		2:
+			return [[{"t": "x", "n": int(eq_data.get("ParamMult", 1))}, {"t": "n", "v": int(eq_data.get("ParamB", 0))}],
+				[{"t": "n", "v": int(eq_data.get("ParamTotal", 0))}]]
+		4:
+			if current_subtopic == 0:
+				return [[{"t": "g", "k": int(eq_data.get("ParamK", 2)), "a": int(eq_data.get("ParamOffset", 0))}],
+					[{"t": "n", "v": int(eq_data.get("ParamTotal", 0))}]]
+		5:
+			var c := int(eq_data.get("ParamC", 1))
+			if current_subtopic == 1:
+				return [[{"t": "g", "k": int(eq_data.get("ParamK", 2)), "a": int(eq_data.get("ParamM", 1))}],
+					[{"t": "x", "n": c}, {"t": "n", "v": int(eq_data.get("ParamN", 0))}]]
+			return [[{"t": "x", "n": int(eq_data.get("ParamA", 2))}, {"t": "n", "v": int(eq_data.get("ParamB", 0))}],
+				[{"t": "x", "n": c}, {"t": "n", "v": int(eq_data.get("ParamD", 0))}]]
+	return []
+
+
+func _draw_balance(draw_size: Vector2, font: Font, left: Array, right: Array) -> void:
+	var cx := draw_size.x / 2.0
+	var beam_y := 30.0
+	var pan_y := draw_size.y - 34.0
+	var half := minf(draw_size.x * 0.27, 170.0)
+	# legenda
+	draw_string(font, Vector2(0, 16), "BALANÇA EM EQUILÍBRIO: os dois lados valem o mesmo", HORIZONTAL_ALIGNMENT_CENTER, draw_size.x, 11, COLOR_MUTED)
+	# coluna e base
+	draw_line(Vector2(cx, beam_y), Vector2(cx, draw_size.y - 10), COLOR_MUTED, 3.0)
+	draw_colored_polygon(PackedVector2Array([Vector2(cx - 22, draw_size.y - 4), Vector2(cx + 22, draw_size.y - 4), Vector2(cx, draw_size.y - 18)]), Color(COLOR_MUTED, 0.8))
+	# travessão
+	draw_line(Vector2(cx - half, beam_y), Vector2(cx + half, beam_y), COLOR_CYAN, 3.0)
+	draw_circle(Vector2(cx, beam_y), 4.0, COLOR_YELLOW)
+	# "=" no meio, para ligar a balança à equação
+	draw_string(font, Vector2(cx - 20, pan_y - 10), "=", HORIZONTAL_ALIGNMENT_CENTER, 40, 22, COLOR_YELLOW)
+	for side in [-1.0, 1.0]:
+		var px: float = cx + half * side
+		var pan_w := half * 1.15
+		# cordas e prato
+		draw_line(Vector2(px, beam_y), Vector2(px - pan_w / 2.0, pan_y), Color(COLOR_MUTED, 0.9), 1.0)
+		draw_line(Vector2(px, beam_y), Vector2(px + pan_w / 2.0, pan_y), Color(COLOR_MUTED, 0.9), 1.0)
+		draw_line(Vector2(px - pan_w / 2.0 - 6, pan_y), Vector2(px + pan_w / 2.0 + 6, pan_y), COLOR_CYAN, 3.0)
+		draw_line(Vector2(px - pan_w / 2.0 + 6, pan_y + 6), Vector2(px + pan_w / 2.0 - 6, pan_y + 6), Color(COLOR_CYAN, 0.5), 2.0)
+		var items: Array = left if side < 0 else right
+		_draw_pan_items(font, items, px, pan_y - 2.0, pan_w)
+		# o lado da equação escrito embaixo do prato
+		draw_string(font, Vector2(px - pan_w / 2.0, pan_y + 24), side_label(items), HORIZONTAL_ALIGNMENT_CENTER, pan_w, 14, COLOR_GREEN if side < 0 else COLOR_YELLOW)
+
+
+## Texto do lado (ex.: "4x - 2", "3(x + 4)", "22").
+func side_label(items: Array) -> String:
+	var parts: Array[String] = []
+	for it in items:
+		match String(it["t"]):
+			"x":
+				var n := int(it["n"])
+				parts.append("x" if n == 1 else "%dx" % n)
+			"g":
+				var a := int(it["a"])
+				parts.append("%d(x %s %d)" % [int(it["k"]), "+" if a >= 0 else "-", absi(a)])
+			"n":
+				var v := int(it["v"])
+				if v == 0 and not parts.is_empty():
+					continue
+				if parts.is_empty():
+					parts.append(str(v))
+				else:
+					parts.append(("+ %d" if v > 0 else "- %d") % absi(v))
+	return " ".join(parts)
+
+
+func _item_width(it: Dictionary) -> float:
+	match String(it["t"]):
+		"x":
+			var n := int(it["n"])
+			return 30.0 if n > MAX_BOXES else n * 26.0 - 4.0
+		"g":
+			var k := int(it["k"])
+			return 50.0 * mini(k, 4) + (30.0 if k > 4 else 0.0)
+		"n":
+			return 0.0 if int(it["v"]) == 0 else 40.0
+	return 0.0
+
+
+func _draw_pan_items(font: Font, items: Array, px: float, base_y: float, pan_w: float) -> void:
+	var total := 0.0
+	var shown: Array = []
+	for it in items:
+		var w := _item_width(it)
+		if w > 0.0:
+			shown.append(it)
+			total += w + 8.0
+	total -= 8.0
+	var x := px - total / 2.0
+	for it in shown:
+		var w := _item_width(it)
+		match String(it["t"]):
+			"x":
+				_draw_x_boxes(font, int(it["n"]), x, base_y)
+			"n":
+				_draw_weight(font, int(it["v"]), x, base_y)
+			"g":
+				_draw_groups(font, int(it["k"]), int(it["a"]), x, base_y)
+		x += w + 8.0
+
+
+func _draw_x_boxes(font: Font, n: int, x: float, base_y: float) -> void:
+	if n > MAX_BOXES:
+		# muitas caixas: uma só, com a quantidade
+		var r := Rect2(x, base_y - 30, 30, 30)
+		draw_rect(r, Color(COLOR_CYAN, 0.18))
+		draw_rect(r, COLOR_CYAN, false, 2.0)
+		draw_string(font, Vector2(x, base_y - 9), "%dx" % n, HORIZONTAL_ALIGNMENT_CENTER, 30, 12, COLOR_CYAN)
+		return
+	for i in n:
+		var r := Rect2(x + i * 26.0, base_y - 22, 22, 22)
+		draw_rect(r, Color(COLOR_CYAN, 0.18))
+		draw_rect(r, COLOR_CYAN, false, 2.0)
+		draw_string(font, Vector2(r.position.x, base_y - 6), "x", HORIZONTAL_ALIGNMENT_CENTER, 22, 14, COLOR_CYAN)
+
+
+## Peso com o número (trapézio, como um peso de balança). Negativo: vermelho e
+## com "-" (é o que está sendo tirado daquele lado).
+func _draw_weight(font: Font, v: int, x: float, base_y: float) -> void:
+	var col := COLOR_YELLOW if v > 0 else COLOR_RED
+	var w := 40.0
+	var h := 26.0
+	var pts := PackedVector2Array([Vector2(x, base_y), Vector2(x + w, base_y), Vector2(x + w - 6, base_y - h), Vector2(x + 6, base_y - h)])
+	draw_colored_polygon(pts, Color(col, 0.2))
+	pts.append(pts[0])
+	draw_polyline(pts, col, 2.0)
+	draw_arc(Vector2(x + w / 2.0, base_y - h - 3), 5.0, PI, TAU, 8, col, 2.0)
+	draw_string(font, Vector2(x, base_y - 7), (str(v) if v > 0 else "-" + str(-v)), HORIZONTAL_ALIGNMENT_CENTER, w, 13, col)
+
+
+## k grupos [x a] (propriedade distributiva): cada grupo numa bandeja.
+func _draw_groups(font: Font, k: int, a: int, x: float, base_y: float) -> void:
+	var shown := mini(k, 4)
+	var gw := 50.0
+	for i in shown:
+		var gx := x + i * gw
+		var tray := Rect2(gx, base_y - 30, gw - 6, 30)
+		draw_rect(tray, Color(COLOR_GREEN, 0.07))
+		draw_rect(tray, Color(COLOR_GREEN, 0.7), false, 1.0)
+		var r := Rect2(gx + 3, base_y - 23, 18, 18)
+		draw_rect(r, Color(COLOR_CYAN, 0.18))
+		draw_rect(r, COLOR_CYAN, false, 2.0)
+		draw_string(font, Vector2(r.position.x, base_y - 9), "x", HORIZONTAL_ALIGNMENT_CENTER, 18, 11, COLOR_CYAN)
+		var col := COLOR_YELLOW if a >= 0 else COLOR_RED
+		draw_string(font, Vector2(gx + 22, base_y - 9), ("+" if a >= 0 else "-") + str(absi(a)), HORIZONTAL_ALIGNMENT_CENTER, gw - 28, 11, col)
+	if k > 4:
+		draw_string(font, Vector2(x + shown * gw, base_y - 9), "×%d" % k, HORIZONTAL_ALIGNMENT_LEFT, 40, 13, COLOR_GREEN)
+

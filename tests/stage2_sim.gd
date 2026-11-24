@@ -109,6 +109,7 @@ func _ready() -> void:
 	check("C: andando não vence a esteira", p.global_position.x < 3050.0, pos())
 	hv0.debug_hack(belt.get_node("Hackable"), true); await step(5)
 	check("C: hack para a esteira", not belt.running and not belt.can_be_hacked())
+	check("barra do hack na esteira", (belt.get_node("Hackable") as Hackable).time_left_ratio() > 0.9)
 	tp(3050, 100); await step(10)
 	await walk_right(120)
 	check("C: com a esteira parada dá para atravessar", p.global_position.x > 3200.0, pos())
@@ -154,6 +155,7 @@ func _ready() -> void:
 	check("válvula fechada pode ser hackeada", valve.can_be_hacked())
 	hv.debug_hack(valve.get_node("Hackable"), true); await step(5)
 	check("hack abre o vapor", valve.active and valve.is_blocking())
+	check("barra do hack na válvula", (valve.get_node("Hackable") as Hackable).time_left_ratio() > 0.9)
 	check("vapor tapa a visão do guarda", not guard.has_line_of_sight_to(p, p.get_aim_point()))
 	tp(1560, 16); await step(5)
 	check("dentro do vapor o jogador some", not guard.has_line_of_sight_to(p, p.get_aim_point()))
@@ -172,6 +174,22 @@ func _ready() -> void:
 	await step(int(valve.cooldown * 60.0) + 20)
 	check("válvula rearma depois do cooldown", valve.can_be_hacked())
 
+	# Drone do chão (playtest à mão: só via quem estava na esteira): vê o chão à frente.
+	var fdrone := lvl.get_node("Drones/FloorDrone") as PatrolDrone
+	fdrone.global_position = Vector2(2300, -60)
+	fdrone.facing = 1.0
+	tp(2440, 16); await step(5)
+	check("drone do chão vê o jogador no chão à frente", fdrone.sees_player())
+	tp(2300 + 400, 16); await step(5)
+	check("drone do chão não vê além do alcance", not fdrone.sees_player())
+	tp(2150, 16); await step(5)
+	check("drone do chão não vê atrás dele", not fdrone.sees_player())
+	var pdrone := lvl.get_node("Drones/PitDrone") as PatrolDrone
+	pdrone.global_position = Vector2(2780, -30)
+	pdrone.facing = 1.0
+	tp(2900, 16); await step(5)
+	check("drone do fosso vê o jogador fora da esteira (na beira)", pdrone.sees_player() or absf(2900.0 - 2780.0) > pdrone.vision_range)
+
 	# Drone do fosso: vê, dispara alarme, e o hack o reinicia.
 	var drone := lvl.get_node("Drones/PitDrone") as PatrolDrone
 	var alarms := [0]
@@ -187,9 +205,21 @@ func _ready() -> void:
 	check("drone vê o jogador no fosso", drone.mode == PatrolDrone.Mode.ALERT, PatrolDrone.Mode.keys()[drone.mode])
 	await step(90)
 	check("drone dispara o alarme", alarms[0] > 0, "alarmes=%d" % alarms[0])
+	# Em alerta, segue o jogador (antes parava no ar).
+	var x_before := drone.global_position.x
+	for i in 100:  # anda para a direita a ~120 px/s
+		tp(2945 + i * 2, 100)
+		await step(1)
+	await step(30)
+	check("drone em alerta segue o jogador", drone.global_position.x > x_before + 100.0 and drone.mode == PatrolDrone.Mode.ALERT,
+		"%.0f -> %.0f" % [x_before, drone.global_position.x])
 	hv.debug_hack(drone.get_node("Hackable"), true); await step(5)
 	check("hack reinicia o drone", drone.mode == PatrolDrone.Mode.REBOOT and not drone.sees_player())
 	check("drone reiniciando não aceita novo hack", not drone.can_be_hacked())
+	var dh := drone.get_node("Hackable") as Hackable
+	var r0 := dh.time_left_ratio()
+	await step(60)
+	check("barra do hack no drone aparece e esvazia", r0 > 0.9 and dh.time_left_ratio() < r0 - 0.05, "%.2f -> %.2f" % [r0, dh.time_left_ratio()])
 	var x_reboot := drone.global_position.x
 	await step(60)
 	check("drone parado durante o reboot", absf(drone.global_position.x - x_reboot) < 0.5)

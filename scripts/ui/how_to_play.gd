@@ -17,7 +17,8 @@ Você é [color=#00f0ff]Eduardo[/color], ex-analista da OmniCorp. Suba a mega-to
 
 [color=#00f0ff][font_size=26]CADA ANDAR[/font_size][/color]
 • Chegue à saída do andar (uma escada, um elevador...).
-• Opcional: há prisioneiros da OmniCorp atrás de campos de força. Resgatar o [color=#39ff14]Dr. Vance[/color] (Lab 07, P&D) ativa o Protocolo Vance: +15% de tempo nos hacks e a SINE ajuda já no 1º erro.
+• Opcional: há prisioneiros da OmniCorp atrás de campos de força. Libertar quem está preso pode render um aliado — e uma ajuda e tanto mais para cima.
+• No topo da torre, o [color=#ff6a1a]Duelo de Paradoxo[/color]: hackeie os 3 Nodos de Vigilância enquanto desvia dos ataques do núcleo (cada um avisa antes e tem uma brecha). Errar a conta só faz o núcleo recuperar a camada; o que derruba é a Defesa Neural zerar. No fim, a última "equação" é diferente de todas: pense antes de digitar.
 • Os guardas atiram com taser: se a sua [b]Defesa Neural[/b] zerar, a infiltração falha e você volta ao início do andar (o jogo salva sozinho em cada andar).
 
 [color=#00f0ff][font_size=26]CONTROLES[/font_size][/color]
@@ -42,7 +43,7 @@ Na visão hacker o tempo desacelera e tudo que pode ser hackeado fica em [color=
 • Resposta certa: o hack funciona.
 • Resposta errada: aparece o aviso em vermelho e você perde 3 segundos. Depois de 2 erros, a [color=#00f0ff]SINE[/color] mostra o passo a passo ao lado.
 • [color=#39ff14]Esc[/color] aborta o hack, mas a Axioma pode rastrear a conexão e soar o alarme (mais chance quanto mais cedo você desiste). No lockdown não dá para abortar.
-• Câmera: desliga  •  Porta: abre  •  Agente: distração no implante  •  Unidade Lógica: fica cega por 6 s  •  Luz neon: apaga  •  Quiosque: alarme falso que atrai guardas  •  Válvula: vapor que tapa a visão  •  Esteira: para  •  Drone: reinicia  •  Laser: desliga por alguns segundos
+• Câmera: desliga  •  Porta: abre  •  Agente: distração no implante  •  Unidade Lógica: fica cega por 6 s  •  Luz neon: apaga  •  Quiosque: alarme falso que atrai guardas  •  Válvula: vapor que tapa a visão  •  Esteira: para  •  Drone: reinicia  •  Laser: desliga por alguns segundos  •  Ponte de luz: aparece por 10 s
 
 [color=#00f0ff][font_size=26]FURTIVIDADE[/font_size][/color]
 • A barra sobre um guarda mostra o quanto ele já te viu; cheia, ele te persegue.
@@ -50,6 +51,7 @@ Na visão hacker o tempo desacelera e tudo que pode ser hackeado fica em [color=
 • [color=#ff6a1a]Variância[/color] (barra no canto superior direito): cada hack e cada alarme aumentam. Se encher, a Axioma manda a [b]Varredura de Rotina[/b], um laser que percorre a área.
 • [color=#ff2d55]Unidades Lógicas[/color] (ciborgues): não ouvem passos, não caem em distração e disparam o alerta quase na hora em que te veem. Só o hack as engana: o sistema visual apaga por alguns segundos.
 • [color=#ff2d55]Barreiras a laser[/color]: cruzar o feixe aceso dispara o alarme. Hackeie o emissor ou passe quando ele apagar (alguns ligam e desligam no ritmo; o feixe pisca antes de religar).
+• [color=#00f0ff]Pontes de luz[/color] (Núcleo): só existem ligadas. Hackeie o emissor ou espere a que pisca no ritmo. Cair no vazio te devolve à última plataforma, mas custa Defesa Neural.
 • [color=#ff2d55]Segurança máxima[/color]: nos laboratórios e áreas restritas os hacks têm menos tempo (o rodapé da tela de hack avisa).
 • [color=#ff2d55]Lockdown[/color]: um alarme em certas salas fecha as portas. Hackeie a porta de saída antes de o tempo acabar.
 • Terminais de dados ([color=#39ff14]F[/color]) contam a história de Nova Gödel."""

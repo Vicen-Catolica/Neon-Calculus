@@ -10,12 +10,15 @@ minimalista" (GDD §6); uma textura gerada por IA saía suja demais.
 - Contorno escuro de 1 px onde o tile encontra o vazio.
 - Topo andável: friso claro + filete de luz ciano.
 
-Uso (na raiz do projeto):  python3 tools/gen_rnd_tiles.py
-Saída: tools/art_src/rnd/plates.png (textura) e assets/tilesets/rnd/rnd_ground.png
+Uso (na raiz do projeto):
+  python3 tools/gen_rnd_tiles.py          # P&D (Fase 3)
+  python3 tools/gen_rnd_tiles.py core     # Núcleo (Fase 4): painéis escuros, friso laranja
+Saída: tools/art_src/<tema>/plates.png (textura) e assets/tilesets/<tema>/<tema>_ground.png
 (+ .tres copiado do das favelas, só com a textura trocada).
 """
 import os
 import random
+import sys
 from collections import deque
 
 import numpy as np
@@ -153,12 +156,31 @@ def build(texture_path: str) -> None:
     img.save(os.path.join(OUT_DIR, NAME + ".png"))
     img.resize((img.width * 4, img.height * 4), Image.NEAREST).save(
         os.path.join(ART_SRC, NAME + "_preview_x4.png"))
+    theme = os.path.basename(OUT_DIR)
     tres = open(SRC_TRES, encoding="utf-8").read()
     tres = tres.replace("res://assets/tilesets/slums/slums_ground.png",
-                        "res://assets/tilesets/rnd/%s.png" % NAME)
+                        "res://assets/tilesets/%s/%s.png" % (theme, NAME))
     open(os.path.join(OUT_DIR, NAME + ".tres"), "w", encoding="utf-8").write(tres)
     print("ok:", os.path.join(OUT_DIR, NAME + ".png"), img.size)
 
 
+## Tema do Núcleo (Fase 4): o território da Axioma é escuro, com luz laranja.
+CORE = {
+    "ART_SRC": os.path.join(ROOT, "tools/art_src/core"),
+    "OUT_DIR": os.path.join(ROOT, "assets/tilesets/core"),
+    "NAME": "core_ground",
+    "TRIM": (96, 112, 140),
+    "CYAN": (255, 106, 26),
+    "CYAN_DIM": (130, 52, 20),
+    "DEEP": 0.75,
+    "PANEL": (42, 48, 66),
+    "PANEL_HI": (66, 76, 100),
+    "PANEL_LO": (28, 32, 46),
+    "SEAM": (12, 14, 22),
+}
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 1 and sys.argv[1] == "core":
+        globals().update(CORE)
     build(make_plates())

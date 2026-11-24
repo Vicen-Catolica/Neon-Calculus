@@ -9,6 +9,9 @@ extends CanvasLayer
 ## relógio real, então não depende de Engine.time_scale.
 ## E / clique / F / Enter: completa a fala ou passa para a próxima. Esc: pula tudo.
 ## Ao terminar, marca o id como visto (vai para o save) e emite `finished`.
+## Falas podem ter "if_flag"/"unless_flag" (marcos da história, ex.: Vance).
+## Quando a Axioma fala, a tela ganha uma interferência vermelha (GDD §9: ela
+## se manifesta pelos monitores e alto-falantes).
 
 signal finished(dialogue_id: String)
 
@@ -16,6 +19,14 @@ const DIALOGUE_DIR := "res://data/dialogue/"
 const CHARS_PER_SEC := 55.0
 
 ## Nome exibido e cor de cada falante (GDD §8: ciano = SINE, vermelho/laranja = Axioma).
+## Retratos (PixelLab, tools/gen_core_art.py); sem arquivo, a caixa mostra a inicial.
+const PORTRAITS := {
+	"SINE": "res://assets/ui/portraits/sine.png",
+	"EDUARDO": "res://assets/ui/portraits/eduardo.png",
+	"AXIOMA": "res://assets/ui/portraits/axioma.png",
+	"VANCE": "res://assets/ui/portraits/vance.png",
+}
+
 const SPEAKERS := {
 	"SINE": ["S.I.N.E.", Color("00f0ff")],
 	"EDUARDO": ["EDUARDO", Color("e8eef2")],
@@ -24,7 +35,9 @@ const SPEAKERS := {
 }
 
 var _root: Control
+var _glitch: ColorRect
 var _portrait: Label
+var _portrait_tex: TextureRect
 var _portrait_box: PanelContainer
 var _portrait_style: StyleBoxFlat
 var _panel_style: StyleBoxFlat
@@ -52,11 +65,20 @@ func is_open() -> bool:
 	return _open
 
 
-## Roteiro pelo id, procurado em todos os JSON de data/dialogue/.
+## Roteiro pelo id, procurado em todos os JSON de data/dialogue/, já filtrado
+## pelos marcos da história do save.
 func lines_for(dialogue_id: String) -> Array:
 	if _cache.is_empty():
 		_load_all()
-	return _cache.get(dialogue_id, [])
+	return (_cache.get(dialogue_id, []) as Array).filter(_line_allowed)
+
+
+func _line_allowed(line: Dictionary) -> bool:
+	if line.has("if_flag") and not GameManager.has_flag(String(line["if_flag"])):
+		return false
+	if line.has("unless_flag") and GameManager.has_flag(String(line["unless_flag"])):
+		return false
+	return true
 
 
 func play_id(dialogue_id: String) -> bool:
@@ -124,6 +146,9 @@ func _show_line() -> void:
 	_name.add_theme_color_override("font_color", color)
 	_portrait.text = String(info[0]).left(1)
 	_portrait.add_theme_color_override("font_color", color)
+	var tex_path: String = PORTRAITS.get(who, "")
+	_portrait_tex.texture = load(tex_path) if tex_path != "" and ResourceLoader.exists(tex_path) else null
+	_portrait.visible = _portrait_tex.texture == null
 	_portrait_style.border_color = color
 	_panel_style.border_color = Color(color, 0.85)
 	_body.text = _current_text()
@@ -131,18 +156,40 @@ func _show_line() -> void:
 	_shown = 0.0
 	_last_ticks = Time.get_ticks_msec()
 	_hint.text = "[E] CONTINUAR    [ESC] PULAR" if _index < _lines.size() - 1 else "[E] FECHAR"
+	_glitch.visible = who == "AXIOMA"
 
 
 func _process(_delta: float) -> void:
 	if not _open:
 		return
 	var now := Time.get_ticks_msec()
+	if _glitch.visible:
+		_glitch.color.a = 0.05 + (0.08 if (now / 70) % 5 == 0 else 0.0)
+		_body.position.x = 2.0 if (now / 50) % 9 == 0 else 0.0
 	var dt := (now - _last_ticks) / 1000.0
 	_last_ticks = now
 	var total := _current_text().length()
 	if _shown < total:
+		var before := int(_shown)
 		_shown = minf(_shown + CHARS_PER_SEC * dt, total)
 		_body.visible_characters = -1 if _shown >= total else int(_shown)
+		_blip(before, int(_shown))
+
+
+## Voice blips (GDD §9): um bipe a cada BLIP_EVERY letras escritas, com o
+## timbre de quem fala (assets/sfx/blip_<falante>.wav).
+const BLIP_EVERY := 3
+
+
+func _blip(from_char: int, to_char: int) -> void:
+	var text := _current_text()
+	for i in range(from_char, mini(to_char, text.length())):
+		if i % BLIP_EVERY != 0 or text[i] == " ":
+			continue
+		var who := current_speaker().to_lower()
+		var sfx := "blip_" + who if Sfx.stream("blip_" + who) else "blip_ui"
+		Sfx.play(sfx, -8.0, 0.08)
+		return
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -161,6 +208,7 @@ func _finish() -> void:
 	var id := _id
 	_open = false
 	visible = false
+	_glitch.visible = false
 	_lines = []
 	_id = ""
 	if id != "":
@@ -189,6 +237,13 @@ func _build() -> void:
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_root)
+	_glitch = ColorRect.new()
+	_glitch.name = "AxiomaGlitch"
+	_glitch.color = Color(1.0, 0.15, 0.1, 0.06)
+	_glitch.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_glitch.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_glitch.visible = false
+	_root.add_child(_glitch)
 
 	var panel := PanelContainer.new()
 	_panel_style = StyleBoxFlat.new()
@@ -221,6 +276,13 @@ func _build() -> void:
 	_portrait.add_theme_font_override("font", font)
 	_portrait.add_theme_font_size_override("font_size", 72)
 	_portrait_box.add_child(_portrait)
+	_portrait_tex = TextureRect.new()
+	_portrait_tex.name = "PortraitArt"
+	_portrait_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_portrait_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_portrait_tex.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_portrait_tex.custom_minimum_size = Vector2(142, 142)
+	_portrait_box.add_child(_portrait_tex)
 
 	var col := VBoxContainer.new()
 	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL

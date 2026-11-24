@@ -70,6 +70,7 @@ func hide_and_watch(x: float, y: float) -> Array:
 
 func _ready() -> void:
 	lvl = load(LEVEL).instantiate()
+	lvl.get_node("LevelExit").set("next_stage", "")  # não troca de fase no meio
 	add_child(lvl)
 	p = lvl.get_node("Eduardo")
 	GameManager.alarm_raised.connect(func(_pp: Vector2) -> void: alarms[0] += 1)
