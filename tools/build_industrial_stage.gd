@@ -223,7 +223,7 @@ func _add_props(lvl: Node) -> void:
 			_hide_spot(spots, p[1], p[2], p[4], "Hide_%s_%d" % [p[0], n])
 	_wall_prop(props, SLUM_PROPS + "pipes_cable.png", Vector2(520, -150), "pipes_duct")
 	_wall_prop(props, PROP_DIR + "control_panel.png", Vector2(4590, -80), "control_panel_door")
-	_wall_prop(props, SLUM_PROPS + "ac_unit.png", Vector2(4300, -260), "ac_unit_wall")
+	_wall_prop(props, SLUM_PROPS + "ac_unit.png", Vector2(4400, -125), "ac_unit_wall")  # na parede da sala D, abaixo do teto
 	# D: racks de servidor — esconderijos escuros entre as câmeras
 	var racks := _holder(lvl, "ServerRacks")
 	for x in [3800.0, 4160.0, 4520.0]:

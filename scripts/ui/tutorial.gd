@@ -136,7 +136,7 @@ func _guide_hack(origin: Vector2) -> bool:
 		return false
 	var hack := _hackable_of(guard)
 	await _wait_free()
-	if not _player_ok():
+	if not _player_ok() or not is_instance_valid(guard):
 		return false
 
 	current_step = "show"
@@ -187,7 +187,9 @@ func _guide_hack(origin: Vector2) -> bool:
 
 ## Espera `cond` ficar verdadeira; desiste se o guia "morrer" (agente alertado,
 ## Eduardo morto, fase trocada).
-func _wait_until(cond: Callable, guard: Node) -> bool:
+## `guard` sem tipo: se a fase troca, ele já foi liberado e um parâmetro
+## tipado dá erro antes do `is_instance_valid`.
+func _wait_until(cond: Callable, guard) -> bool:
 	while not cond.call():
 		if not _guide_alive(guard):
 			return false
@@ -195,7 +197,7 @@ func _wait_until(cond: Callable, guard: Node) -> bool:
 	return true
 
 
-func _guide_alive(guard: Node) -> bool:
+func _guide_alive(guard) -> bool:
 	if not _player_ok() or not is_instance_valid(guard) or not guard.is_inside_tree():
 		return false
 	if guard.has_method("_current_state_name") and guard._current_state_name() == "maxalert":
@@ -340,7 +342,8 @@ func _run_hint(hint_name: String, origin: Vector2) -> void:
 	var nxt: String = cfg.get("next", "")
 	if nxt != "":
 		await get_tree().create_timer(0.6, false).timeout
-		_hint_queue.push_front([nxt, p.global_position])
+		if is_instance_valid(p) and p.is_inside_tree():  # saiu da fase nesse meio-tempo
+			_hint_queue.push_front([nxt, p.global_position])
 
 
 # --- Câmera ---------------------------------------------------------------
@@ -433,9 +436,13 @@ func _pretty(code: Key) -> String:
 func key_of(action: String) -> String:
 	if not InputMap.has_action(action):
 		return action
-	for ev in InputMap.action_get_events(action):
+	var events := InputMap.action_get_events(action)
+	# Tecla primeiro: remapear apaga a tecla antiga e põe a nova no fim da lista,
+	# depois do clique do mouse (senão a HUD mostrava "Mouse 1").
+	for ev in events:
 		if ev is InputEventKey:
 			return _key_name(ev as InputEventKey)
+	for ev in events:
 		if ev is InputEventMouseButton:
 			return "Mouse %d" % (ev as InputEventMouseButton).button_index
 	return action

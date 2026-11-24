@@ -95,6 +95,7 @@ func _label(parent: Node, font: Font, size: int, color: Color) -> Label:
 
 
 func show_entry(entry: Dictionary) -> void:
+	_hint.text = "[%s] FECHAR" % Tutorial.key_of("interact_world")  # tecla atual (remapeável)
 	_source.text = String(entry.get("source", "")).to_upper()
 	_title.text = String(entry.get("title", ""))
 	_author.text = "— " + String(entry.get("author", ""))

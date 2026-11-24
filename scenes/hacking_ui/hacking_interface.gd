@@ -260,6 +260,8 @@ func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 	if sine_at_start:
 		sine_at_start = false
 		_activate_ai_assistant()
+		# Sem isso a SINE "aparece do nada" (playtest): diz que é o prêmio do resgate.
+		_show_feedback("PROTOCOLO VANCE: a SINE já abriu o passo a passo ao lado.", Color("#ffaa00"))
 
 	if equation_label:
 		equation_label.text = str(eq_data.get("Expression", ""))
@@ -470,7 +472,7 @@ func _trigger_error(wrong_value: int = 0) -> void:
 	if paradox_mode:
 		msg = "x = %d? Então %d = %d. Falso: nenhum número funciona aqui. -%d s." % [wrong_value, wrong_value, wrong_value + 1, int(ERROR_PENALTY)]
 	if error_count >= sine_after_errors():
-		msg += "\nA SINE abriu o passo a passo ao lado."
+		msg += "\nA SINE abriu o passo a passo ao lado." + (" (Protocolo Vance: já no 1º erro)" if vance_protocol() and error_count == 1 else "")
 	_show_feedback(msg, FEEDBACK_ERR)
 	_flash_input(FEEDBACK_ERR)
 

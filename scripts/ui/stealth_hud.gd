@@ -103,7 +103,8 @@ func _process(delta: float) -> void:
 
 func _current_hint() -> String:
 	if GameManager.state == GameManager.State.HACK_VISION:
-		return "[MOUSE] MIRAR   [TAB] PRÓXIMO ALVO   [E / CLIQUE] HACKEAR"
+		return "[MOUSE] MIRAR   [%s] PRÓXIMO ALVO   [%s / CLIQUE] HACKEAR" % [
+			Tutorial.key_of("hack_next_target").to_upper(), Tutorial.key_of("hack_confirm")]
 	var player := get_tree().get_first_node_in_group("Player")
 	if player == null:
 		return ""

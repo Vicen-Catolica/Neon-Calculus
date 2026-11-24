@@ -236,6 +236,16 @@ func full_duel() -> void:
 	var top_h := duel.nodes[2].get_node("Hackable") as Hackable
 	check("Duelo: camada 3 é o nó de cima, com parênteses", duel.layer == 3 and top_h.get_difficulty() == Vector2i(5, 1))
 	check("Vance: SINE abre o passo a passo na última camada", top_h.sine_at_start)
+	ui.sine_at_start = true
+	ui.start_hacking(5, 1)
+	for i in 5:
+		await get_tree().process_frame
+	var fb := (ui.find_child("FeedbackLabel", true, false) as Label).text
+	check("Vance: a tela diz por que a SINE já abriu", ui.ai_assistant_panel.visible and "PROTOCOLO VANCE" in fb, fb)
+	ui.hack_timer.stop()
+	ui.hide()
+	get_tree().paused = false
+	get_tree().call_group("hud", "show_hud")
 	check("Vance: brecha maior nos pulsos", duel._pulse().gap_width_deg == ParadoxDuel.VANCE_PULSE_GAP)
 	check("Duelo: sem Varredura de Rotina na arena", get_tree().get_nodes_in_group("routine_sweep").is_empty())
 	check("Duelo: hack dos nós não mexe na variância", top_h.variance_cost == 0.0 and top_h.variance_fail_cost == 0.0)

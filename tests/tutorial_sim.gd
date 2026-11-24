@@ -164,9 +164,22 @@ func _ready() -> void:
 	g.physical_keycode = KEY_G
 	InputMap.action_add_event("camo", g)
 	check("tecla remapeada aparece na dica", "[G]" in Tutorial.hint_text("suit"), Tutorial.hint_text("suit"))
+	check("Como jogar mostra a tecla remapeada", "[color=#39ff14]G[/color]" in HowToPlay.with_keys(HowToPlay.TEXT))
 	InputMap.action_erase_events("camo")
 	for e in old_events:
 		InputMap.action_add_event("camo", e)
+	# Remapear como as Opções fazem: a tecla nova vai para o fim, depois do clique.
+	var conf_events := InputMap.action_get_events("hack_confirm")
+	for e in conf_events:
+		if e is InputEventKey:
+			InputMap.action_erase_event("hack_confirm", e)
+	var r := InputEventKey.new()
+	r.physical_keycode = KEY_R
+	InputMap.action_add_event("hack_confirm", r)
+	check("tecla remapeada vem antes do clique do mouse", Tutorial.key_of("hack_confirm") == "R", Tutorial.key_of("hack_confirm"))
+	InputMap.action_erase_events("hack_confirm")
+	for e in conf_events:
+		InputMap.action_add_event("hack_confirm", e)
 
 	# Saiu da fase com a dica aberta (ex.: Menu pela pausa): o aviso não fica preso.
 	GameManager.dialogues_seen.erase("hint_crouch")
@@ -181,6 +194,24 @@ func _ready() -> void:
 	check("trocou de cena com a dica aberta: o aviso some", Tutorial.current_hint == "" and Tutorial.banner_text() == "",
 		Tutorial.banner_text())
 	holder.add_child(p)
+	await frames(3)
+
+	# Saiu da fase no meio do guia do hack (o agente foi liberado): o guia encerra
+	# sem erro de script, em vez de travar com o aviso.
+	GameManager.dialogues_seen.erase("guide_hack")
+	p.global_position = Vector2(470, 16)
+	Tutorial.guide("hack", p.global_position)
+	for i in 240:
+		await get_tree().process_frame
+		if Dialogue.is_open():
+			break
+	await read_all()
+	await frames(4)
+	var was_vision := Tutorial.current_step == "vision"
+	guard.free()
+	await frames(5)
+	check("agente liberado no meio do guia: o guia encerra e o aviso some",
+		was_vision and Tutorial.current_guide == "" and Tutorial.banner_text() == "", "passo=%s" % Tutorial.current_step)
 
 	print("TUDO OK — 0 falha(s)" if fails == 0 else "%d FALHA(S)" % fails)
 	get_tree().quit(1 if fails > 0 else 0)

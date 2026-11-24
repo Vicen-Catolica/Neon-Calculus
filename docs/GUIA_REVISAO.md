@@ -162,7 +162,7 @@ Nada disto foi jogado com teclado e mouse, só por simulação. Vale passar por 
 - **Efeitos sonoros provisórios:** os sons (voice blips, taser, alerta, passos, hack…) são sintetizados por `tools/gen_sfx.py`. Para trocar por um som gravado, basta sobrescrever `assets/sfx/<nome>.wav` com o mesmo nome.
 - **Ciclos de Processamento / upgrades do traje** (WDD §10): fora do escopo.
 - **Build de Windows** (M5 do cronograma): não foi gerada nem testada.
-- **Dicas de tecla fixas no texto:** só o "Como jogar" e o "[N]" do Paradoxo ainda mostram as teclas padrão; as dicas do tutorial e os avisos da HUD (esconder, terminal, sonar, camuflagem, hackear, diálogo, lockdown) já usam a tecla configurada.
+- **Dicas de tecla fixas no texto:** só o "[N]" do Paradoxo (não é remapeável) e o "Enter"/"Esc" da tela de hack; o "Como jogar", as dicas do tutorial e os avisos da HUD já usam a tecla configurada.
 - **Arte ainda desenhada em código:** emissor de laser, cela, ponte de luz, núcleo e nós (funcionam e combinam com o estilo, mas não são pixel art desenhada).
 
 ---
@@ -299,4 +299,18 @@ Os avisos da HUD que tinham a tecla escrita fixa ("[F] ESCONDER", "SONAR [V]", "
 | `[A]`, `[Espaço]` em negrito caíam na fonte padrão | `bold_font` do aviso usa a mesma fonte da UI | `scripts/ui/tutorial.gd` |
 
 Não mexi: letras "apagando" nas placas (é o pisca-pisca proposital do neon) e `max_defense` (é o seu god mode, volte para 100.0 antes do build final).
+
+### Nono playtest (rodada 4 do Gemini + Duelo jogado por você)
+
+| Achado | O que mudou | Onde |
+|---|---|---|
+| Duelo: passo a passo no 2º erro, depois no 1º, depois já aberto | É o Protocolo Vance (Vance resgatado: SINE no 1º erro e já aberta no último cristal). A lógica está igual nos 3 cristais (testei com e sem resgate); o 1º cristal com 2 erros não reproduzi. Agora a tela diz o motivo: "PROTOCOLO VANCE: a SINE já abriu o passo a passo" e "(Protocolo Vance: já no 1º erro)" | `hacking_interface.gd`, teste em `duel_sim` |
+| `SCRIPT ERROR` ao sair da fase no meio do guia do hack | `_guide_alive`/`_wait_until` aceitam o agente já liberado; o guia encerra | `scripts/ui/tutorial.gd`, teste em `tutorial_sim` |
+| `SCRIPT ERROR` ao sair da fase entre duas dicas encadeadas | Depois da espera de 0,6 s, confere se o Eduardo ainda existe | `scripts/ui/tutorial.gd` |
+| Remapear hackear/visão mostrava "[Mouse 1]"/"[Mouse 2]" | `key_of` procura tecla antes de botão do mouse | `scripts/ui/tutorial.gd`, teste em `tutorial_sim` |
+| Rodapé da visão hacker com "[TAB]" e "[E]" fixos | Usa as teclas configuradas | `scripts/ui/stealth_hud.gd` |
+| "[F] FECHAR" do leitor de terminal e aviso do lockdown não acompanhavam o remapeamento na mesma fase | Texto refeito ao abrir | `lore_reader.gd`, `lockdown_zone.gd` |
+| "Como jogar" com teclas fixas | Tabela de controles e citações de tecla usam as teclas configuradas | `scripts/ui/how_to_play.gd` (`with_keys`) |
+| Cliques do Menu Principal ignoravam o volume de Efeitos | `ClickSFX`/`HoverSFX` no bus SFX | `scenes/main_menu/main_menu.tscn` |
+| Ar-condicionado dentro do teto da sala dos servidores (Fase 2) | Na parede da sala, acima do barril | `tools/build_industrial_stage.gd` |
 

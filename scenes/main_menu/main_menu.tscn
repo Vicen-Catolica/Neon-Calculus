@@ -293,9 +293,11 @@ autoplay = true
 bus = &"BGM"
 
 [node name="ClickSFX" type="AudioStreamPlayer" parent="." unique_id=195621025]
+bus = &"SFX"
 stream = ExtResource("8_4xg86")
 
 [node name="HoverSFX" type="AudioStreamPlayer" parent="." unique_id=1614403851]
+bus = &"SFX"
 stream = ExtResource("8_4xg86")
 volume_db = -11.679
 pitch_scale = 0.3
