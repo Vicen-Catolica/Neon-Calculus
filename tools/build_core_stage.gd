@@ -29,7 +29,7 @@ const GROUND_RECTS := [
 	[-12, 0, 12, 12],     # A: plataforma de chegada
 	[20, 0, 27, 2],       # B: plataforma flutuante 1
 	[35, 0, 42, 2],       # B: plataforma flutuante 2
-	[50, 0, 126, 12],     # C + D
+	[50, 0, 131, 12],     # C + D (até a borda: sob a parede do Domo não vaza o fundo)
 ]
 
 const WALL_RECTS := [
@@ -230,13 +230,7 @@ func _add_exit(lvl: Node) -> void:
 	# Porta do Domo: as portas do elevador executivo, tingidas do laranja da Axioma.
 	var door := _prop(lvl, RND_PROPS + "exec_elevator.png", DOOR_X, 16.0, "DomeDoor")
 	door.modulate = Color(1.0, 0.62, 0.45)
-	var sign := Label.new()
-	sign.name = "DomeSign"
-	sign.text = "DOMO DE CONTROLE NEURAL"
-	sign.position = Vector2(DOOR_X - 150, -250)
-	sign.add_theme_font_size_override("font_size", 16)
-	sign.add_theme_color_override("font_color", Color("FF6A1A"))
-	lvl.add_child(sign)
+	_exit_sign(lvl, "DomeSign", "DOMO DE CONTROLE NEURAL", Vector2(DOOR_X - 150, -250), Color("FF6A1A"))
 
 
 func _add_zone_labels(lvl: Node) -> void:

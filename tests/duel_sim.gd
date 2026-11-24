@@ -249,7 +249,7 @@ func full_duel() -> void:
 	var core_h := duel.core.get_node("Hackable") as Hackable
 	hv._start_hack(core_h)
 	await get_tree().process_frame
-	check("Paradoxo: a tela mostra x = x + 1 e o botão Ø", ui.paradox_mode and ui.equation_label.text == "x = x + 1" and ui._paradox_btn.visible)
+	check("Paradoxo: a tela mostra x = x + 1 e o botão ∅", ui.paradox_mode and ui.equation_label.text == "x = x + 1" and ui._paradox_btn.visible)
 	check("Paradoxo: sem fórmula entregando a resposta", ui.formula_text() == "", ui.formula_text())
 	check("Paradoxo: não dá para abortar", not ui.can_abort)
 	ui.current_input_text = "5"

@@ -130,6 +130,11 @@ func _process_ground_air(delta: float, dir: float) -> void:
 	_climb_cooldown = maxf(_climb_cooldown - delta, 0.0)
 	if _climb_cooldown <= 0.0 and _ladder_available() and (Input.is_action_pressed("climb_up") or (Input.is_action_pressed("climb_down") and not is_on_floor())):
 		_enter_climb()
+	elif _climb_cooldown <= 0.0 and Input.is_action_pressed("climb_down") and is_on_floor() and _ladder_below():
+		# Em pé no patamar do topo: S começa a descida. Entra uns px na grade de
+		# mão única (mais fundo que a margem dela) para atravessá-la.
+		_enter_climb()
+		global_position.y += 6.0
 
 
 func _process_climb(dir: float) -> void:
@@ -332,6 +337,15 @@ func unregister_ladder(area: Area2D) -> void:
 
 func _ladder_available() -> bool:
 	return not _ladders.is_empty()
+
+
+## Há escada descendo a partir dos pés (topo de escada, não a base dela)?
+func _ladder_below() -> bool:
+	for l in _ladders:
+		# a área da escada fica com a origem na base (y da base)
+		if l.global_position.y > global_position.y + 24.0:
+			return true
+	return false
 
 
 func _enter_climb() -> void:

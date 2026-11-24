@@ -477,4 +477,21 @@ func _add_exit(lvl: Node) -> void:
 	dark.vertex_colors = PackedColorArray([Color(c, 0.0), Color(c, 0.0), Color(c, 0.96), Color(c, 1.0),
 		Color(c, 1.0), Color(c, 0.96)])
 	lvl.add_child(dark)
+	# Borda direita em degradê (antes terminava numa linha vertical dura):
+	# dois quadriláteros que vão do escuro da borda ao transparente.
+	var xf := xr + 360.0
+	var quads := [
+		[[Vector2(xr, top), Vector2(xf, top), Vector2(xf, fade_end), Vector2(xr, fade_end)], [1.0, 0.0, 0.0, 0.96]],
+		[[Vector2(xr, fade_end), Vector2(xf, fade_end), Vector2(xf, fade_start), Vector2(xr, fade_start)], [0.96, 0.0, 0.0, 0.0]],
+	]
+	for i in quads.size():
+		var feather := Polygon2D.new()
+		feather.name = "ExitDarknessEdge%d" % i
+		feather.z_index = 20
+		feather.polygon = PackedVector2Array(quads[i][0])
+		var cols := PackedColorArray()
+		for a in quads[i][1]:
+			cols.append(Color(c, a))
+		feather.vertex_colors = cols
+		lvl.add_child(feather)
 	_exit(lvl, NEXT_STAGE, Vector2(4 * T + 16, _y(-36)))

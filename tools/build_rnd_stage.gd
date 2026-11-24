@@ -334,13 +334,7 @@ func _add_exit(lvl: Node) -> void:
 	var exit := _exit(lvl, NEXT_STAGE, EXIT_POS, Vector2(80, 120))
 	exit.name = "LevelExit"
 	exit.set("require_standing", true)
-	var sign := Label.new()
-	sign.name = "ElevatorSign"
-	sign.text = "ELEVADOR EXECUTIVO  ->  NÚCLEO"
-	sign.position = Vector2(5150, -968)
-	sign.add_theme_font_size_override("font_size", 16)
-	sign.add_theme_color_override("font_color", Color("00F0FF"))
-	lvl.add_child(sign)
+	_exit_sign(lvl, "ElevatorSign", "ELEVADOR EXECUTIVO  ->  NÚCLEO", Vector2(5150, -968), Color("00F0FF"))
 
 
 ## Placas de greybox com o nome de cada trecho (saem na troca pela arte final).

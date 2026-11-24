@@ -696,4 +696,5 @@ unique_name_in_owner = true
 
 [node name="BGMPlayer" type="AudioStreamPlayer" parent="." unique_id=1299447350]
 stream = ExtResource("5_opal3")
+bus = &"BGM"
 

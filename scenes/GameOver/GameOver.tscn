@@ -77,3 +77,4 @@ text = "Menu Principal"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1373324339]
 stream = ExtResource("3_ppu1c")
+bus = &"BGM"

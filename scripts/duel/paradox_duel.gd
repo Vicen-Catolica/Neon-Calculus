@@ -10,7 +10,7 @@ extends Node
 ## camada" (o nó apaga por alguns segundos) e a variância sobe. Quem derruba o
 ## Eduardo é a Defesa Neural zerar com os ataques (game over volta ao começo do
 ## Duelo, o checkpoint do andar). Com os 3 nós no chão, o núcleo abre: hackeá-lo
-## é o Paradoxo final (x = x + 1, "Ø SEM SOLUÇÃO").
+## é o Paradoxo final (x = x + 1, "∅ SEM SOLUÇÃO").
 ##
 ## Protocolo Vance (resgate na Fase 3): brecha maior nos pulsos (a "porta" que
 ## ele deixou) e o passo a passo da SINE já aberto na última camada.
@@ -94,6 +94,7 @@ func _ready() -> void:
 	_music.name = "DuelMusic"
 	_music.stream = load(MUSIC)
 	_music.volume_db = -6.0
+	_music.bus = &"BGM"  # slider "Música" das Opções
 	add_child(_music)
 
 

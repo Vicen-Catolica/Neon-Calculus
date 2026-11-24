@@ -58,8 +58,11 @@ func bar_rects() -> Array[Rect2]:
 	if dir == Dir.DOWN:
 		var g0 := gap_center - gap_size / 2.0
 		var g1 := gap_center + gap_size / 2.0
-		out.append(Rect2(arena.position.x, pos - THICK / 2.0, g0 - arena.position.x, THICK))
-		out.append(Rect2(g1, pos - THICK / 2.0, arena.end.x - g1, THICK))
+		# Brecha encostada na borda: o lado de fora não tem barra (largura <= 0).
+		if g0 > arena.position.x:
+			out.append(Rect2(arena.position.x, pos - THICK / 2.0, g0 - arena.position.x, THICK))
+		if g1 < arena.end.x:
+			out.append(Rect2(g1, pos - THICK / 2.0, arena.end.x - g1, THICK))
 	else:
 		var gap_top := gap_base_y - gap_center
 		out.append(Rect2(pos - THICK / 2.0, arena.position.y, THICK, gap_top - arena.position.y))

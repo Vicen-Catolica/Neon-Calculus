@@ -25,6 +25,6 @@
 		"title": "PROTOCOLO DE INTEGRIDADE // NÚCLEO",
 		"author": "Manutenção automática",
 		"text": "ALERTA: entrada de dados contraditória detectada na variável V-0 (origem: código-base, autor Vance).\n\nTentativas de resolução: 9.441.207. Resultado: indefinido.\n\nAção recomendada: nenhuma. A variável é inofensiva enquanto ninguém a enviar ao núcleo como uma equação.\n\nObservação: o núcleo não admite a resposta \"sem solução\". Ele continua calculando.",
-		"hint": "Nem toda equação tem resposta. Ex.: 2x + 1 = 2x + 3. Tire 2x dos dois lados: 1 = 3, que é falso. Quando sobra uma mentira, a resposta é: sem solução (Ø)."
+		"hint": "Nem toda equação tem resposta. Ex.: 2x + 1 = 2x + 3. Tire 2x dos dois lados: 1 = 3, que é falso. Quando sobra uma mentira, a resposta é: sem solução (∅)."
 	}
 }

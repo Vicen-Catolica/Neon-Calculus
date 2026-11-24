@@ -11,13 +11,35 @@ const STEEL_HI := Color(0.42, 0.45, 0.5)
 const HAZARD := Color(0.95, 0.72, 0.1)
 
 
-## Ponto atingido por um raio no mundo (ou null). Ignora áreas.
+## Ponto atingido por um raio no mundo (ou null). Ignora áreas. Também para em
+## passarelas de mão única: o raio as atravessa vindo de baixo, então o trecho é
+## varrido com consultas de ponto a cada 4 px (só no carregamento, barato).
 static func hit(node: Node2D, from: Vector2, to: Vector2, exclude: Array[RID] = []) -> Variant:
+	var space := node.get_world_2d().direct_space_state
 	var q := PhysicsRayQueryParameters2D.create(from, to, WORLD_MASK)
 	q.exclude = exclude
 	q.collide_with_areas = false
-	var r := node.get_world_2d().direct_space_state.intersect_ray(q)
-	return r["position"] if not r.is_empty() else null
+	var r := space.intersect_ray(q)
+	var end: Vector2 = r["position"] if not r.is_empty() else to
+	var pq := PhysicsPointQueryParameters2D.new()
+	pq.collision_mask = WORLD_MASK
+	pq.exclude = exclude
+	var dir := (end - from).normalized()
+	var length := from.distance_to(end)
+	var d := 4.0
+	while d < length:
+		pq.position = from + dir * d
+		if not space.intersect_point(pq, 1).is_empty():
+			# refina para 1 px: primeiro ponto sólido do trecho
+			var e := maxf(d - 4.0, 0.0)
+			while e < d:
+				pq.position = from + dir * (e + 1.0)
+				if not space.intersect_point(pq, 1).is_empty():
+					break
+				e += 1.0
+			return from + dir * e
+		d += 4.0
+	return end if not r.is_empty() else null
 
 
 ## Haste vertical de `a` até `b` (globais), presa em `parent` sem herdar a

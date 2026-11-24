@@ -93,7 +93,7 @@ O save fica em `user://save.cfg` (no Linux, `~/.local/share/godot/app_userdata/<
 | **V** | Ping Sonar (novo) |
 | **C** | Variável Oculta, camuflagem (nova) |
 | Esc | pausa; durante o hack, aborta (não no lockdown nem no Duelo) |
-| N | no Paradoxo final, responde "Ø SEM SOLUÇÃO" |
+| N | no Paradoxo final, responde "∅ SEM SOLUÇÃO" |
 
 ---
 
@@ -134,7 +134,7 @@ Nada disto foi jogado com teclado e mouse, só por simulação. Vale passar por 
 - [ ] Confronto com a Axioma antes de começar; não se repete após game over.
 - [ ] Cada ataque avisa antes. A brecha da varredura é alcançável; a varredura lateral passa agachado; o pulso tem um setor livre; a grade tem vãos.
 - [ ] Errar a equação de um nó só apaga o nó por 4 s.
-- [ ] O Paradoxo `x = x + 1`: um número é erro; Ø (ou N) vence.
+- [ ] O Paradoxo `x = x + 1`: um número é erro; ∅ (ou N) vence.
 - [ ] Vitória: falas finais, tela branca e encerramento com estatísticas e créditos.
 - [ ] Depois de zerar, "Continuar" leva ao encerramento.
 - [ ] **Dificuldade:** o Duelo está justo para quem joga de verdade? (O robô vence sem levar golpe porque reage no primeiro quadro do aviso.)
@@ -251,4 +251,19 @@ Para rever: o guia e as conversas tocam uma vez por save; use "Novo jogo" para v
 | Lore falava em "nível inferior" | Textos falam em subir a torre | `data/lore/slums.json`, `data/dialogue/slums.json` |
 
 Não reproduzido: cones de visão atravessando o chão (headless e com janela, os cones param no piso). Mantido de propósito: o hack **pausa** o mundo.
+
+### Sexto playtest (segunda rodada do Gemini, validada)
+
+| Pedido | O que mudou | Onde |
+|---|---|---|
+| Erro "Rect2 size is negative" no Duelo | A varredura não cria o pedaço de barra vazio quando a brecha encosta na borda da arena | `scripts/duel/sweep_attack.gd` |
+| Músicas fora do slider "Música" | Trilha do Duelo, do hack e do game over no bus `BGM` | `paradox_duel.gd`, `HackingInterface.tscn`, `GameOver.tscn` |
+| Daltonismo simulava em vez de corrigir | Filtro de daltonização: calcula o que a pessoa perde e joga nos canais que ela enxerga. Pesos ajustados para a paleta do jogo (vermelho, verde, laranja, amarelo, ciano, rosa): a menor diferença entre essas cores, vista pela pessoa daltônica, sobe de 0,17→0,29 (protan), 0,02→0,22 (deutan) e 0,07→0,17 (tritan) | `scenes/options/colorblind.gdshader` |
+| Descer escada pelo topo | Em pé no patamar do topo, S começa a descida (atravessa a grade de mão única) | `scripts/player/eduardo.gd` (`_ladder_below`) |
+| Apoios atravessando passarela | A busca de teto/chão dos apoios também para em passarela de mão única: a porta de lockdown de D ganhou a verga | `scripts/core/supports.gd` |
+| Corte reto do escurecimento da saída (Fase 1) | Borda direita em degradê | `build_slums_stage.gd` |
+| Fundo vazando sob a parede do Domo | Chão vai até a borda da fase | `build_core_stage.gd` |
+| Placas de saída como texto solto | Placa escura com borda neon (Setor 2, P&D, Domo) | `stage_builder_base.gd` (`_exit_sign`) |
+| Mancha no retrato da Axioma | Canto superior esquerdo refeito (espelho do canto direito) | `assets/ui/portraits/axioma.png` |
+| "Ø" parecido com "O" | Símbolo de conjunto vazio de verdade: "∅ SEM SOLUÇÃO" | `hacking_interface.gd`, `data/lore/core.json` |
 
