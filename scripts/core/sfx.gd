@@ -20,12 +20,14 @@ var _last_ms: Dictionary = {}
 var _players: Array[AudioStreamPlayer] = []
 var _players_2d: Array[AudioStreamPlayer2D] = []
 var _next := 0
+var _bus: StringName = &"Master"
 var _next_2d := 0
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	var bus := &"SFX" if AudioServer.get_bus_index(&"SFX") >= 0 else &"Master"
+	_bus = bus
 	for i in POOL:
 		var p := AudioStreamPlayer.new()
 		p.bus = bus
@@ -65,6 +67,8 @@ func play(sfx_name: String, volume_db: float = 0.0, pitch_jitter: float = 0.0) -
 	var p := _players[_next]
 	_next = (_next + 1) % POOL
 	p.stream = s
+	# Blips das falas vão para o bus Voice (slider "Voz" nas Opções).
+	p.bus = &"Voice" if sfx_name.begins_with("blip") and AudioServer.get_bus_index(&"Voice") >= 0 else _bus
 	p.volume_db = volume_db
 	p.pitch_scale = 1.0 + randf_range(-pitch_jitter, pitch_jitter)
 	p.play()

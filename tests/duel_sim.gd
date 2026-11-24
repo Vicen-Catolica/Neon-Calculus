@@ -237,6 +237,8 @@ func full_duel() -> void:
 	check("Duelo: camada 3 é o nó de cima, com parênteses", duel.layer == 3 and top_h.get_difficulty() == Vector2i(5, 1))
 	check("Vance: SINE abre o passo a passo na última camada", top_h.sine_at_start)
 	check("Vance: brecha maior nos pulsos", duel._pulse().gap_width_deg == ParadoxDuel.VANCE_PULSE_GAP)
+	check("Duelo: sem Varredura de Rotina na arena", get_tree().get_nodes_in_group("routine_sweep").is_empty())
+	check("Duelo: hack dos nós não mexe na variância", top_h.variance_cost == 0.0 and top_h.variance_fail_cost == 0.0)
 	await step(300)
 	hv.debug_hack(top_h, true)
 	await step(3)
@@ -248,6 +250,7 @@ func full_duel() -> void:
 	hv._start_hack(core_h)
 	await get_tree().process_frame
 	check("Paradoxo: a tela mostra x = x + 1 e o botão Ø", ui.paradox_mode and ui.equation_label.text == "x = x + 1" and ui._paradox_btn.visible)
+	check("Paradoxo: sem fórmula entregando a resposta", ui.formula_text() == "", ui.formula_text())
 	check("Paradoxo: não dá para abortar", not ui.can_abort)
 	ui.current_input_text = "5"
 	ui._on_submit_pressed()

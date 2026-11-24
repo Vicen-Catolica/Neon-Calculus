@@ -81,6 +81,9 @@ func _ready() -> void:
 		n.broken.connect(_on_node_broken.bind(i))
 		var h := n.get_node("Hackable") as Hackable
 		h.time_limit_mult = node_time_mult
+		# A variância não pesa no Duelo (sem Varredura de Rotina aqui).
+		h.variance_cost = 0.0
+		h.variance_fail_cost = 0.0
 		h.hack_failed.connect(_on_node_failed.bind(i))
 	# Protocolo Vance: a SINE abre o passo a passo já no começo da última camada.
 	(nodes[2].get_node("Hackable") as Hackable).sine_at_start = GameManager.has_flag(VANCE_FLAG)
@@ -226,32 +229,37 @@ func clear_attacks() -> void:
 # --- Padrões de ataque ---------------------------------------------------------
 
 ## Escolhe e dispara o padrão da camada atual (a camada 3 vale no Paradoxo).
-func spawn_pattern() -> void:
+## Todo padrão tem saída no piso em que o jogador está (chão ou passarela), ao
+## alcance correndo: dá para desviar sem descer nem subir escada.
+## `kind` força um padrão (testes).
+func spawn_pattern(kind: String = "") -> void:
 	var options := ["sweep_down", "pulse"]
 	if layer >= 2:
 		options += ["sweep_side", "grid"]
 	if layer >= 3:
 		options += ["combo", "combo"]
-	match options[_rng.randi() % options.size()]:
+	if kind == "":
+		kind = options[_rng.randi() % options.size()]
+	var span := player_span()
+	match kind:
 		"sweep_down":
-			_add(_sweep_down(_near_x(GAP_NEAR_MIN, GAP_NEAR_MAX)))
+			_add(_sweep_down(_sweep_gap_x(span)))
 		"pulse":
-			_add(_pulse())
+			_add(_pulse(span))
 		"sweep_side":
 			var s := SweepAttack.new()
 			s.dir = SweepAttack.Dir.RIGHT if _rng.randi() % 2 == 0 else SweepAttack.Dir.LEFT
 			s.gap_center = SweepAttack.CROUCH_GAP
+			s.gap_base_y = span.z
 			_add(s)
 		"grid":
-			_add(_grid(_grid_columns()))
+			_add(_grid(_grid_columns(span)))
 		"combo":
-			# Grade + varredura descendo com a brecha num vão da grade: sempre há saída.
-			var cols := _grid_columns()
-			var free: Array = GRID_SLOTS.filter(func(x): return not (x in cols))
-			var px := _player_pos().x
-			free.sort_custom(func(a, b): return absf(a - px) < absf(b - px))
+			# Grade + varredura descendo com a brecha num vão da grade, no piso do
+			# jogador: sempre há saída.
+			var cols := _grid_columns(span)
 			_add(_grid(cols))
-			_add(_sweep_down(free[0]))  # o vão livre mais perto do jogador
+			_add(_sweep_down(_nearest_free_x(span, cols)))
 
 
 func _add(a: DuelAttack) -> void:
@@ -270,21 +278,119 @@ func _sweep_down(gap_x: float) -> SweepAttack:
 	return s
 
 
-func _pulse() -> PulseAttack:
+# --- Piso do jogador -------------------------------------------------------------
+
+const RUN_SPEED := 200.0
+## Fração do tempo que conta como "dá para chegar" (reação + aceleração).
+const REACH_FRACTION := 0.7
+const ARENA_X0 := 40.0
+const ARENA_X1 := 1880.0
+
+## Piso onde o jogador está (ou cairia): Vector3(x0, x1, y). Raios para baixo a
+## cada 16 px a partir dele, até a borda da passarela ou uma parede.
+func player_span() -> Vector3:
+	var p := _player_pos()
+	var space := core.get_world_2d().direct_space_state
+	var sy := _ground_y(space, Vector2(p.x, p.y - 8.0))
+	if is_nan(sy):
+		return Vector3(ARENA_X0, ARENA_X1, 16.0)
+	var x0 := p.x
+	var x1 := p.x
+	for dir in [-1.0, 1.0]:
+		var x := p.x
+		while true:
+			var nx: float = x + dir * 16.0
+			if nx < ARENA_X0 or nx > ARENA_X1:
+				break
+			var gy := _ground_y(space, Vector2(nx, sy - 8.0), 24.0)
+			if is_nan(gy) or absf(gy - sy) > 4.0:
+				break
+			if _wall_between(space, Vector2(x, sy - 40.0), Vector2(nx, sy - 40.0)):
+				break
+			x = nx
+		if dir < 0.0:
+			x0 = x
+		else:
+			x1 = x
+	return Vector3(x0, x1, sy)
+
+
+func _ground_y(space: PhysicsDirectSpaceState2D, from: Vector2, depth: float = 1400.0) -> float:
+	var q := PhysicsRayQueryParameters2D.create(from, from + Vector2(0, depth), 1)
+	q.collide_with_areas = false
+	var r := space.intersect_ray(q)
+	return float(r["position"].y) if not r.is_empty() else NAN
+
+
+func _wall_between(space: PhysicsDirectSpaceState2D, a: Vector2, b: Vector2) -> bool:
+	var q := PhysicsRayQueryParameters2D.create(a, b, 1)
+	q.collide_with_areas = false
+	return not space.intersect_ray(q).is_empty()
+
+
+## Quanto o jogador consegue correr até o ataque chegar nele (`seconds`).
+func reach(seconds: float) -> float:
+	return RUN_SPEED * seconds * REACH_FRACTION
+
+
+## x da brecha da varredura descendo: no piso do jogador, longe o bastante para
+## pedir um passo, perto o bastante para chegar antes da barra.
+func _sweep_gap_x(span: Vector3) -> float:
+	var px := _player_pos().x
+	var sw := SweepAttack.new()
+	var head := span.z - 110.0
+	var t_hit := sw.telegraph_time + sw.active_time * clampf((head - sw.arena.position.y) / (sw.floor_y - sw.arena.position.y), 0.0, 1.0)
+	var r := reach(t_hit) + sw.gap_size / 2.0 - 20.0
+	sw.free()
+	var hi := minf(GAP_NEAR_MAX, r)
+	var lo := minf(GAP_NEAR_MIN, hi * 0.5)
+	var lo_x := span.x + 40.0
+	var hi_x := span.y - 40.0
+	if hi_x <= lo_x:
+		return (span.x + span.y) / 2.0
+	var sides := [1.0, -1.0] if _rng.randi() % 2 == 0 else [-1.0, 1.0]
+	for side in sides:
+		var room: float = (hi_x - px) if side > 0.0 else (px - lo_x)
+		if room >= lo:
+			return clampf(px + side * _rng.randf_range(lo, minf(hi, room)), lo_x, hi_x)
+	# Passarela curta: a brecha fica no lado com mais espaço.
+	return hi_x if (hi_x - px) > (px - lo_x) else lo_x
+
+
+func _pulse(span: Vector3 = Vector3(ARENA_X0, ARENA_X1, 16.0)) -> PulseAttack:
 	var p := PulseAttack.new()
 	p.center = core.global_position
-	# Brecha perto do ângulo do jogador (mas não em cima dele): exige se mexer,
-	# sem pedir uma travessia impossível da arena.
-	var to_player := _player_pos() + Vector2(0, -50) - core.global_position
-	# A brecha gira para dentro da arena (rumo a "para baixo", 90°): nunca para
-	# cima de quem está no chão.
-	var pang := rad_to_deg(to_player.angle())
-	var side := -1.0 if pang > 90.0 or pang < -90.0 else 1.0
-	if absf(pang - 90.0) < 20.0:
-		side = 1.0 if _rng.randi() % 2 == 0 else -1.0
 	p.gap_width_deg = VANCE_PULSE_GAP if vance() else PULSE_GAP
-	p.gap_angle_deg = rad_to_deg(to_player.angle()) + side * (p.gap_width_deg / 2.0 + _rng.randf_range(PULSE_OFF_MIN, PULSE_OFF_MAX))
+	# Brecha ao lado do jogador (não em cima dele), num ângulo que ele alcança
+	# correndo pelo próprio piso antes de o anel chegar.
+	var pp := _player_pos()
+	var pang := _ang(p.center, Vector2(pp.x, span.z))
+	var dist := (Vector2(pp.x, span.z - 50.0) - p.center).length()
+	var t_hit := p.telegraph_time + p.active_time * clampf((dist - 60.0) / (p.max_radius - 60.0), 0.0, 1.0)
+	var r := reach(t_hit)
+	var sides := [1.0, -1.0] if _rng.randi() % 2 == 0 else [-1.0, 1.0]
+	for side in sides:
+		var gap: float = pang + side * (p.gap_width_deg / 2.0 + _rng.randf_range(PULSE_OFF_MIN, PULSE_OFF_MAX))
+		if _pulse_reachable(p.center, gap, p.gap_width_deg, span, pp.x, r):
+			p.gap_angle_deg = gap
+			return p
+	# Nenhum lado cabe no piso: a brecha fica no próprio jogador.
+	p.gap_angle_deg = pang
 	return p
+
+
+func _ang(center: Vector2, foot: Vector2) -> float:
+	return rad_to_deg((foot + Vector2(0, -50) - center).angle())
+
+
+## Há um ponto do piso, a até `r` px do jogador, dentro da brecha (com folga)?
+func _pulse_reachable(center: Vector2, gap: float, width: float, span: Vector3, px: float, r: float) -> bool:
+	var x := maxf(span.x, px - r)
+	while x <= minf(span.y, px + r):
+		if absf(wrapf(_ang(center, Vector2(x, span.z)) - gap, -180.0, 180.0)) <= width / 2.0 - 6.0:
+			return true
+		x += 8.0
+	return false
 
 
 func _grid(cols: Array) -> LaserGridAttack:
@@ -296,29 +402,53 @@ func _grid(cols: Array) -> LaserGridAttack:
 	return g
 
 
-func _grid_columns() -> Array:
+## 4 colunas sorteadas; se o piso do jogador ficar sem vão ao alcance, tira a
+## coluna que mais atrapalha até abrir um.
+func _grid_columns(span: Vector3 = Vector3(ARENA_X0, ARENA_X1, 16.0)) -> Array:
 	var slots: Array = GRID_SLOTS.duplicate()
 	for i in range(slots.size() - 1, 0, -1):
 		var j := _rng.randi() % (i + 1)
 		var tmp = slots[i]
 		slots[i] = slots[j]
 		slots[j] = tmp
-	return slots.slice(0, 4)
+	var cols: Array = slots.slice(0, 4)
+	var g := LaserGridAttack.new()
+	var r := reach(g.telegraph_time)
+	var px := _player_pos().x
+	while not cols.is_empty():
+		var fx := _nearest_free_x(span, cols)
+		if not is_nan(fx) and absf(fx - px) <= r:
+			break
+		var worst = cols[0]
+		for c in cols:
+			if absf(float(c) - px) < absf(float(worst) - px):
+				worst = c
+		cols.erase(worst)
+	g.free()
+	return cols
+
+
+## x livre (fora das colunas, com folga do corpo) mais perto do jogador no piso dele.
+func _nearest_free_x(span: Vector3, cols: Array) -> float:
+	var px := _player_pos().x
+	var half := 35.0 + 20.0
+	var best := NAN
+	var x := span.x + 14.0
+	while x <= span.y - 14.0:
+		var ok := true
+		for c in cols:
+			if absf(x - float(c)) < half:
+				ok = false
+				break
+		if ok and (is_nan(best) or absf(x - px) < absf(best - px)):
+			best = x
+		x += 4.0
+	return best
 
 
 func _player_pos() -> Vector2:
 	var p := get_tree().get_first_node_in_group("Player") as Node2D
 	return p.global_position if p else Vector2(960, 16)
-
-
-## x perto do jogador (de `lo` a `hi` px para um lado), dentro da arena.
-func _near_x(lo: float, hi: float) -> float:
-	var px := _player_pos().x
-	var side := 1.0 if _rng.randi() % 2 == 0 else -1.0
-	var x := px + side * _rng.randf_range(lo, hi)
-	if x < 150.0 or x > 1770.0:
-		x = px - side * _rng.randf_range(lo, hi)
-	return clampf(x, 150.0, 1770.0)
 
 
 func _flash(text: String, color: Color) -> void:

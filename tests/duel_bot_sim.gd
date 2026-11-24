@@ -25,8 +25,8 @@ func release_all() -> void:
 		Input.action_release(a)
 
 
-## Onde ficar (x no chão) e se agachar, olhando os ataques vivos.
-func plan(p: Node2D, core: Node2D) -> Array:
+## Onde ficar (x no piso `span` = (x0, x1, y)) e se agachar, olhando os ataques vivos.
+func plan(p: Node2D, core: Node2D, span: Vector3 = Vector3(60, 1860, 16)) -> Array:
 	var x := p.global_position.x
 	var target := x
 	var crouch := false
@@ -54,8 +54,8 @@ func plan(p: Node2D, core: Node2D) -> Array:
 			var inside := absf(diff) - pu.gap_width_deg / 2.0 + 8.0
 			if inside > 0.0:
 				var ang := deg_to_rad(my + signf(diff) * inside)
-				var dy := (16.0 - 50.0) - pu.center.y
-				if sin(ang) > 0.08:
+				var dy := (span.z - 50.0) - pu.center.y
+				if absf(sin(ang)) > 0.08 and signf(sin(ang)) == signf(dy):
 					target = pu.center.x + dy * cos(ang) / sin(ang)
 	if grid and not has_down:
 		# vão mais perto entre as colunas
@@ -65,15 +65,23 @@ func plan(p: Node2D, core: Node2D) -> Array:
 		for c in grid.columns:
 			xs.append(c)
 		xs.sort()
-		var cand: Array = [80.0, 1840.0]
+		var cand: Array = [span.x + 16.0, span.y - 16.0]
 		for i in xs.size() - 1:
 			cand.append((xs[i] + xs[i + 1]) / 2.0)
 		for c in cand:
+			if c < span.x or c > span.y:
+				continue
+			var clear := true
+			for col in xs:
+				if absf(c - col) < 50.0:
+					clear = false
+			if not clear:
+				continue
 			if absf(c - target) < best_d:
 				best_d = absf(c - target)
 				best = c
 		target = best
-	return [clampf(target, 60.0, 1860.0), crouch]
+	return [clampf(target, span.x + 16.0, span.y - 16.0), crouch]
 
 
 func run_duel(seed: int) -> Array:
@@ -135,8 +143,73 @@ func run_duel(seed: int) -> Array:
 	return res
 
 
+## Passarelas: o robô fica no piso dele (nunca desce) e cada padrão é disparado
+## várias vezes. Todo padrão tem que ter saída ali mesmo.
+const PERCHES := [
+	["passarela esquerda", Vector2(290, -272)],
+	["passarela direita", Vector2(1630, -272)],
+	["passarela do meio", Vector2(600, -464)],
+	["passarela de cima", Vector2(900, -624)],
+]
+const KINDS := ["sweep_down", "pulse", "sweep_side", "grid", "combo"]
+
+
+func run_perch(label: String, at: Vector2, seed: int) -> void:
+	GameManager.reset_progress()
+	GameManager.mark_dialogue_seen("duel_confront")
+	var lvl: Node = load(LEVEL).instantiate()
+	var duel := lvl.get_node("ParadoxDuel") as ParadoxDuel
+	duel.rng_seed = seed
+	duel.go_to_ending = false
+	add_child(lvl)
+	duel.set_process(false)
+	duel.layer = 3
+	var p := lvl.get_node("Eduardo") as Eduardo
+	p.global_position = at + Vector2(0, -4)
+	p.velocity = Vector2.ZERO
+	for i in 20:
+		await get_tree().physics_frame
+	var span := duel.player_span()
+	var hits := {}
+	var fell := false
+	for rep in 2:
+		for kind in KINDS:
+			duel.spawn_pattern(kind)
+			var got := [0]
+			for a in get_tree().get_nodes_in_group("duel_attack"):
+				(a as DuelAttack).hit_player.connect(func() -> void: got[0] += 1)
+			var frames := 0
+			while duel.attack_running() and frames < 60 * 6:
+				await get_tree().physics_frame
+				frames += 1
+				if Dialogue.is_open():
+					Dialogue.skip()
+				var pl := plan(p, duel.core, span)
+				var dx: float = pl[0] - p.global_position.x
+				release_all()
+				if pl[1]:
+					Input.action_press("crouch")
+				if absf(dx) > 10.0:
+					Input.action_press("run")
+					Input.action_press("move_right" if dx > 0 else "move_left")
+			release_all()
+			for i in 30:
+				await get_tree().physics_frame
+			hits[kind] = int(hits.get(kind, 0)) + got[0]
+			if absf(p.global_position.y - span.z) > 6.0:
+				fell = true
+	check("%s: robô desvia de tudo sem sair da passarela" % label,
+		not fell and hits.values().reduce(func(a, b): return a + b, 0) == 0,
+		"piso %.0f..%.0f y%.0f, acertos %s%s" % [span.x, span.y, span.z, str(hits), ", caiu" if fell else ""])
+	lvl.queue_free()
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+
+
 func _ready() -> void:
 	await get_tree().process_frame
+	for i in PERCHES.size():
+		await run_perch(PERCHES[i][0], PERCHES[i][1], 7 + i * 13)
 	for s in SEEDS:
 		var r: Array = await run_duel(s)
 		check("robô que desvia vence o Duelo (semente %d)" % s, r[0] and not r[1],

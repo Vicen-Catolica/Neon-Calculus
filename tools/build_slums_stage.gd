@@ -101,6 +101,8 @@ func build() -> Node:
 	_ladders(lvl, LADDERS)
 	_add_props(lvl)
 	_add_neon(lvl)
+	# Puxadinho da laje H4: pilares até a laje (o vão de 96 px continua livre).
+	_posts(_holder(lvl, "Supports"), 2832.0, 2968.0, -720.0, -624.0)  # bordas do bloco (colisão) e laje
 	_add_terminals(lvl)
 	_add_kiosk_and_door(lvl)
 	_add_cameras(lvl)
@@ -110,6 +112,8 @@ func build() -> Node:
 	# conversa no meio do caminho (relação criador e criação).
 	_dialogue_trigger(lvl, "slums_intro", Vector2(64, 16))
 	_tutorial_trigger(lvl, "hack", Vector2(460, 16))
+	# Módulos do traje (Sonar [V] e Camuflagem [C]) depois do primeiro agente.
+	_dialogue_trigger(lvl, "slums_suit", Vector2(1800, 16), Vector2(120, 400))
 	_dialogue_trigger(lvl, "slums_kiosk", Vector2(2300, -48), Vector2(120, 400))
 	_dialogue_trigger(lvl, "slums_upstairs", Vector2(3500, -48), Vector2(120, 400))
 	_player_and_ui(lvl, Vector2(64, 16))
@@ -259,6 +263,58 @@ func _add_houses(lvl: Node) -> void:
 			house.add_child(sf)
 
 
+## Braço de ferro saindo da parede em `wall_x` (altura `arm_y`) até `x_end`, com
+## mão-francesa e correntes até `hang_y` (topo da placa pendurada).
+func _hang_bracket(parent: Node, wall_x: float, arm_y: float, x_end: float, chains: Array, hang_y: float) -> void:
+	var b := Node2D.new()
+	b.name = "Bracket_%d" % int(wall_x)
+	parent.add_child(b)
+	var iron := Color(0.16, 0.15, 0.17)
+	var lines := [[Vector2(wall_x, arm_y), Vector2(x_end, arm_y), 4.0],
+		[Vector2(wall_x, arm_y + 26.0), Vector2(wall_x + (x_end - wall_x) * 0.6, arm_y), 3.0],
+		[Vector2(wall_x - 2.0, arm_y - 6.0), Vector2(wall_x - 2.0, arm_y + 30.0), 5.0]]
+	for cx in chains:
+		lines.append([Vector2(cx, arm_y), Vector2(cx, hang_y), 2.0])
+	for l in lines:
+		var ln := Line2D.new()
+		ln.width = l[2]
+		ln.default_color = iron
+		ln.points = PackedVector2Array([l[0], l[1]])
+		b.add_child(ln)
+
+
+## Pilares de madeira/ferro sob um bloco suspenso (só visual: não colidem, o vão
+## de baixo continua livre para passar agachado).
+func _posts(parent: Node, x0: float, x1: float, top: float, bottom: float) -> void:
+	var holder := Node2D.new()
+	holder.name = "Posts_%d" % int(x0)
+	parent.add_child(holder)
+	for x in [x0 + 7.0, x1 - 7.0]:
+		var post := Polygon2D.new()
+		post.color = Color(0.2, 0.17, 0.16)
+		post.polygon = PackedVector2Array([Vector2(x - 6, top), Vector2(x + 6, top), Vector2(x + 6, bottom), Vector2(x - 6, bottom)])
+		holder.add_child(post)
+		var hi := Polygon2D.new()
+		hi.color = Color(0.34, 0.29, 0.26)
+		hi.polygon = PackedVector2Array([Vector2(x - 6, top), Vector2(x - 3, top), Vector2(x - 3, bottom), Vector2(x - 6, bottom)])
+		holder.add_child(hi)
+		var foot := Polygon2D.new()
+		foot.color = Color(0.12, 0.11, 0.12)
+		foot.polygon = PackedVector2Array([Vector2(x - 9, bottom - 4), Vector2(x + 9, bottom - 4), Vector2(x + 9, bottom), Vector2(x - 9, bottom)])
+		holder.add_child(foot)
+	# travessa em X entre os pilares, no alto (não atrapalha a leitura do vão)
+	var brace := Line2D.new()
+	brace.width = 3.0
+	brace.default_color = Color(0.2, 0.17, 0.16)
+	brace.points = PackedVector2Array([Vector2(x0 + 7, top + 2), Vector2(x0 + 30, top + 22)])
+	holder.add_child(brace)
+	var brace2 := Line2D.new()
+	brace2.width = 3.0
+	brace2.default_color = Color(0.2, 0.17, 0.16)
+	brace2.points = PackedVector2Array([Vector2(x1 - 7, top + 2), Vector2(x1 - 30, top + 22)])
+	holder.add_child(brace2)
+
+
 ## Topo do letreiro da loja (para a placa de neon): y do centro do letreiro.
 func _storefront_sign_y(shop: String) -> float:
 	var tex: Texture2D = load(FACADE_DIR + "storefront_%s.png" % shop)
@@ -349,6 +405,8 @@ func _add_neon(lvl: Node) -> void:
 	_slum_neon(ns, "neon_OPEN_24H_flicker_2f", Vector2(STOREFRONTS["24h"], _storefront_sign_y("24h")), false)
 	# RAMEN ilumina os caixotes: é preciso hackear a luz para se esconder ali.
 	_slum_neon(ns, "neon_RAMEN_flicker_2f", Vector2(STOREFRONTS["ramen"], _storefront_sign_y("ramen")), true, Vector2(260, 150), 16.0)
+	# Tigela pendurada num braço de ferro preso na quina da loja (antes flutuava).
+	_hang_bracket(ns, 1140.0, -186.0, 1200.0, [1150.0, 1190.0], -179.0)
 	_slum_neon(ns, "neon_ramen_bowl", Vector2(1170, -150), false)
 	_slum_neon(ns, "neon_BAR_flicker_2f", Vector2(1700, -300), false)       # 2º andar da casa da passarela
 	_slum_neon(ns, "neon_hanging_sign_arrow", Vector2(2030, -250), false)   # parede da casa H6

@@ -67,6 +67,12 @@ func _add_support() -> void:
 	if not is_inside_tree():
 		return
 	var top := global_position + Vector2(0, -height)
+	# Encostado num piso/passarela (mão única: o raio de baixo a atravessa).
+	var q := PhysicsPointQueryParameters2D.new()
+	q.position = top + Vector2(0, -3)
+	q.collision_mask = Supports.WORLD_MASK
+	if not get_world_2d().direct_space_state.intersect_point(q, 1).is_empty():
+		return
 	var up = Supports.hit(self, top + Vector2(0, -2), top + Vector2(0, -420))
 	if up != null and top.y - (up as Vector2).y > 3.0:
 		Supports.pole(self, top + Vector2(0, -4), up, 4.0, "EmitterPole")

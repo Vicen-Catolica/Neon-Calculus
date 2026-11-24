@@ -515,6 +515,8 @@ func die() -> void:
 		return
 	is_dead = true
 	get_tree().call_group("hud", "hide_hud")
+	# Estado de game over já na queda: some o HUD de furtividade e a pausa não abre.
+	GameManager.set_state(GameManager.State.GAME_OVER)
 	# Atingido pelo taser: cai no chão ("caught") e só então a tela de game over.
 	if _hidden:
 		_unhide()

@@ -87,10 +87,12 @@ func load_settings() -> void:
 	else:
 		apply_settings()
 
-func save_audio_settings(master_vol: float, bgm_vol: float, sfx_vol: float) -> void:
+func save_audio_settings(master_vol: float, bgm_vol: float, sfx_vol: float, voice_vol: float = -1.0) -> void:
 	config.set_value("Audio", "master_volume", master_vol)
 	config.set_value("Audio", "bgm_volume", bgm_vol)
 	config.set_value("Audio", "sfx_volume", sfx_vol)
+	# Voz = os "blips" das falas nos diálogos (bus Voice).
+	config.set_value("Audio", "voice_volume", voice_vol if voice_vol >= 0.0 else config.get_value("Audio", "voice_volume", 0.8))
 	config.save(SAVE_PATH)
 	apply_audio_settings()
 
@@ -203,6 +205,7 @@ func apply_audio_settings() -> void:
 	_set_bus_volume("Master", config.get_value("Audio", "master_volume", 1.0))
 	_set_bus_volume("BGM", config.get_value("Audio", "bgm_volume", 0.8))
 	_set_bus_volume("SFX", config.get_value("Audio", "sfx_volume", 0.8))
+	_set_bus_volume("Voice", config.get_value("Audio", "voice_volume", 0.8))
 
 func apply_video_settings() -> void:
 	# Se a janela ainda estiver embutida pelo editor, interrompe antes de disparar o aviso.

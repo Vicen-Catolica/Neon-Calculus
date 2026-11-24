@@ -89,6 +89,11 @@ func build() -> Node:
 	# Confronto com a Axioma ao entrar no Domo (o Duelo espera ele terminar).
 	_dialogue_trigger(lvl, "duel_confront", Vector2(120, 16))
 	_player_and_ui(lvl, Vector2(120, 16))
+	# Sem Varredura de Rotina no Duelo: errar um nó já tem a punição própria
+	# (o núcleo recupera a camada); um laser genérico no meio do chefe confundia.
+	var sweep := lvl.get_node("RoutineSweep")
+	lvl.remove_child(sweep)
+	sweep.free()
 	return lvl
 
 

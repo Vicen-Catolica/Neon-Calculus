@@ -45,7 +45,7 @@ SIMS="duel_sim duel_bot_sim" tools/run_tests.sh
 | `stage3_sim`, `stage3_live_sim` | Fase 3: luzes, lasers, ciborgues, Vance, sonar, camuflagem; esconderijos com tudo ligado |
 | `stage4_sim`, `stage4_live_sim` | Fase 4: pontes de luz, abismo, galeria, lore, alarme; esconderijos com tudo ligado |
 | `duel_sim` | peças do Duelo e o Duelo inteiro por código, até a vitória |
-| `duel_bot_sim` | robô que só desvia vence o Duelo em 3 sementes (os padrões são justos) |
+| `duel_bot_sim` | robô que só desvia não leva golpe parado em cada passarela (todos os padrões) e vence o Duelo em 3 sementes |
 | `balance_sim` | tabela de tempos de hack por tipo, lockdown, laser, ciborgue, Duelo |
 | `ui_sim` | tela de hack (acerto, erro, abortar, SINE, nível 5, Paradoxo), diálogos, Como jogar, pausa, lore, encerramento |
 | `guard_nav_sim` | agentes: atacam colados e recuam atirando, puxam o Eduardo do esconderijo se o viram entrar, sobem/descem escadas, pulam só o que dá para pular, param na beirada, seguram distância sem caminho, rádio chama reforços |
@@ -160,7 +160,6 @@ Nada disto foi jogado com teclado e mouse, só por simulação. Vale passar por 
 - **Playtest com teclado e mouse** (seção 5).
 - **Créditos das músicas:** a tela final lista só os títulos das três faixas; falta o autor.
 - **Efeitos sonoros provisórios:** os sons (voice blips, taser, alerta, passos, hack…) são sintetizados por `tools/gen_sfx.py`. Para trocar por um som gravado, basta sobrescrever `assets/sfx/<nome>.wav` com o mesmo nome.
-- **"Configurações" no menu de pausa** (GDD §8): a pausa tem Retomar, Como jogar, Reiniciar andar e Menu principal; as opções só estão no menu principal.
 - **Ciclos de Processamento / upgrades do traje** (WDD §10): fora do escopo.
 - **Build de Windows** (M5 do cronograma): não foi gerada nem testada.
 - **Dicas de tecla fixas no texto:** a HUD ("[F] ESCONDER", "SONAR [V]"…), a visão hacker ("[E] HACKEAR") e o "Como jogar" mostram as teclas padrão; se o jogador remapear nas Opções, essas dicas não acompanham.
@@ -233,3 +232,23 @@ Para rever: o guia e as conversas tocam uma vez por save; use "Novo jogo" para v
 | Objetos flutuando | Automático em todas as fases: câmera de parede sem parede atrás ganha haste até o teto (ou poste até o chão); emissor de laser sem teto ganha haste; porta mais baixa que o teto ganha verga de aço com faixa de perigo. Servidores do mezanino de P&D movidos para cima da passarela; câmera da ponte do Núcleo sobre a plataforma | `scripts/core/supports.gd`, `security_camera.gd`, `laser_barrier.gd`, `security_door.gd` |
 | Porta "teleportando" por baixo / porta final estranha | Saídas de P&D e do Núcleo só valem em pé dentro (como o elevador do Setor 2). Porta do Domo encostada na parede direita, que agora vai até o chão | `build_rnd_stage.gd`, `build_core_stage.gd` |
 | Duelo difícil demais | Golpe tira 15 (antes 25: 7 golpes até cair), intervalos entre ataques 2,4/1,9/1,5 s (antes 1,6/1,2/0,8), brecha do pulso 90° (120° com o Vance). Os nós ("cristais") são hackeáveis a até 900 px e sem linha de visão: dá para mirar do chão, sem subir até eles | `scripts/duel/*`, `hackable.gd` (`hack_range`, `ignore_line_of_sight`) |
+
+### Quinto playtest (relatório do Gemini, validado)
+
+| Pedido | O que mudou | Onde |
+|---|---|---|
+| Ataques do chefe impossíveis de desviar na passarela | Todo padrão agora tem saída **no piso em que o Eduardo está** (chão ou passarela), ao alcance correndo: o duelo mede o piso com raios (`player_span()`), põe a brecha da varredura e do pulso dentro dele, tira colunas da grade até abrir um vão ali, e a varredura lateral deixa a brecha de agachar rente à passarela (antes só rente ao chão) | `scripts/duel/paradox_duel.gd`, `sweep_attack.gd` |
+| Varredura de Rotina dentro do Duelo | Arena sem `RoutineSweep`; hack dos nós não mexe na variância (errar já faz o núcleo recuperar a camada) | `build_duel_stage.gd`, `paradox_duel.gd` |
+| Spoilers | "Como jogar" não diz mais onde está o Vance nem a resposta do Paradoxo; a tela do Paradoxo não mostra fórmula (a SINE explica depois do 1º erro) | `how_to_play.gd`, `hacking_interface.gd` |
+| Aviso do tutorial preso | O guia do hack desiste se o Eduardo fica a mais de 700 px do agente | `scripts/ui/tutorial.gd` |
+| Sonar e Camuflagem sem apresentação | Conversa `slums_suit` (SINE ensina [V] e [C]) logo depois do primeiro agente | `data/dialogue/slums.json`, `build_slums_stage.gd` |
+| Escada de D batia a cabeça no duto | Chaminé nas colunas 111–112, como a da escada 79 | `build_rnd_stage.gd` |
+| Lasers da galeria soltos sob o mezanino | Emissor encosta no mezanino; a haste não atravessa mais passarela | `build_core_stage.gd`, `laser_barrier.gd` |
+| Puxadinho e tigela de ramen flutuando | Pilares sob o puxadinho (o vão de 96 px continua livre); tigela num braço de ferro com correntes | `build_slums_stage.gd` |
+| HUD ilegível, slider "Voz" morto, sem Opções na pausa | Textos da Defesa em 18/16 px; "Voz" controla o bus novo `Voice` (blips das falas) e é salvo; botão "Opções" na pausa (Esc volta) | `hud.gd`, `default_bus_layout.tres`, `settings_manager.gd`, `options_menu.gd`, `sfx.gd`, `pause_menu.gd` |
+| Estado de game over | Ao cair, o `GameManager` entra em `GAME_OVER` (some o HUD de furtividade) | `eduardo.gd` |
+| Guarda congelava com o cone visível | Caixa de "na tela" do guarda cobre corpo e alcance (920×280) | `Entities/Enemy/Enemy.tscn` |
+| Lore falava em "nível inferior" | Textos falam em subir a torre | `data/lore/slums.json`, `data/dialogue/slums.json` |
+
+Não reproduzido: cones de visão atravessando o chão (headless e com janela, os cones param no piso). Mantido de propósito: o hack **pausa** o mundo.
+

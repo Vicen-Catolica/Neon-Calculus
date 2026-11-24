@@ -33,7 +33,7 @@ func read_all() -> void:
 func _ready() -> void:
 	Tutorial.allow_in_tests = true
 	GameManager.dialogues_seen.clear()
-	var ids := ["slums_intro", "slums_kiosk", "slums_upstairs", "ind_arrival", "ind_drones", "ind_top",
+	var ids := ["slums_intro", "slums_suit", "slums_kiosk", "slums_upstairs", "ind_arrival", "ind_drones", "ind_top",
 		"tut_hack_show", "tut_hack_done", "tut_hack_failed", "tut_spotted"]
 	var missing := ids.filter(func(id): return Dialogue.lines_for(id).is_empty())
 	check("roteiros novos da SINE carregam", missing.is_empty(), str(missing))
@@ -109,6 +109,25 @@ func _ready() -> void:
 	await frames(4)
 	check("guia termina e fica salvo (uma vez por save)", Tutorial.current_guide == "" and "guide_hack" in GameManager.dialogues_seen)
 	check("aviso some no fim", Tutorial.banner_text() == "")
+
+	# 2. Jogador ignora o guia e segue adiante: o aviso não fica preso na tela.
+	GameManager.dialogues_seen.erase("guide_hack")
+	p.global_position = Vector2(470, 16)
+	Tutorial.guide("hack", p.global_position)
+	for i in 240:
+		await get_tree().process_frame
+		if Dialogue.is_open():
+			break
+	await read_all()
+	await frames(4)
+	check("guia de novo: pede a visão hacker", Tutorial.current_step == "vision" and Tutorial.banner_text() != "")
+	var away := guard.global_position.x + Tutorial.GIVE_UP_DISTANCE + 60.0
+	if away > 1740.0:
+		away = guard.global_position.x - Tutorial.GIVE_UP_DISTANCE - 60.0
+	p.global_position = Vector2(away, 16)
+	await frames(10)
+	check("passou do agente sem hackear: o guia desiste e o aviso some",
+		Tutorial.current_guide == "" and Tutorial.banner_text() == "", "x=%.0f passo=%s" % [away, Tutorial.current_step])
 
 	print("TUDO OK — 0 falha(s)" if fails == 0 else "%d FALHA(S)" % fails)
 	get_tree().quit(1 if fails > 0 else 0)

@@ -34,8 +34,10 @@ const GROUND_RECTS := [
 const WALL_RECTS := [
 	[-12, -16, -7, -1],    # parede esquerda (doca do elevador de carga)
 	[-8, -16, 78, -12],    # teto principal (face de baixo em -368)...
-	[81, -16, 155, -12],   # ...com uma chaminé nas colunas 79–80 (boca do duto)
+	[81, -16, 110, -12],   # ...com uma chaminé nas colunas 79–80 (boca do duto)
 	[78, -21, 81, -17],    # tampa da chaminé: dá para ficar em pé no topo da escada
+	[113, -16, 155, -12],  # chaminé nas colunas 111–112: a escada de D sobe até o duto
+	[110, -21, 113, -17],  # (playtest: sem ela, subir por D batia a cabeça no teto)
 	[80, -9, 110, -6],     # C: teto do corredor; em cima dele, o duto (96 px)
 	[151, -11, 155, -5],   # verga da porta D -> E (vão de 160 px)
 	[151, -30, 155, -17],  # parede esquerda do átrio, acima do teto
@@ -48,6 +50,7 @@ const CATWALKS := [
 	[40, 74, -5, false],     # B: mezanino dos escritórios (y = -144)
 	[116, 146, -5, false],   # D: mezanino dos laboratórios (Lab 07)
 	[78, 79, -9, false],     # C: patamar da escada na boca do duto (y = -272)
+	[111, 112, -9, false],   # C/D: patamar da escada do outro lado do duto
 	# E: átrio, um andar a cada 128 px
 	[156, 169, -4, false],
 	[156, 169, -8, false],

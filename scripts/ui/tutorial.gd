@@ -27,6 +27,8 @@ var allow_in_tests: bool = false
 ## Guia em andamento ("" = nenhum) e o passo atual (para testes e depuração).
 var current_guide: String = ""
 var current_step: String = ""
+## Distância do agente em que o guia do hack desiste (o jogador seguiu adiante).
+const GIVE_UP_DISTANCE := 700.0
 
 var _pending: Dictionary = {}
 var _layer: CanvasLayer
@@ -190,6 +192,10 @@ func _guide_alive(guard: Node) -> bool:
 	if not _player_ok() or not is_instance_valid(guard) or not guard.is_inside_tree():
 		return false
 	if guard.has_method("_current_state_name") and guard._current_state_name() == "maxalert":
+		return false
+	# Passou do agente sem hackear (ou voltou muito): o guia desiste e some.
+	var p := _player()
+	if p and (p as Node2D).global_position.distance_to((guard as Node2D).global_position) > GIVE_UP_DISTANCE:
 		return false
 	return true
 

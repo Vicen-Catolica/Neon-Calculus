@@ -165,6 +165,10 @@ func _ready() -> void:
 	release_all()
 	await step(60)
 	check("C: agachado atravessa o duto e desce para D", p.global_position.x > 3540.0, pos())
+	# Volta: a escada de D sobe até o duto (chaminé em cima dela, como na 79).
+	await climb(111 * 32 + 16, 16.0, 420)
+	check("D: escada de volta sobe até a boca do duto (y≈-272)", absf(p.global_position.y + 272.0) < 6.0, pos())
+	tp(3600, 16); await step(20)
 	var corridor_cam := lvl.get_node("Cameras/CorridorCamera") as Node2D
 	check("C: a câmera do corredor fica abaixo do duto", corridor_cam.global_position.y > -272.0)
 

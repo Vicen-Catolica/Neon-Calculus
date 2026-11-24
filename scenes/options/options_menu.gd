@@ -545,7 +545,7 @@ func _load_current_values() -> void:
 	bgm_slider.value = SettingsManager.config.get_value("Audio", "bgm_volume", 0.8)
 	sfx_slider.value = SettingsManager.config.get_value("Audio", "sfx_volume", 0.8)
 	if voice_slider:
-		voice_slider.value = SettingsManager.config.get_value("Audio", "sfx_volume", 0.8)
+		voice_slider.value = SettingsManager.config.get_value("Audio", "voice_volume", 0.8)
 
 	var current_mode: int = SettingsManager.config.get_value("Video", "display_mode", 1)
 	display_option.select(current_mode)
@@ -565,6 +565,8 @@ func _connect_audio_signals() -> void:
 	master_slider.value_changed.connect(func(val): SettingsManager._set_bus_volume("Master", val))
 	bgm_slider.value_changed.connect(func(val): SettingsManager._set_bus_volume("BGM", val))
 	sfx_slider.value_changed.connect(func(val): SettingsManager._set_bus_volume("SFX", val))
+	if voice_slider:
+		voice_slider.value_changed.connect(func(val): SettingsManager._set_bus_volume("Voice", val))
 
 
 # ── Botões do rodapé (sinais conectados no Editor) ──
@@ -579,7 +581,8 @@ func _on_save_button_pressed() -> void:
 	if equation_size_option.get_popup().visible:
 		equation_size_option.get_popup().hide()
 
-	SettingsManager.save_audio_settings(master_slider.value, bgm_slider.value, sfx_slider.value)
+	SettingsManager.save_audio_settings(master_slider.value, bgm_slider.value, sfx_slider.value,
+		voice_slider.value if voice_slider else -1.0)
 	SettingsManager.save_video_settings(display_option.selected, resolution_option.selected, vsync_check.button_pressed)
 	SettingsManager.save_accessibility_settings(colorblind_option.selected, equation_size_option.selected)
 	SettingsManager.save_controls_settings(pending_controls)

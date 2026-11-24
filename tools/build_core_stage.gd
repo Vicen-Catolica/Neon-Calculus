@@ -199,7 +199,8 @@ func _add_lasers(lvl: Node) -> void:
 	# Só no chão da galeria (até o mezanino); o mezanino é a outra rota.
 	for l in [[2150.0, 0.0], [2950.0, 1.8]]:
 		var laser := _instance("res://scenes/objects/laser_barrier.tscn", "Laser%d" % int(l[0]), Vector2(l[0], 16))
-		laser.set("height", 16.0 + 144.0 - 8.0)
+		# Emissor encostado na face de baixo do mezanino (antes sobrava um vão de 8 px).
+		laser.set("height", 16.0 + 144.0)
 		laser.set("mode", LaserBarrier.Mode.TIMED)
 		laser.set("phase", l[1])
 		holder.add_child(laser)

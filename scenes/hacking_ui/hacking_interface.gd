@@ -382,7 +382,7 @@ func _on_submit_pressed() -> void:
 
 ## Paradoxo final: a "equação" x = x + 1, sem gerador. Nenhum número serve.
 func start_paradox() -> void:
-	_show_formula("se os x somem e sobra algo falso (0 = 1), não há solução")
+	_show_formula("")  # a descoberta é do jogador; a SINE explica depois do 1º erro
 	paradox_mode = true
 	get_tree().paused = true
 	get_tree().call_group("hud", "hide_hud")
