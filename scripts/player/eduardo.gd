@@ -264,11 +264,11 @@ func can_hide() -> bool:
 ## Texto de ajuda para a HUD.
 func get_interaction_hint() -> String:
 	if _hidden:
-		return "[F] SAIR DO ESCONDERIJO"
+		return "[%s] SAIR DO ESCONDERIJO" % Tutorial.key_of("interact_world")
 	if not _hide_spots.is_empty():
 		if not _lights.is_empty():
 			return "LUZ DEMAIS PARA SE ESCONDER — APAGUE A LUZ"
-		return "[F] ESCONDER"
+		return "[%s] ESCONDER" % Tutorial.key_of("interact_world")
 	return ""
 
 

@@ -8,6 +8,8 @@ extends Area2D
 ## Se preenchido, dispara um guia do Tutorial (passo a passo da SINE) em vez
 ## de um roteiro simples. Ex.: "hack".
 @export var guide: String = ""
+## Se preenchido, mostra uma dica de tecla do Tutorial (ex.: "hide"), sem pausar.
+@export var hint: String = ""
 
 var _waiting: bool = false
 
@@ -19,6 +21,9 @@ func _ready() -> void:
 
 func _on_body_entered(body: Node2D) -> void:
 	if not body.is_in_group("Player"):
+		return
+	if hint != "":
+		Tutorial.hint(hint, global_position)
 		return
 	if guide != "":
 		if not ("guide_" + guide in GameManager.dialogues_seen):

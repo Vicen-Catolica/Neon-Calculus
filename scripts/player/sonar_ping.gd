@@ -99,7 +99,7 @@ func _process(delta: float) -> void:
 	_arrows.queue_redraw()
 	_bar.size.x = 160.0 * (1.0 - cooldown_left / COOLDOWN)
 	_bar.color = CYAN if ready_to_ping() else Color(CYAN, 0.45)
-	_label.text = "SONAR [V]  " + ("PRONTO" if ready_to_ping() else "%d s" % ceili(cooldown_left))
+	_label.text = "SONAR [%s]  " % Tutorial.key_of("sonar_ping") + ("PRONTO" if ready_to_ping() else "%d s" % ceili(cooldown_left))
 
 
 func _draw() -> void:
@@ -200,7 +200,7 @@ func _build_ui() -> void:
 	_label.add_theme_font_override("font", font)
 	_label.add_theme_font_size_override("font_size", 18)
 	_label.add_theme_color_override("font_color", CYAN)
-	_label.text = "SONAR [V]  PRONTO"
+	_label.text = "SONAR [%s]  PRONTO" % Tutorial.key_of("sonar_ping")
 	_ui.add_child(_label)
 
 

@@ -171,7 +171,7 @@ func _build_ui() -> void:
 	_msg = _label(font, 20, Color(1, 0.75, 0.75), 295)
 	_clock = _label(font, 56, Color(1, 0.9, 0.9), 365)
 	var hint := _label(font, 18, Color(0.35, 0.95, 1.0), 445)
-	hint.text = "HACKEIE A PORTA DE SAÍDA  [Q]"
+	hint.text = "HACKEIE A PORTA DE SAÍDA  [%s]" % Tutorial.key_of("hack_vision")
 
 
 func _label(font: Font, size: int, color: Color, y: float) -> Label:

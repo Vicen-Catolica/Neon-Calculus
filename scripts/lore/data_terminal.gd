@@ -23,7 +23,7 @@ func is_player_near() -> bool:
 
 func get_interaction_hint() -> String:
 	var read := entry_id in GameManager.lore_read
-	return "[F] LER TERMINAL" + ("  (LIDO)" if read else "")
+	return "[%s] LER TERMINAL" % Tutorial.key_of("interact_world") + ("  (LIDO)" if read else "")
 
 
 func _unhandled_input(event: InputEvent) -> void:

@@ -80,7 +80,7 @@ func _build() -> void:
 	_tip.custom_minimum_size = Vector2(1000, 0)
 	_tip_box.visible = false
 	_hint = _label(box, font, 16, Color(0.6, 0.8, 0.85))
-	_hint.text = "[F] FECHAR"
+	_hint.text = "[%s] FECHAR" % Tutorial.key_of("interact_world")
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
 

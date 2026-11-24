@@ -9,6 +9,13 @@ extends Node
 ##    Disparados por DialogueTrigger com `guide` (ver stage_builder_base
 ##    `_tutorial_trigger`). Também uma vez por save (id "guide_<nome>").
 ##
+## 3. Dicas de tecla (`Tutorial.hint("move", origem)`): aviso curto no alto da
+##    tela na primeira vez que algo aparece (andar, esconder, escada, agachar,
+##    sonar...), sem pausar. Some quando o jogador faz a ação, se afasta ou o
+##    tempo acaba. Uma vez por save (id "hint_<nome>"). Disparadas por
+##    DialogueTrigger com `hint` (ver stage_builder_base `_hint_trigger`).
+##    Para quem não abriu o "Como jogar".
+##
 ## As teclas mostradas saem do InputMap: se o jogador remapear, o texto acompanha.
 
 ## evento -> id do roteiro
@@ -230,6 +237,110 @@ func _hackable_of(node: Node) -> Hackable:
 	return null
 
 
+# --- Dicas de tecla -----------------------------------------------------------
+
+## {ação} no texto vira a tecla (ou teclas) dela. `done`: ações que, apertadas,
+## encerram a dica (vazio = só por tempo/distância). `walk`: encerra quando o
+## Eduardo anda isso. `next`: dica seguinte, logo depois.
+const HINTS := {
+	"move": {"text": "{move_left} / {move_right} andar    {jump} pular    segure {run} para correr (faz barulho)",
+		"walk": 260.0},
+	"pause": {"text": "{ui_cancel} pausa o jogo. Lá está o [b]Como jogar[/b], com todos os controles.",
+		"done": ["ui_cancel"], "time": 6.0},
+	"hide": {"text": "Esconderijo: aperte {interact_world} para se esconder (só no escuro). {interact_world} de novo para sair.",
+		"done": ["interact_world"]},
+	"ladder": {"text": "Escada: segure {climb_up} para subir e {climb_down} para descer.",
+		"done": ["climb_up"], "next": "pause"},
+	"suit": {"text": "{sonar_ping} Ping Sonar    {camo} Camuflagem (5 s)    as barras embaixo, à esquerda, mostram a recarga",
+		"done": ["sonar_ping", "camo"]},
+	"crouch": {"text": "Teto baixo: segure {crouch} para agachar e passar. Agachado, você também não faz barulho.",
+		"done": ["crouch"]},
+}
+const HINT_MIN := 2.5
+const HINT_MAX := 12.0
+## Longe disto do gatilho, a dica some (o jogador seguiu adiante).
+const HINT_RANGE := 700.0
+
+var current_hint: String = ""
+var _hint_queue: Array = []
+var _hint_loop: bool = false
+
+
+func hint(hint_name: String, origin: Vector2) -> void:
+	if not HINTS.has(hint_name) or ("hint_" + hint_name) in GameManager.dialogues_seen or not _allowed_here():
+		return
+	for q in _hint_queue:
+		if q[0] == hint_name:
+			return
+	if current_hint == hint_name:
+		return
+	_hint_queue.append([hint_name, origin])
+	if not _hint_loop:
+		_next_hint()
+
+
+func _next_hint() -> void:
+	_hint_loop = true
+	while not _hint_queue.is_empty():
+		var h: Array = _hint_queue.pop_front()
+		await _run_hint(h[0], h[1])
+	_hint_loop = false
+
+
+## Texto da dica com as teclas no lugar de {ação}.
+func hint_text(hint_name: String) -> String:
+	var text: String = HINTS[hint_name]["text"]
+	var re := RegEx.create_from_string("\\{([a-z_]+)\\}")
+	for m in re.search_all(text):
+		text = text.replace(m.get_string(0), "[b][%s][/b]" % keys_of(m.get_string(1)))
+	return text
+
+
+func _run_hint(hint_name: String, origin: Vector2) -> void:
+	# Espera o jogo livre e nenhum guia usando o aviso.
+	await _wait_free()
+	while current_guide != "":
+		await get_tree().process_frame
+		await _wait_free()
+	var seen := "hint_" + hint_name
+	if seen in GameManager.dialogues_seen or not _player_ok():
+		return
+	var p := _player()
+	if p == null or p.global_position.distance_to(origin) > HINT_RANGE:
+		return
+	var cfg: Dictionary = HINTS[hint_name]
+	var done: Array = cfg.get("done", [])
+	var walk: float = cfg.get("walk", 0.0)
+	var max_t: float = cfg.get("time", HINT_MAX)
+	current_hint = hint_name
+	GameManager.mark_dialogue_seen(seen)
+	_show_banner(hint_text(hint_name))
+	var t := 0.0
+	var did := false
+	var start_x := p.global_position.x
+	while true:
+		await get_tree().process_frame
+		if current_guide != "" or not is_instance_valid(p) or not p.is_inside_tree():
+			current_hint = ""
+			return  # um guia tomou o aviso (ou a fase trocou)
+		for a in done:
+			if Input.is_action_pressed(a):
+				did = true
+		if get_tree().paused:
+			continue
+		t += get_process_delta_time()
+		if walk > 0.0 and absf(p.global_position.x - start_x) >= walk:
+			did = true
+		if (did and t >= HINT_MIN) or t >= max_t or p.global_position.distance_to(origin) > HINT_RANGE + 300.0:
+			break
+	_hide_banner()
+	current_hint = ""
+	var nxt: String = cfg.get("next", "")
+	if nxt != "":
+		await get_tree().create_timer(0.6, false).timeout
+		_hint_queue.push_front([nxt, p.global_position])
+
+
 # --- Câmera ---------------------------------------------------------------
 
 var _cam_tween: Tween
@@ -271,19 +382,45 @@ func _tween_offset(cam: Camera2D, to: Vector2) -> void:
 
 # --- Teclas ---------------------------------------------------------------
 
+## Nomes em português das teclas especiais.
+const KEY_NAMES := {"Space": "Espaço", "Escape": "Esc", "Up": "↑", "Down": "↓", "Left": "←", "Right": "→",
+	"Control": "Ctrl", "Enter": "Enter", "Backspace": "Apagar"}
+
+
+## Todas as teclas de teclado da ação, ex.: "S ou Ctrl".
+func keys_of(action: String) -> String:
+	if not InputMap.has_action(action):
+		return action
+	var names: Array[String] = []
+	for ev in InputMap.action_get_events(action):
+		if ev is InputEventKey:
+			var n := _key_name(ev as InputEventKey)
+			if not (n in names):
+				names.append(n)
+	if names.is_empty():
+		return key_of(action)
+	# letras primeiro (S antes de Ctrl)
+	names.sort_custom(func(a, b): return a.length() < b.length())
+	return " ou ".join(names)
+
+
+func _key_name(k: InputEventKey) -> String:
+	var code: Key = k.keycode
+	if code == KEY_NONE:
+		code = DisplayServer.keyboard_get_keycode_from_physical(k.physical_keycode)
+	if code == KEY_NONE:
+		code = k.physical_keycode
+	var n := OS.get_keycode_string(code)
+	return KEY_NAMES.get(n, n)
+
+
 ## Nome da primeira tecla de teclado ligada à ação (ex.: "Q", "Tab").
 func key_of(action: String) -> String:
 	if not InputMap.has_action(action):
 		return action
 	for ev in InputMap.action_get_events(action):
 		if ev is InputEventKey:
-			var k := ev as InputEventKey
-			var code: Key = k.keycode
-			if code == KEY_NONE:
-				code = DisplayServer.keyboard_get_keycode_from_physical(k.physical_keycode)
-			if code == KEY_NONE:
-				code = k.physical_keycode
-			return OS.get_keycode_string(code)
+			return _key_name(ev as InputEventKey)
 		if ev is InputEventMouseButton:
 			return "Mouse %d" % (ev as InputEventMouseButton).button_index
 	return action

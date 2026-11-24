@@ -155,7 +155,7 @@ func _show_line() -> void:
 	_body.visible_characters = 0
 	_shown = 0.0
 	_last_ticks = Time.get_ticks_msec()
-	_hint.text = "[E] CONTINUAR    [ESC] PULAR" if _index < _lines.size() - 1 else "[E] FECHAR"
+	_hint.text = ("[%s] CONTINUAR    [%s] PULAR" % [Tutorial.key_of("hack_confirm"), Tutorial.key_of("ui_cancel")]) if _index < _lines.size() - 1 else "[%s] FECHAR" % Tutorial.key_of("hack_confirm")
 	_glitch.visible = who == "AXIOMA"
 
 

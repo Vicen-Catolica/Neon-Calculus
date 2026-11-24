@@ -251,7 +251,7 @@ func _on_draw() -> void:
 			s += dash * 2.0
 		var label := target.get_label()
 		_drawer.draw_string(_font, to + Vector2(-60, -34), label, HORIZONTAL_ALIGNMENT_CENTER, 120, 11, CYAN)
-		_drawer.draw_string(_font, to + Vector2(-60, 40), "[E] HACKEAR", HORIZONTAL_ALIGNMENT_CENTER, 120, 9, CYAN)
+		_drawer.draw_string(_font, to + Vector2(-60, 40), "[%s] HACKEAR" % Tutorial.key_of("hack_confirm"), HORIZONTAL_ALIGNMENT_CENTER, 120, 9, CYAN)
 
 
 func _draw_brackets(c: Vector2, r: float, col: Color, w: float) -> void:

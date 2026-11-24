@@ -162,7 +162,7 @@ Nada disto foi jogado com teclado e mouse, só por simulação. Vale passar por 
 - **Efeitos sonoros provisórios:** os sons (voice blips, taser, alerta, passos, hack…) são sintetizados por `tools/gen_sfx.py`. Para trocar por um som gravado, basta sobrescrever `assets/sfx/<nome>.wav` com o mesmo nome.
 - **Ciclos de Processamento / upgrades do traje** (WDD §10): fora do escopo.
 - **Build de Windows** (M5 do cronograma): não foi gerada nem testada.
-- **Dicas de tecla fixas no texto:** a HUD ("[F] ESCONDER", "SONAR [V]"…), a visão hacker ("[E] HACKEAR") e o "Como jogar" mostram as teclas padrão; se o jogador remapear nas Opções, essas dicas não acompanham.
+- **Dicas de tecla fixas no texto:** só o "Como jogar" e o "[N]" do Paradoxo ainda mostram as teclas padrão; as dicas do tutorial e os avisos da HUD (esconder, terminal, sonar, camuflagem, hackear, diálogo, lockdown) já usam a tecla configurada.
 - **Arte ainda desenhada em código:** emissor de laser, cela, ponte de luz, núcleo e nós (funcionam e combinam com o estilo, mas não são pixel art desenhada).
 
 ---
@@ -266,4 +266,19 @@ Não reproduzido: cones de visão atravessando o chão (headless e com janela, o
 | Placas de saída como texto solto | Placa escura com borda neon (Setor 2, P&D, Domo) | `stage_builder_base.gd` (`_exit_sign`) |
 | Mancha no retrato da Axioma | Canto superior esquerdo refeito (espelho do canto direito) | `assets/ui/portraits/axioma.png` |
 | "Ø" parecido com "O" | Símbolo de conjunto vazio de verdade: "∅ SEM SOLUÇÃO" | `hacking_interface.gd`, `data/lore/core.json` |
+
+### Dicas de tecla durante o jogo (pedido seu)
+
+Para quem não abriu o "Como jogar": na primeira vez que cada coisa aparece na Fase 1, a SINE mostra no alto da tela a tecla certa (lida do InputMap, então acompanha o remapeamento), sem pausar. A dica some quando o jogador faz a ação, se afasta ou depois de ~12 s, e não volta no mesmo save (`hint_<nome>` em `dialogues_seen`).
+
+| Dica | Onde aparece | Some quando |
+|---|---|---|
+| andar / pular / correr | no começo, depois da conversa de abertura | andou 260 px |
+| esconderijo | nos sacos de lixo antes do primeiro agente | apertou a tecla de esconder |
+| escada | na primeira escada | subiu |
+| pausa e "Como jogar" | logo depois da escada | 6 s (ou apertou Esc) |
+| Sonar e Camuflagem | depois da conversa dos módulos do traje | usou um dos dois |
+| agachar | antes do túnel baixo do prédio T1 | agachou |
+
+Os avisos da HUD que tinham a tecla escrita fixa ("[F] ESCONDER", "SONAR [V]", "[E] HACKEAR", "[E] CONTINUAR"...) também passaram a mostrar a tecla configurada. Código: `scripts/ui/tutorial.gd` (`hint`, `HINTS`, `keys_of`), gatilhos em `build_slums_stage.gd` (`_hint_trigger`).
 
