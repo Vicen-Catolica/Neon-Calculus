@@ -48,7 +48,8 @@ var max_security: bool = false
 ## Abre o passo a passo da SINE já no começo (Protocolo Vance na última camada do Duelo).
 var sine_at_start: bool = false
 ## Paradoxo final do Duelo (GDD §1/§9: a "Variável Infinita"): x = x + 1 não tem
-## solução; a resposta é o botão "∅ SEM SOLUÇÃO" (ou a tecla N).
+## solução; a resposta é o botão "⌀ SEM SOLUÇÃO" (ou a tecla N).
+## (⌀ U+2300 no lugar de ∅ U+2205: a Exo2 não tem o glifo do conjunto vazio.)
 var paradox_mode: bool = false
 var _paradox_btn: Button
 const PARADOX_TIME := 60.0
@@ -259,6 +260,8 @@ func start_hacking(floor_level: int, sub_topic: int = 0) -> void:
 	if sine_at_start:
 		sine_at_start = false
 		_activate_ai_assistant()
+		# Sem isso a SINE "aparece do nada" (playtest): diz que é o prêmio do resgate.
+		_show_feedback("PROTOCOLO VANCE: a SINE já abriu o passo a passo ao lado.", Color("#ffaa00"))
 
 	if equation_label:
 		equation_label.text = str(eq_data.get("Expression", ""))
@@ -405,7 +408,7 @@ func start_paradox() -> void:
 	_paradox_btn.visible = true
 	current_input_text = ""
 	_update_input_display()
-	_show_feedback("Encontre x... ou prove que ele não existe. Número + Enter, ou [∅ SEM SOLUÇÃO] (tecla N).", Color(0.6, 0.8, 0.85))
+	_show_feedback("Encontre x... ou prove que ele não existe. Número + Enter, ou [⌀ SEM SOLUÇÃO] (tecla N).", Color(0.6, 0.8, 0.85))
 	show()
 	_time_total = PARADOX_TIME
 	if hack_timer:
@@ -417,7 +420,7 @@ func _ensure_paradox_button() -> void:
 		return
 	_paradox_btn = Button.new()
 	_paradox_btn.name = "ParadoxButton"
-	_paradox_btn.text = "∅ SEM SOLUÇÃO  [N]"
+	_paradox_btn.text = "⌀ SEM SOLUÇÃO  [N]"
 	_paradox_btn.custom_minimum_size = Vector2(submit_button.custom_minimum_size.x, 44)
 	_paradox_btn.size_flags_horizontal = submit_button.size_flags_horizontal
 	_paradox_btn.add_theme_font_override("font", load("res://assets/fonts/ui_font.tres"))
@@ -448,7 +451,7 @@ func _on_paradox_answer() -> void:
 	if hack_timer:
 		hack_timer.paused = true
 	if input_line:
-		input_line.text = "x = ∅"
+		input_line.text = "x = ⌀"
 	_show_feedback("PARADOXO ACEITO: nenhum x satisfaz x = x + 1.\nA AXIOMA NÃO CONSEGUE COMPUTAR A VARIÁVEL INFINITA.", FEEDBACK_OK)
 	_flash_input(FEEDBACK_OK)
 	await _wait_real(RESULT_HOLD * 2.0)
@@ -469,7 +472,7 @@ func _trigger_error(wrong_value: int = 0) -> void:
 	if paradox_mode:
 		msg = "x = %d? Então %d = %d. Falso: nenhum número funciona aqui. -%d s." % [wrong_value, wrong_value, wrong_value + 1, int(ERROR_PENALTY)]
 	if error_count >= sine_after_errors():
-		msg += "\nA SINE abriu o passo a passo ao lado."
+		msg += "\nA SINE abriu o passo a passo ao lado." + (" (Protocolo Vance: já no 1º erro)" if vance_protocol() and error_count == 1 else "")
 	_show_feedback(msg, FEEDBACK_ERR)
 	_flash_input(FEEDBACK_ERR)
 
@@ -622,7 +625,7 @@ func _generate_step_by_step_hint() -> String:
 		text += "    0 = 1\n"
 		text += " 2. Isso é sempre falso.\n"
 		text += " > Nenhum número satisfaz a equação.\n"
-		text += " > Responda: ∅ SEM SOLUÇÃO (tecla N).\n"
+		text += " > Responda: ⌀ SEM SOLUÇÃO (tecla N).\n"
 		text += " > A Axioma vai tentar calcular para sempre."
 		return text
 

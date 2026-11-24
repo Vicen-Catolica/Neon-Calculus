@@ -93,7 +93,7 @@ O save fica em `user://save.cfg` (no Linux, `~/.local/share/godot/app_userdata/<
 | **V** | Ping Sonar (novo) |
 | **C** | Variável Oculta, camuflagem (nova) |
 | Esc | pausa; durante o hack, aborta (não no lockdown nem no Duelo) |
-| N | no Paradoxo final, responde "∅ SEM SOLUÇÃO" |
+| N | no Paradoxo final, responde "⌀ SEM SOLUÇÃO" |
 
 ---
 
@@ -134,7 +134,7 @@ Nada disto foi jogado com teclado e mouse, só por simulação. Vale passar por 
 - [ ] Confronto com a Axioma antes de começar; não se repete após game over.
 - [ ] Cada ataque avisa antes. A brecha da varredura é alcançável; a varredura lateral passa agachado; o pulso tem um setor livre; a grade tem vãos.
 - [ ] Errar a equação de um nó só apaga o nó por 4 s.
-- [ ] O Paradoxo `x = x + 1`: um número é erro; ∅ (ou N) vence.
+- [ ] O Paradoxo `x = x + 1`: um número é erro; ⌀ (ou N) vence.
 - [ ] Vitória: falas finais, tela branca e encerramento com estatísticas e créditos.
 - [ ] Depois de zerar, "Continuar" leva ao encerramento.
 - [ ] **Dificuldade:** o Duelo está justo para quem joga de verdade? (O robô vence sem levar golpe porque reage no primeiro quadro do aviso.)
@@ -162,7 +162,7 @@ Nada disto foi jogado com teclado e mouse, só por simulação. Vale passar por 
 - **Efeitos sonoros provisórios:** os sons (voice blips, taser, alerta, passos, hack…) são sintetizados por `tools/gen_sfx.py`. Para trocar por um som gravado, basta sobrescrever `assets/sfx/<nome>.wav` com o mesmo nome.
 - **Ciclos de Processamento / upgrades do traje** (WDD §10): fora do escopo.
 - **Build de Windows** (M5 do cronograma): não foi gerada nem testada.
-- **Dicas de tecla fixas no texto:** a HUD ("[F] ESCONDER", "SONAR [V]"…), a visão hacker ("[E] HACKEAR") e o "Como jogar" mostram as teclas padrão; se o jogador remapear nas Opções, essas dicas não acompanham.
+- **Dicas de tecla fixas no texto:** só o "[N]" do Paradoxo (não é remapeável) e o "Enter"/"Esc" da tela de hack; o "Como jogar", as dicas do tutorial e os avisos da HUD já usam a tecla configurada.
 - **Arte ainda desenhada em código:** emissor de laser, cela, ponte de luz, núcleo e nós (funcionam e combinam com o estilo, mas não são pixel art desenhada).
 
 ---
@@ -265,5 +265,52 @@ Não reproduzido: cones de visão atravessando o chão (headless e com janela, o
 | Fundo vazando sob a parede do Domo | Chão vai até a borda da fase | `build_core_stage.gd` |
 | Placas de saída como texto solto | Placa escura com borda neon (Setor 2, P&D, Domo) | `stage_builder_base.gd` (`_exit_sign`) |
 | Mancha no retrato da Axioma | Canto superior esquerdo refeito (espelho do canto direito) | `assets/ui/portraits/axioma.png` |
-| "Ø" parecido com "O" | Símbolo de conjunto vazio de verdade: "∅ SEM SOLUÇÃO" | `hacking_interface.gd`, `data/lore/core.json` |
+| "Ø" parecido com "O" | Símbolo de conjunto vazio: "⌀ SEM SOLUÇÃO" (ver oitavo playtest) | `hacking_interface.gd`, `data/lore/core.json` |
+
+### Dicas de tecla durante o jogo (pedido seu)
+
+Para quem não abriu o "Como jogar": na primeira vez que cada coisa aparece na Fase 1, a SINE mostra no alto da tela a tecla certa (lida do InputMap, então acompanha o remapeamento), sem pausar. A dica some quando o jogador faz a ação, se afasta ou depois de ~12 s, e não volta no mesmo save (`hint_<nome>` em `dialogues_seen`).
+
+| Dica | Onde aparece | Some quando |
+|---|---|---|
+| andar / pular / correr | no começo, depois da conversa de abertura | andou 260 px |
+| esconderijo | nos sacos de lixo antes do primeiro agente | apertou a tecla de esconder |
+| escada | na primeira escada | subiu |
+| pausa e "Como jogar" | logo depois da escada | 6 s (ou apertou Esc) |
+| Sonar e Camuflagem | depois da conversa dos módulos do traje | usou um dos dois |
+| agachar | antes do túnel baixo do prédio T1 | agachou |
+
+Os avisos da HUD que tinham a tecla escrita fixa ("[F] ESCONDER", "SONAR [V]", "[E] HACKEAR", "[E] CONTINUAR"...) também passaram a mostrar a tecla configurada. Código: `scripts/ui/tutorial.gd` (`hint`, `HINTS`, `keys_of`), gatilhos em `build_slums_stage.gd` (`_hint_trigger`).
+
+### Sétimo playtest
+
+| Pedido | O que mudou | Onde |
+|---|---|---|
+| Porta da entrada de D (P&D) sem sentido, solta embaixo do patamar da escada | Porta de lockdown movida para x = 3696, dentro de uma divisória que desce do teto até ela (vira a porta dos laboratórios); o mezanino começa logo depois. A área do lockdown começa depois da porta | `tools/build_rnd_stage.gd` |
+| Agachado sob as passarelas do átrio (fim da Fase 3), não levantava | O teste de "dá para levantar?" ignora passarela de mão única (dá para atravessá-la de baixo); teto sólido (dutos) continua mantendo agachado | `scripts/player/eduardo.gd` (`_can_stand`, `_solid_over`) |
+
+### Oitavo playtest (rodada final do Gemini, validada)
+
+| Achado | O que mudou | Onde |
+|---|---|---|
+| "∅" aparecia como "?" num círculo | A Exo2 não tem o ∅ (U+2205). Troquei por ⌀ (U+2300), que a fonte tem e tem o mesmo desenho | `hacking_interface.gd`, `data/lore/core.json`, `paradox_duel.gd`, `tests/duel_sim.gd` |
+| Dica da SINE ficava presa no Menu ao sair da fase com ela aberta | `_run_hint` esconde o aviso quando o Eduardo sai da árvore (só não esconde quando um guia assumiu o aviso) | `scripts/ui/tutorial.gd`, teste novo em `tutorial_sim` |
+| HUD consultava o layout do teclado todo quadro (milhares de erros no headless) | Nome da tecla física fica em cache; no headless nem consulta o DisplayServer | `scripts/ui/tutorial.gd` (`_key_name`) |
+| `[A]`, `[Espaço]` em negrito caíam na fonte padrão | `bold_font` do aviso usa a mesma fonte da UI | `scripts/ui/tutorial.gd` |
+
+Não mexi: letras "apagando" nas placas (é o pisca-pisca proposital do neon) e `max_defense` (é o seu god mode, volte para 100.0 antes do build final).
+
+### Nono playtest (rodada 4 do Gemini + Duelo jogado por você)
+
+| Achado | O que mudou | Onde |
+|---|---|---|
+| Duelo: passo a passo no 2º erro, depois no 1º, depois já aberto | É o Protocolo Vance (Vance resgatado: SINE no 1º erro e já aberta no último cristal). A lógica está igual nos 3 cristais (testei com e sem resgate); o 1º cristal com 2 erros não reproduzi. Agora a tela diz o motivo: "PROTOCOLO VANCE: a SINE já abriu o passo a passo" e "(Protocolo Vance: já no 1º erro)" | `hacking_interface.gd`, teste em `duel_sim` |
+| `SCRIPT ERROR` ao sair da fase no meio do guia do hack | `_guide_alive`/`_wait_until` aceitam o agente já liberado; o guia encerra | `scripts/ui/tutorial.gd`, teste em `tutorial_sim` |
+| `SCRIPT ERROR` ao sair da fase entre duas dicas encadeadas | Depois da espera de 0,6 s, confere se o Eduardo ainda existe | `scripts/ui/tutorial.gd` |
+| Remapear hackear/visão mostrava "[Mouse 1]"/"[Mouse 2]" | `key_of` procura tecla antes de botão do mouse | `scripts/ui/tutorial.gd`, teste em `tutorial_sim` |
+| Rodapé da visão hacker com "[TAB]" e "[E]" fixos | Usa as teclas configuradas | `scripts/ui/stealth_hud.gd` |
+| "[F] FECHAR" do leitor de terminal e aviso do lockdown não acompanhavam o remapeamento na mesma fase | Texto refeito ao abrir | `lore_reader.gd`, `lockdown_zone.gd` |
+| "Como jogar" com teclas fixas | Tabela de controles e citações de tecla usam as teclas configuradas | `scripts/ui/how_to_play.gd` (`with_keys`) |
+| Cliques do Menu Principal ignoravam o volume de Efeitos | `ClickSFX`/`HoverSFX` no bus SFX | `scenes/main_menu/main_menu.tscn` |
+| Ar-condicionado dentro do teto da sala dos servidores (Fase 2) | Na parede da sala, acima do barril | `tools/build_industrial_stage.gd` |
 

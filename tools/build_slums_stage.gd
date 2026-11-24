@@ -111,7 +111,15 @@ func build() -> Node:
 	# SINE: conversa de abertura, guia do hack antes do primeiro agente e uma
 	# conversa no meio do caminho (relação criador e criação).
 	_dialogue_trigger(lvl, "slums_intro", Vector2(64, 16))
+	# Dicas de tecla na primeira vez que cada coisa aparece (para quem não
+	# abriu o "Como jogar"): andar/pular/correr e pausa, esconderijo, escada,
+	# módulos do traje, agachar no túnel.
+	_hint_trigger(lvl, "move", Vector2(64, 16))
+	_hint_trigger(lvl, "hide", Vector2(330, 16))
 	_tutorial_trigger(lvl, "hack", Vector2(460, 16))
+	_hint_trigger(lvl, "ladder", Vector2(46 * T + 16, 16))
+	_hint_trigger(lvl, "suit", Vector2(1800, 16), Vector2(120, 400))
+	_hint_trigger(lvl, "crouch", Vector2(3260, -48))
 	# Módulos do traje (Sonar [V] e Camuflagem [C]) depois do primeiro agente.
 	_dialogue_trigger(lvl, "slums_suit", Vector2(1800, 16), Vector2(120, 400))
 	_dialogue_trigger(lvl, "slums_kiosk", Vector2(2300, -48), Vector2(120, 400))

@@ -55,6 +55,15 @@ func _ready() -> void:
 			break
 	check("conversa de abertura da SINE na Fase 1", Dialogue.is_open() and Dialogue.current_speaker() == "SINE")
 	await read_all()
+	# Dica de tecla logo depois da abertura (para quem não abriu o "Como jogar").
+	for i in 30:
+		await get_tree().process_frame
+		if Tutorial.current_hint != "":
+			break
+	var move_txt := Tutorial.banner_text()
+	check("dica de andar/pular/correr aparece depois da abertura", Tutorial.current_hint == "move"
+		and "[A]" in move_txt and "[Espaço]" in move_txt and "[Shift]" in move_txt, move_txt)
+	check("dica de tecla não pausa o jogo", not get_tree().paused)
 	# Agentes parados (o guia não pode morrer porque alguém viu o Eduardo).
 	var guard := lvl.get_node("Guards/Guard1") as Enemy
 	for g in get_tree().get_nodes_in_group("guards"):
@@ -111,6 +120,9 @@ func _ready() -> void:
 	check("aviso some no fim", Tutorial.banner_text() == "")
 
 	# 2. Jogador ignora o guia e segue adiante: o aviso não fica preso na tela.
+	# (dicas de tecla já vistas, para não ocuparem o aviso neste trecho)
+	for h in Tutorial.HINTS:
+		GameManager.mark_dialogue_seen("hint_" + h)
 	GameManager.dialogues_seen.erase("guide_hack")
 	p.global_position = Vector2(470, 16)
 	Tutorial.guide("hack", p.global_position)
@@ -128,6 +140,78 @@ func _ready() -> void:
 	await frames(10)
 	check("passou do agente sem hackear: o guia desiste e o aviso some",
 		Tutorial.current_guide == "" and Tutorial.banner_text() == "", "x=%.0f passo=%s" % [away, Tutorial.current_step])
+
+	# 3. Dica de agachar: mostra as duas teclas e some depois de agachar.
+	await frames(10)
+	GameManager.dialogues_seen.erase("hint_crouch")
+	Tutorial.hint("crouch", p.global_position)
+	for i in 30:
+		await get_tree().process_frame
+		if Tutorial.current_hint == "crouch":
+			break
+	var cr := Tutorial.banner_text()
+	check("dica de agachar mostra as duas teclas", Tutorial.current_hint == "crouch" and "[S ou Ctrl]" in cr, cr)
+	Input.action_press("crouch")
+	await get_tree().create_timer(Tutorial.HINT_MIN + 0.5, true, false, true).timeout
+	Input.action_release("crouch")
+	await frames(5)
+	check("agachou: a dica some e fica salva", Tutorial.current_hint == "" and Tutorial.banner_text() == ""
+		and "hint_crouch" in GameManager.dialogues_seen)
+	# Remapeou a tecla nas Opções: dica e aviso da HUD acompanham.
+	var old_events := InputMap.action_get_events("camo")
+	InputMap.action_erase_events("camo")
+	var g := InputEventKey.new()
+	g.physical_keycode = KEY_G
+	InputMap.action_add_event("camo", g)
+	check("tecla remapeada aparece na dica", "[G]" in Tutorial.hint_text("suit"), Tutorial.hint_text("suit"))
+	check("Como jogar mostra a tecla remapeada", "[color=#39ff14]G[/color]" in HowToPlay.with_keys(HowToPlay.TEXT))
+	InputMap.action_erase_events("camo")
+	for e in old_events:
+		InputMap.action_add_event("camo", e)
+	# Remapear como as Opções fazem: a tecla nova vai para o fim, depois do clique.
+	var conf_events := InputMap.action_get_events("hack_confirm")
+	for e in conf_events:
+		if e is InputEventKey:
+			InputMap.action_erase_event("hack_confirm", e)
+	var r := InputEventKey.new()
+	r.physical_keycode = KEY_R
+	InputMap.action_add_event("hack_confirm", r)
+	check("tecla remapeada vem antes do clique do mouse", Tutorial.key_of("hack_confirm") == "R", Tutorial.key_of("hack_confirm"))
+	InputMap.action_erase_events("hack_confirm")
+	for e in conf_events:
+		InputMap.action_add_event("hack_confirm", e)
+
+	# Saiu da fase com a dica aberta (ex.: Menu pela pausa): o aviso não fica preso.
+	GameManager.dialogues_seen.erase("hint_crouch")
+	Tutorial.hint("crouch", p.global_position)
+	for i in 30:
+		await get_tree().process_frame
+		if Tutorial.current_hint == "crouch":
+			break
+	var holder := p.get_parent()
+	holder.remove_child(p)
+	await frames(3)
+	check("trocou de cena com a dica aberta: o aviso some", Tutorial.current_hint == "" and Tutorial.banner_text() == "",
+		Tutorial.banner_text())
+	holder.add_child(p)
+	await frames(3)
+
+	# Saiu da fase no meio do guia do hack (o agente foi liberado): o guia encerra
+	# sem erro de script, em vez de travar com o aviso.
+	GameManager.dialogues_seen.erase("guide_hack")
+	p.global_position = Vector2(470, 16)
+	Tutorial.guide("hack", p.global_position)
+	for i in 240:
+		await get_tree().process_frame
+		if Dialogue.is_open():
+			break
+	await read_all()
+	await frames(4)
+	var was_vision := Tutorial.current_step == "vision"
+	guard.free()
+	await frames(5)
+	check("agente liberado no meio do guia: o guia encerra e o aviso some",
+		was_vision and Tutorial.current_guide == "" and Tutorial.banner_text() == "", "passo=%s" % Tutorial.current_step)
 
 	print("TUDO OK — 0 falha(s)" if fails == 0 else "%d FALHA(S)" % fails)
 	get_tree().quit(1 if fails > 0 else 0)

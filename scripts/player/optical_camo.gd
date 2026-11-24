@@ -98,11 +98,11 @@ func _process(delta: float) -> void:
 	_bar.size.x = 160.0 * battery / CAPACITY
 	_bar.color = CYAN if battery >= MIN_TO_START else Color(1.0, 0.4, 0.3)
 	if active:
-		_label.text = "CAMUFLAGEM [C]  ATIVA %.1f s" % battery
+		_label.text = "CAMUFLAGEM [%s]  ATIVA %.1f s" % [Tutorial.key_of("camo"), battery]
 	elif battery >= CAPACITY:
-		_label.text = "CAMUFLAGEM [C]  PRONTA"
+		_label.text = "CAMUFLAGEM [%s]  PRONTA" % Tutorial.key_of("camo")
 	else:
-		_label.text = "CAMUFLAGEM [C]  %d%%" % int(100.0 * battery / CAPACITY)
+		_label.text = "CAMUFLAGEM [%s]  %d%%" % [Tutorial.key_of("camo"), int(100.0 * battery / CAPACITY)]
 
 
 func _build_ui() -> void:
@@ -126,7 +126,7 @@ func _build_ui() -> void:
 	_label.add_theme_font_override("font", font)
 	_label.add_theme_font_size_override("font_size", 18)
 	_label.add_theme_color_override("font_color", CYAN)
-	_label.text = "CAMUFLAGEM [C]  PRONTA"
+	_label.text = "CAMUFLAGEM [%s]  PRONTA" % Tutorial.key_of("camo")
 	ui.add_child(_label)
 
 

@@ -23,18 +23,18 @@ Você é [color=#00f0ff]Eduardo[/color], ex-analista da OmniCorp. Suba a mega-to
 
 [color=#00f0ff][font_size=26]CONTROLES[/font_size][/color]
 [table=2]
-[cell][color=#39ff14]A / D[/color]   [/cell][cell]andar[/cell]
-[cell][color=#39ff14]Shift[/color]   [/cell][cell]correr (faz barulho)[/cell]
-[cell][color=#39ff14]S ou Ctrl[/color]   [/cell][cell]agachar (silencioso; passa por dutos baixos)[/cell]
-[cell][color=#39ff14]Espaço[/color]   [/cell][cell]pular[/cell]
-[cell][color=#39ff14]W / S[/color]   [/cell][cell]subir e descer escadas[/cell]
-[cell][color=#39ff14]F[/color]   [/cell][cell]esconder-se / ler terminal[/cell]
-[cell][color=#39ff14]Q ou botão direito[/color]   [/cell][cell]segurar para a visão hacker[/cell]
-[cell][color=#39ff14]Mouse ou Tab[/color]   [/cell][cell]escolher o alvo (na visão hacker)[/cell]
-[cell][color=#39ff14]E ou clique[/color]   [/cell][cell]hackear o alvo escolhido[/cell]
-[cell][color=#39ff14]V[/color]   [/cell][cell]Ping Sonar: revela inimigos, cones de visão e alvos através das paredes (recarrega em 12 s)[/cell]
-[cell][color=#39ff14]C[/color]   [/cell][cell]Variável Oculta: camuflagem de até 5 s; câmeras, drones e guardas não te veem (os passos ainda fazem barulho e os lasers ainda disparam)[/cell]
-[cell][color=#39ff14]E, F ou clique[/color]   [/cell][cell]avançar diálogo (Esc pula)[/cell]
+[cell][color=#39ff14]{move_left} / {move_right}[/color]   [/cell][cell]andar[/cell]
+[cell][color=#39ff14]{run}[/color]   [/cell][cell]correr (faz barulho)[/cell]
+[cell][color=#39ff14]{crouch}[/color]   [/cell][cell]agachar (silencioso; passa por dutos baixos)[/cell]
+[cell][color=#39ff14]{jump}[/color]   [/cell][cell]pular[/cell]
+[cell][color=#39ff14]{climb_up} / {climb_down}[/color]   [/cell][cell]subir e descer escadas[/cell]
+[cell][color=#39ff14]{interact_world}[/color]   [/cell][cell]esconder-se / ler terminal[/cell]
+[cell][color=#39ff14]{hack_vision} ou botão direito[/color]   [/cell][cell]segurar para a visão hacker[/cell]
+[cell][color=#39ff14]Mouse ou {hack_next_target}[/color]   [/cell][cell]escolher o alvo (na visão hacker)[/cell]
+[cell][color=#39ff14]{hack_confirm} ou clique[/color]   [/cell][cell]hackear o alvo escolhido[/cell]
+[cell][color=#39ff14]{sonar_ping}[/color]   [/cell][cell]Ping Sonar: revela inimigos, cones de visão e alvos através das paredes (recarrega em 12 s)[/cell]
+[cell][color=#39ff14]{camo}[/color]   [/cell][cell]Variável Oculta: camuflagem de até 5 s; câmeras, drones e guardas não te veem (os passos ainda fazem barulho e os lasers ainda disparam)[/cell]
+[cell][color=#39ff14]{hack_confirm}, {interact_world} ou clique[/color]   [/cell][cell]avançar diálogo (Esc pula)[/cell]
 [cell][color=#39ff14]Esc[/color]   [/cell][cell]pausa[/cell]
 [/table]
 
@@ -47,16 +47,24 @@ Na visão hacker o tempo desacelera e tudo que pode ser hackeado fica em [color=
 
 [color=#00f0ff][font_size=26]FURTIVIDADE[/font_size][/color]
 • A barra sobre um guarda mostra o quanto ele já te viu; cheia, ele te persegue.
-• Esconda-se atrás de caixotes, armários e racks ([color=#39ff14]F[/color]). Sob luz neon não dá: apague a luz antes.
+• Esconda-se atrás de caixotes, armários e racks ([color=#39ff14]{interact_world}[/color]). Sob luz neon não dá: apague a luz antes.
 • [color=#ff6a1a]Variância[/color] (barra no canto superior direito): cada hack e cada alarme aumentam. Se encher, a Axioma manda a [b]Varredura de Rotina[/b], um laser que percorre a área.
 • [color=#ff2d55]Unidades Lógicas[/color] (ciborgues): não ouvem passos, não caem em distração e disparam o alerta quase na hora em que te veem. Só o hack as engana: o sistema visual apaga por alguns segundos.
 • [color=#ff2d55]Barreiras a laser[/color]: cruzar o feixe aceso dispara o alarme. Hackeie o emissor ou passe quando ele apagar (alguns ligam e desligam no ritmo; o feixe pisca antes de religar).
 • [color=#00f0ff]Pontes de luz[/color] (Núcleo): só existem ligadas. Hackeie o emissor ou espere a que pisca no ritmo. Cair no vazio te devolve à última plataforma, mas custa Defesa Neural.
 • [color=#ff2d55]Segurança máxima[/color]: nos laboratórios e áreas restritas os hacks têm menos tempo (o rodapé da tela de hack avisa).
 • [color=#ff2d55]Lockdown[/color]: um alarme em certas salas fecha as portas. Hackeie a porta de saída antes de o tempo acabar.
-• Terminais de dados ([color=#39ff14]F[/color]) contam a história de Nova Gödel."""
+• Terminais de dados ([color=#39ff14]{interact_world}[/color]) contam a história de Nova Gödel."""
 
 var _panel: PanelContainer
+
+
+## Troca cada {ação} pelas teclas configuradas agora (acompanha o remapeamento).
+static func with_keys(text: String) -> String:
+	var re := RegEx.create_from_string("\\{([a-z_]+)\\}")
+	for m in re.search_all(text):
+		text = text.replace(m.get_string(0), Tutorial.keys_of(m.get_string(1)))
+	return text
 
 
 func _ready() -> void:
@@ -108,7 +116,7 @@ func _build() -> void:
 	var body := RichTextLabel.new()
 	body.name = "Body"
 	body.bbcode_enabled = true
-	body.text = TEXT
+	body.text = with_keys(TEXT)
 	body.fit_content = false
 	body.scroll_active = true
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL

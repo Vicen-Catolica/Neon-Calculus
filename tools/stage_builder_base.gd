@@ -450,6 +450,14 @@ func _tutorial_trigger(lvl: Node, guide_name: String, pos: Vector2, size: Vector
 	return t
 
 
+## Dica de tecla do Tutorial (sem pausa) ao entrar na área.
+func _hint_trigger(lvl: Node, hint_name: String, pos: Vector2, size: Vector2 = Vector2(96, 400)) -> Area2D:
+	var t := _dialogue_trigger(lvl, "", pos, size)
+	t.name = "Hint_" + hint_name
+	t.set("hint", hint_name)
+	return t
+
+
 ## Placa de saída: texto numa placa escura com borda neon (antes era texto solto
 ## no ar). `pos` é o canto de cima à esquerda, como no Label.
 func _exit_sign(lvl: Node, sign_name: String, text: String, pos: Vector2, color: Color) -> Label:
