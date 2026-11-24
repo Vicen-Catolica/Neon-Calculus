@@ -41,9 +41,9 @@ func _ready() -> void:
 
 
 func _create_extra_cyberpunk_elements() -> void:
-	# Carrega a fonte Orbitron padrão do projeto
-	if ResourceLoader.exists("res://assets/fonts/Orbitron-Bold.ttf"):
-		custom_font = load("res://assets/fonts/Orbitron-Bold.ttf")
+	# Fonte de interface do projeto (Exo 2: acentos do português legíveis)
+	if ResourceLoader.exists("res://assets/fonts/ui_font.tres"):
+		custom_font = load("res://assets/fonts/ui_font.tres")
 
 	# Subtítulo formatado como alerta de terminal
 	if vbox_container and not vbox_container.has_node("SubtitleLabel"):
@@ -274,15 +274,23 @@ func _connect_signals() -> void:
 
 
 func _on_restart_pressed() -> void:
-	get_tree().paused = false
 	queue_free()
-	get_tree().reload_current_scene()
+	# Volta ao checkpoint gravado (início do andar); sem save, recomeça a cena atual.
+	var scene := SaveGame.restore()
+	if scene == "" and get_tree().current_scene:
+		scene = get_tree().current_scene.scene_file_path
+	if scene != "":
+		LevelTransition.change_level(scene)
+	else:
+		get_tree().paused = false
+		get_tree().reload_current_scene()
 
 
 func _on_menu_pressed() -> void:
 	get_tree().paused = false
 	queue_free()
-	if ResourceLoader.exists("res://scenes/main_menu/main_menu.tscn"):
-		get_tree().change_scene_to_file("res://scenes/main_menu/main_menu.tscn")
+	Engine.time_scale = 1.0
+	if ResourceLoader.exists(GameManager.MAIN_MENU_SCENE):
+		get_tree().change_scene_to_file(GameManager.MAIN_MENU_SCENE)
 	else:
 		get_tree().reload_current_scene()

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cnfgitl2fihxh"]
 
 [ext_resource type="Script" uid="uid://c6l2cnjv56y4d" path="res://scenes/options/options_menu.gd" id="1_ajvyi"]
-[ext_resource type="FontFile" uid="uid://b7b4e0l00k2m6" path="res://assets/fonts/Orbitron-Bold.ttf" id="2_7if5n"]
+[ext_resource type="FontVariation" path="res://assets/fonts/ui_font.tres" id="2_7if5n"]
 
 [sub_resource type="StyleBoxLine" id="StyleBoxLine_bputu"]
 color = Color(0.043137256, 0.05490196, 0.078431375, 0.8509804)

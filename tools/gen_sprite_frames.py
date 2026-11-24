@@ -23,6 +23,10 @@ EDUARDO = [
     ("land", "land", False, 16.0),
     ("ladder_enter", "ladder_enter", False, 14.0),
     ("ladder_climb", "ladder_climb", True, 9.0),
+    ("hide", "hide", False, 10.0),
+    # "crouch hacking - fx" do Krita: personagem + partículas no mesmo quadro.
+    ("crouch_hack", "crouch_hack", True, 6.0),
+    ("caught", "caught", False, 9.0),
 ]
 
 GUARD = [

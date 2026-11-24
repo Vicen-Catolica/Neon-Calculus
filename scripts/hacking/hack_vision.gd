@@ -33,7 +33,7 @@ var _font: Font
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_player = get_parent() as Node2D
-	_font = load("res://assets/fonts/Orbitron-Bold.ttf") if ResourceLoader.exists("res://assets/fonts/Orbitron-Bold.ttf") else ThemeDB.fallback_font
+	_font = load("res://assets/fonts/ui_font.tres") if ResourceLoader.exists("res://assets/fonts/ui_font.tres") else ThemeDB.fallback_font
 	_layer = CanvasLayer.new()
 	_layer.layer = 5
 	_layer.follow_viewport_enabled = true
@@ -179,6 +179,7 @@ func _start_hack(h: Hackable) -> void:
 	if not _hacking_ui.hacking_failed.is_connected(_on_hack_failed):
 		_hacking_ui.hacking_failed.connect(_on_hack_failed, CONNECT_ONE_SHOT)
 	var d := h.get_difficulty()
+	_hacking_ui.set("time_limit_mult", h.time_limit_mult)
 	_hacking_ui.start_hacking(d.x, d.y)
 
 

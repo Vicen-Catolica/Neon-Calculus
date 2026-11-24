@@ -7,7 +7,8 @@ extends Node2D
 signal hacked
 signal hack_failed
 
-enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK }
+## Novos tipos sempre no fim: o valor numérico fica salvo nas cenas.
+enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK, VALVE, CONVEYOR, DRONE }
 
 @export var kind: Kind = Kind.CAMERA
 @export var display_name: String = "ALVO"
@@ -15,12 +16,18 @@ enum Kind { CAMERA, DOOR, GUARD, CYBORG, LIGHT, KIOSK }
 ## Variância somada ao hackear com sucesso / ao falhar.
 @export var variance_cost: float = 12.0
 @export var variance_fail_cost: float = 25.0
+## Somado ao nível da equação (ex.: saída de um lockdown = +1).
+@export var difficulty_bonus: int = 0
+## Multiplica o tempo limite da equação (< 1 = desafio rápido).
+@export var time_limit_mult: float = 1.0
 ## Colisor do próprio alvo, ignorado no teste de linha de visão (ex.: porta).
 @export var ignore_body: CollisionObject2D
 
 const KIND_LABEL := {
 	Kind.CAMERA: "CÂMERA", Kind.DOOR: "PORTA", Kind.GUARD: "AGENTE",
 	Kind.CYBORG: "UNIDADE LÓGICA", Kind.LIGHT: "LUZ NEON", Kind.KIOSK: "QUIOSQUE AXIOMA",
+	Kind.VALVE: "VÁLVULA DE VAPOR", Kind.CONVEYOR: "ESTEIRA",
+	Kind.DRONE: "DRONE DE PATRULHA",
 }
 
 
@@ -38,12 +45,12 @@ func get_difficulty() -> Vector2i:
 	var floor_level: int = GameManager.current_floor
 	var sub_topic := 0
 	match kind:
-		Kind.DOOR, Kind.GUARD:
+		Kind.DOOR, Kind.GUARD, Kind.DRONE:
 			sub_topic = 1
 		Kind.CYBORG:
 			floor_level += 1
 			sub_topic = 1
-	return Vector2i(clampi(floor_level, 1, 4), sub_topic)
+	return Vector2i(clampi(floor_level + difficulty_bonus, 1, 4), sub_topic)
 
 
 func can_be_hacked() -> bool:

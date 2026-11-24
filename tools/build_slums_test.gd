@@ -15,7 +15,7 @@ var structs: TileMapLayer
 func _ready() -> void:
 	root = Node2D.new()
 	root.name = "SlumsTest"
-	root.set_script(load("res://scripts/core/slums_level.gd"))
+	root.set_script(load("res://scripts/core/level.gd"))
 
 	_build_background()
 	_build_tiles()

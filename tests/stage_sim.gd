@@ -43,6 +43,12 @@ func _ready() -> void:
 	tp(430, 16); await step(10)
 	Input.action_press("interact_world"); await step(2); Input.action_release("interact_world"); await step(10)
 	check("esconder nos sacos de lixo", p.is_hidden() and not p.is_detectable())
+	check("escondido usa a animação hide", p.sprite.animation == &"hide", String(p.sprite.animation))
+	# Hack escondido: animação agachada com as partículas no próprio quadro.
+	GameManager.set_state(GameManager.State.HACKING); await step(3)
+	check("hack escondido usa crouch_hack", p.sprite.animation == &"crouch_hack" and p.is_hidden(), String(p.sprite.animation))
+	GameManager.set_state(GameManager.State.PLAYING); await step(5)
+	check("depois do hack volta à pose escondida", p.sprite.animation == &"hide" and p.is_hidden(), String(p.sprite.animation))
 	Input.action_press("interact_world"); await step(2); Input.action_release("interact_world"); await step(10)
 	check("sair do esconderijo", not p.is_hidden())
 
@@ -179,4 +185,4 @@ func _ready() -> void:
 	check("variância cai depois do atraso", GameManager.variance < v0, "%.1f -> %.1f" % [v0, GameManager.variance])
 
 	print("\n%s — %d falha(s)" % ["TUDO OK" if fails == 0 else "HÁ FALHAS", fails])
-	get_tree().quit()
+	get_tree().quit(1 if fails > 0 else 0)

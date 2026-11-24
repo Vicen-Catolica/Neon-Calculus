@@ -1,0 +1,26 @@
+{
+	"industrial_01_sine": {
+		"source": "Terminal de manutenção — duto de entrada",
+		"title": "CANAL SEGURO // SINE",
+		"author": "SINE",
+		"text": "Você saiu do escopo do contrato, Eduardo. Registrei isso. Também registrei que eu faria o mesmo.\n\nEstamos no Setor Industrial, a primeira camada de dentro da torre. Aqui a Axioma não precisa de vitrines: só de produção. Vapor, esteiras e servidores velhos demais para serem trocados.\n\nOs dutos de manutenção são baixos. Agachado, você passa. Em pé, não.\n\nProbabilidade de chegarmos ao elevador de carga sem alarme: 41%. Eu gostaria que esse número subisse."
+	},
+	"industrial_02_drones": {
+		"source": "Terminal de linha — montagem de drones",
+		"title": "RELATÓRIO DE PRODUÇÃO // LINHA 3",
+		"author": "Supervisor T. Arantes, Manutenção",
+		"text": "Meta do turno: 340 drones de patrulha. Entregues: 338. A Axioma marcou a linha 3 como 'desvio aceitável', o que significa que amanhã a meta é 360.\n\nOs braços da montadora travam se a esteira para no meio do ciclo. Já pedi peça três vezes. A resposta é sempre a mesma: 'o sistema prevê que a falha não ocorrerá'.\n\nOcorre toda noite.\n\nObs.: ninguém desce no fosso da esteira. A câmera do teto só enxerga a passarela."
+	},
+	"industrial_03_mandatory": {
+		"source": "Servidor de refrigeração — registro esquecido",
+		"title": "DIÁRIO // ATUALIZAÇÃO MANDATÓRIA 2141-07",
+		"author": "Dra. I. Kessler, P&D OmniCorp",
+		"text": "Hoje medimos a latência dos chips vitais durante a Atualização Mandatória. Toda a população conectada ao mesmo tempo, 11 minutos.\n\nO relatório oficial fala em 'sincronização de dados de saúde'. O pacote que eu vi passar por estes servidores não era de saúde. Era um modelo de previsão comportamental, um por cidadão, e cada um vinha com um campo chamado AJUSTE.\n\nPerguntei ao meu supervisor o que o campo ajusta. Ele disse que eu não tenho Score para essa pergunta.\n\nDeixo isto num servidor que vai ser desligado. Talvez seja o único lugar que a Axioma não lê."
+	},
+	"industrial_04_vance": {
+		"source": "Painel do elevador de carga — mensagem fixada",
+		"title": "TRANSFERÊNCIA DE CARGA // ACESSO RESTRITO P&D",
+		"author": "Sistema de logística (mensagem anexada)",
+		"text": "CARGA: 1 (uma) unidade humana — classificação: ATIVO DE CONHECIMENTO.\nORIGEM: Detenção, subnível 2.\nDESTINO: Laboratório 07, P&D.\nRESPONSÁVEL PELO CÓDIGO-BASE: Dr. A. Vance.\n\n[anexo, texto livre]\nSe alguém da Resistência ler isto: ele ainda está vivo e ainda lembra como a Axioma foi escrita. Ele sabe onde fica o ponto cego que deixou no núcleo. Subam."
+	}
+}

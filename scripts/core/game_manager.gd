@@ -12,6 +12,13 @@ signal lore_unlocked(entry_id: String)
 
 enum State { PLAYING, HACK_VISION, HACKING, PAUSED, GAME_OVER }
 
+## Andares da torre, de baixo para cima: cena e nome mostrado na transição.
+const LEVELS := {
+	1: {"scene": "res://scenes/levels/slums/slums_stage1.tscn", "title": "Submundo de Neon"},
+	2: {"scene": "res://scenes/levels/industrial/industrial_stage2.tscn", "title": "Setor Industrial"},
+}
+const MAIN_MENU_SCENE := "res://scenes/main_menu/main_menu.tscn"
+
 ## Fator de velocidade do mundo em cada modo.
 const WORLD_SPEED_NORMAL: float = 1.0
 const WORLD_SPEED_HACK_VISION: float = 0.25
@@ -96,6 +103,21 @@ func mark_lore_read(entry_id: String) -> void:
 		return
 	lore_read.append(entry_id)
 	lore_unlocked.emit(entry_id)
+
+
+## Nome do andar de uma cena (para a tela de transição); "" se não for um andar.
+func level_title(scene_path: String) -> String:
+	for n in LEVELS:
+		if LEVELS[n]["scene"] == scene_path:
+			return LEVELS[n]["title"]
+	return ""
+
+
+## Novo jogo: esquece lore lida e variância (o save é apagado pelo SaveGame).
+func reset_progress() -> void:
+	lore_read.clear()
+	current_floor = 1
+	reset_variance()
 
 
 func _time_scale_for(s: State) -> float:

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://420lu1b3xoq7"]
 
 [ext_resource type="Script" uid="uid://di6bxdge2rfem" path="res://scenes/Hud/hud.gd" id="1_65fyq"]
-[ext_resource type="FontFile" uid="uid://b7b4e0l00k2m6" path="res://assets/fonts/Orbitron-Bold.ttf" id="2_8q4vl"]
+[ext_resource type="FontVariation" path="res://assets/fonts/ui_font.tres" id="2_8q4vl"]
 
 [node name="Hud" type="CanvasLayer" unique_id=1461386447]
 script = ExtResource("1_65fyq")

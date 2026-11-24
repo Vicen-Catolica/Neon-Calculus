@@ -100,6 +100,9 @@ func _draw_clean_number_line(center: Vector2, font: Font) -> void:
 	draw_line(Vector2(end_x, line_y - 12), Vector2(end_x - (6 * dir), line_y - 16), COLOR_YELLOW, 2.0, true)
 	draw_line(Vector2(end_x, line_y - 12), Vector2(end_x - (6 * dir), line_y - 8), COLOR_YELLOW, 2.0, true)
 	
+	# rótulo do salto: "+a" ou "-|a|"
+	var jump := ("+" if a >= 0 else "-") + str(abs(a))
+	draw_string(font, Vector2(minf(start_x, end_x) - 10, line_y - 20), jump, HORIZONTAL_ALIGNMENT_CENTER, absf(end_x - start_x) + 20, 13, COLOR_YELLOW)
 	draw_string(font, Vector2(start_x - 10, line_y + 18), "x", HORIZONTAL_ALIGNMENT_CENTER, 20, 13, COLOR_YELLOW)
 	draw_string(font, Vector2(end_x - 10, line_y + 18), str(res), HORIZONTAL_ALIGNMENT_CENTER, 20, 13, COLOR_GREEN)
 
@@ -120,54 +123,57 @@ func _draw_clean_algebra_blocks(center: Vector2, font: Font) -> void:
 	draw_string(font, Vector2(start_x + total_w + 10, center.y + 4), "=  " + str(res), HORIZONTAL_ALIGNMENT_LEFT, -1, 16, COLOR_GREEN)
 
 # --- STAGE 2: EQUAÇÃO DO 1º GRAU (MODELO DE BARRAS / TAPE MODEL) ---
+# Duas barras do mesmo tamanho = os dois lados da equação.
+#  ax + b = c  ->  [   c   ]  sobre  [ ax ][ b ]
+#  ax - b = c  ->  [  ax   ]  sobre  [ c ][ b ]   (ax é o maior: c + b)
 func _draw_clean_equation_balance(center: Vector2, font: Font) -> void:
 	var mult: int = int(eq_data.get("ParamMult", 2))
 	var b_val: int = int(eq_data.get("ParamB", 0))
 	var total: int = int(eq_data.get("ParamTotal", 0))
-	
+	var abs_b: int = abs(b_val)
+
 	var total_w: float = 220.0
 	var bar_h: float = 28.0
 	var start_x: float = center.x - (total_w / 2.0)
-	
-	# --- BARRA SUPERIOR (TOTAL = C) ---
 	var top_y: float = center.y - 28.0
-	var top_rect := Rect2(start_x, top_y, total_w, bar_h)
-	draw_rect(top_rect, COLOR_GREEN, false, 2.0)
-	draw_string(font, Vector2(start_x, top_y + 19), "TOTAL = " + str(total), HORIZONTAL_ALIGNMENT_CENTER, total_w, 14, COLOR_GREEN)
-	
-	# --- BARRA INFERIOR DIVIDIDA (Ax + B) ---
 	var bot_y: float = center.y + 6.0
-	var abs_b: int = abs(b_val)
-	
-	var ratio: float = float(abs_b) / float(max(1, total))
-	var w_b: float = clamp(total_w * ratio, 40.0, 90.0)
-	var w_ax: float = total_w - w_b
-	
-	var rect_ax := Rect2(start_x, bot_y, w_ax, bar_h)
-	var rect_b := Rect2(start_x + w_ax, bot_y, w_b, bar_h)
-	
-	# Bloco do Ax
-	draw_rect(rect_ax, COLOR_CYAN, false, 2.0)
-	draw_string(font, Vector2(start_x, bot_y + 19), str(mult) + "x", HORIZONTAL_ALIGNMENT_CENTER, w_ax, 13, COLOR_CYAN)
-	
-	# Bloco do B
-	var sign_str: String = "+" if b_val >= 0 else "-"
-	draw_rect(rect_b, COLOR_YELLOW, false, 2.0)
-	draw_string(font, Vector2(start_x + w_ax, bot_y + 19), sign_str + " " + str(abs_b), HORIZONTAL_ALIGNMENT_CENTER, w_b, 13, COLOR_YELLOW)
 
-# --- STAGE 3 (TEMA 0): REGRA DE TRÊS (VISUALIZADOR DE MULTIPLICAÇÃO CRUZADA) ---
+	var whole: float = float(total if b_val >= 0 else total + abs_b)
+	var w_b: float = clamp(total_w * float(abs_b) / maxf(1.0, whole), 40.0, 90.0)
+	var w_rest: float = total_w - w_b
+
+	if b_val >= 0:
+		_bar(font, Rect2(start_x, top_y, total_w, bar_h), str(total), COLOR_GREEN)
+		_bar(font, Rect2(start_x, bot_y, w_rest, bar_h), str(mult) + "x", COLOR_CYAN)
+		_bar(font, Rect2(start_x + w_rest, bot_y, w_b, bar_h), "+" + str(abs_b), COLOR_YELLOW)
+	else:
+		_bar(font, Rect2(start_x, top_y, total_w, bar_h), str(mult) + "x", COLOR_CYAN)
+		_bar(font, Rect2(start_x, bot_y, w_rest, bar_h), str(total), COLOR_GREEN)
+		_bar(font, Rect2(start_x + w_rest, bot_y, w_b, bar_h), str(abs_b), COLOR_YELLOW)
+
+
+func _bar(font: Font, r: Rect2, label: String, color: Color) -> void:
+	draw_rect(r, color, false, 2.0)
+	draw_string(font, Vector2(r.position.x, r.position.y + 19), label, HORIZONTAL_ALIGNMENT_CENTER, r.size.x, 14, color)
+
+# --- STAGE 3 (TEMA 0): REGRA DE TRÊS ---
+# x / base = num / den, desenhado como duas frações (a multiplicação cruzada
+# fica no passo a passo da SINE).
 func _draw_clean_ratio_cross(center: Vector2, font: Font) -> void:
 	var base_val: int = int(eq_data.get("ParamBase", 3))
 	var right_num: int = int(eq_data.get("ParamRightNum", 12))
 	var right_den: int = int(eq_data.get("ParamRightDen", 6))
-	
-	draw_string(font, Vector2(center.x - 50, center.y - 15), "x", HORIZONTAL_ALIGNMENT_CENTER, 20, 16, COLOR_GREEN)
-	draw_string(font, Vector2(center.x + 30, center.y - 15), str(right_num), HORIZONTAL_ALIGNMENT_CENTER, 20, 16, COLOR_CYAN)
-	draw_string(font, Vector2(center.x - 50, center.y + 20), str(base_val), HORIZONTAL_ALIGNMENT_CENTER, 20, 16, COLOR_CYAN)
-	draw_string(font, Vector2(center.x + 30, center.y + 20), str(right_den), HORIZONTAL_ALIGNMENT_CENTER, 20, 16, COLOR_CYAN)
-	
-	draw_line(Vector2(center.x - 25, center.y - 10), Vector2(center.x + 25, center.y + 15), COLOR_MUTED, 1.5, true)
-	draw_line(Vector2(center.x - 25, center.y + 15), Vector2(center.x + 25, center.y - 10), COLOR_MUTED, 1.5, true)
+	var lx := center.x - 50.0
+	var rx := center.x + 50.0
+	var w := 44.0
+	# frações
+	draw_string(font, Vector2(lx - w / 2.0, center.y - 8), "x", HORIZONTAL_ALIGNMENT_CENTER, w, 18, COLOR_GREEN)
+	draw_line(Vector2(lx - w / 2.0, center.y), Vector2(lx + w / 2.0, center.y), COLOR_CYAN, 2.0)
+	draw_string(font, Vector2(lx - w / 2.0, center.y + 22), str(base_val), HORIZONTAL_ALIGNMENT_CENTER, w, 18, COLOR_CYAN)
+	draw_string(font, Vector2(center.x - 15, center.y + 7), "=", HORIZONTAL_ALIGNMENT_CENTER, 30, 20, COLOR_CYAN)
+	draw_string(font, Vector2(rx - w / 2.0, center.y - 8), str(right_num), HORIZONTAL_ALIGNMENT_CENTER, w, 18, COLOR_CYAN)
+	draw_line(Vector2(rx - w / 2.0, center.y), Vector2(rx + w / 2.0, center.y), COLOR_CYAN, 2.0)
+	draw_string(font, Vector2(rx - w / 2.0, center.y + 22), str(right_den), HORIZONTAL_ALIGNMENT_CENTER, w, 18, COLOR_CYAN)
 
 # --- STAGE 3 (TEMA 1): GEOMETRIA (RETÂNGULO) ---
 func _draw_clean_geometry_rectangle(center: Vector2, font: Font) -> void:
@@ -201,9 +207,9 @@ func _draw_clean_geometry_rectangle(center: Vector2, font: Font) -> void:
 	draw_string(font, Vector2(rect.position.x, rect.position.y - 8.0), base_text, HORIZONTAL_ALIGNMENT_CENTER, rect_w, 12, COLOR_GREEN)
 	
 	# 5. ALTURA (À esquerda do retângulo com margem em Amarelo)
-	var alt_text := "ALT = " + str(int(altura))
-	var alt_x: float = rect.position.x - 75.0
-	draw_string(font, Vector2(alt_x, center.y + 5.0), alt_text, HORIZONTAL_ALIGNMENT_RIGHT, 65.0, 12, COLOR_YELLOW)
+	var alt_text := "ALTURA = " + str(int(altura))
+	var alt_x: float = rect.position.x - 105.0
+	draw_string(font, Vector2(alt_x, center.y + 5.0), alt_text, HORIZONTAL_ALIGNMENT_RIGHT, 95.0, 12, COLOR_YELLOW)
 
 # --- STAGE 4 (TEMA 0): PROPRIEDADE DISTRIBUTIVA ---
 func _draw_clean_distributive_blocks(center: Vector2, font: Font) -> void:
@@ -224,7 +230,7 @@ func _draw_clean_distributive_blocks(center: Vector2, font: Font) -> void:
 	draw_rect(rect_b, COLOR_GREEN, false, 2.0)
 	
 	draw_string(font, rect_a.position + Vector2(10, 22), str(k) + "·x", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, COLOR_CYAN)
-	draw_string(font, rect_b.position + Vector2(10, 22), str(mult_offset), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, COLOR_GREEN)
+	draw_string(font, rect_b.position + Vector2(8, 22), "+" + str(mult_offset), HORIZONTAL_ALIGNMENT_LEFT, -1, 12, COLOR_GREEN)
 	draw_string(font, Vector2(center.x - 50, center.y + 32), "= " + str(total), HORIZONTAL_ALIGNMENT_CENTER, 100, 13, COLOR_YELLOW)
 
 # --- STAGE 4 (TEMA 1): ÂNGULOS DO TRIÂNGULO ---

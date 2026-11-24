@@ -66,7 +66,7 @@ func _ready() -> void:
 	await step(20)
 	for g in get_tree().get_nodes_in_group("guards"):
 		g.process_mode = Node.PROCESS_MODE_DISABLED
-	var exit := lvl.get_node("ExitToStage2")
+	var exit := lvl.get_node("LevelExit")
 	exit.set("next_stage", "")  # não troca de cena no teste
 
 	# Poço: zigue-zague de escadas até o telhado da torre.
@@ -121,4 +121,4 @@ func _ready() -> void:
 	check("patamar está dentro da saída", (exit as Area2D).overlaps_body(p))
 
 	print("\n%s — %d falha(s)" % ["TUDO OK" if fails == 0 else "HÁ FALHAS", fails])
-	get_tree().quit()
+	get_tree().quit(1 if fails > 0 else 0)
