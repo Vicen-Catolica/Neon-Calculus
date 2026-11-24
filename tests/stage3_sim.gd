@@ -195,6 +195,16 @@ func _ready() -> void:
 	await walk("move_right", 120)
 	check("D: porta hackeada leva ao átrio", p.global_position.x > 4950.0, pos())
 
+	# E: agachado sob a passarela de mão única, solta e levanta (antes prendia).
+	tp(5100, 16); await step(15)
+	Input.action_press("crouch"); await step(15)
+	Input.action_release("crouch"); await step(20)
+	check("E: sob a passarela do átrio, levanta depois de agachar", not p.get("_crouching"), pos())
+	tp(3000, -272); await step(15)
+	Input.action_press("crouch"); await step(15)
+	Input.action_release("crouch"); await step(20)
+	check("C: dentro do duto (teto sólido), continua agachado", p.get("_crouching"), pos())
+	tp(5000, 16); await step(15)
 	# E: zigue-zague de 6 escadas até o elevador executivo.
 	var ladders := [[167, 16.0], [158, -112.0], [167, -240.0], [158, -368.0], [167, -496.0], [158, -624.0]]
 	var ok := true
@@ -231,7 +241,7 @@ func _ready() -> void:
 	check("alarme nos laboratórios inicia o lockdown", zone.active and not shutter.is_open)
 	tp(3800, 16); await step(5)
 	await walk("move_left", 200)
-	check("lockdown: entrada bloqueada", p.global_position.x > 3590.0, pos())
+	check("lockdown: entrada bloqueada", p.global_position.x > 3700.0, pos())
 	var exit_h := exit_door.get_node("Hackable") as Hackable
 	check("lockdown: saída vira equação de nível 4", exit_h.get_difficulty().x == 4)
 	check("lockdown: hack da saída não pode ser abortado", not exit_h.abortable)

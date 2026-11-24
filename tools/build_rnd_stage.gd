@@ -38,6 +38,7 @@ const WALL_RECTS := [
 	[78, -21, 81, -17],    # tampa da chaminé: dá para ficar em pé no topo da escada
 	[113, -16, 155, -12],  # chaminé nas colunas 111–112: a escada de D sobe até o duto
 	[110, -21, 113, -17],  # (playtest: sem ela, subir por D batia a cabeça no teto)
+	[114, -12, 116, -5],   # divisória da entrada de D: do teto até a porta de lockdown
 	[80, -9, 110, -6],     # C: teto do corredor; em cima dele, o duto (96 px)
 	[151, -11, 155, -5],   # verga da porta D -> E (vão de 160 px)
 	[151, -30, 155, -17],  # parede esquerda do átrio, acima do teto
@@ -245,7 +246,7 @@ func _add_kiosk_and_doors(lvl: Node) -> void:
 	# D -> E: porta biométrica do átrio.
 	lvl.add_child(_instance("res://scenes/objects/security_door.tscn", "SecurityDoor", Vector2(151 * T + 40, 16)))
 	# Entrada de D: aberta; só fecha no lockdown (não é hackeável).
-	var shutter := _instance("res://scenes/objects/security_door.tscn", "LockdownShutterWest", Vector2(3600, 16))
+	var shutter := _instance("res://scenes/objects/security_door.tscn", "LockdownShutterWest", Vector2(3696, 16))
 	shutter.set("start_open", true)
 	shutter.set("hackable_enabled", false)
 	lvl.add_child(shutter)
@@ -254,7 +255,7 @@ func _add_kiosk_and_doors(lvl: Node) -> void:
 
 ## D: alarme com o jogador nos laboratórios fecha as portas; 20 s para hackear a saída.
 func _add_lockdown(lvl: Node) -> void:
-	var room := Rect2(3620, CEILING_Y, 151 * T + 30 - 3620, 16 - CEILING_Y)
+	var room := Rect2(3730, CEILING_Y, 151 * T + 30 - 3730, 16 - CEILING_Y)
 	var zone := Area2D.new()
 	zone.name = "LabLockdown"
 	zone.set_script(load("res://scripts/core/lockdown_zone.gd"))

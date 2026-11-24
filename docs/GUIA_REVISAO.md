@@ -282,3 +282,10 @@ Para quem não abriu o "Como jogar": na primeira vez que cada coisa aparece na F
 
 Os avisos da HUD que tinham a tecla escrita fixa ("[F] ESCONDER", "SONAR [V]", "[E] HACKEAR", "[E] CONTINUAR"...) também passaram a mostrar a tecla configurada. Código: `scripts/ui/tutorial.gd` (`hint`, `HINTS`, `keys_of`), gatilhos em `build_slums_stage.gd` (`_hint_trigger`).
 
+### Sétimo playtest
+
+| Pedido | O que mudou | Onde |
+|---|---|---|
+| Porta da entrada de D (P&D) sem sentido, solta embaixo do patamar da escada | Porta de lockdown movida para x = 3696, dentro de uma divisória que desce do teto até ela (vira a porta dos laboratórios); o mezanino começa logo depois. A área do lockdown começa depois da porta | `tools/build_rnd_stage.gd` |
+| Agachado sob as passarelas do átrio (fim da Fase 3), não levantava | O teste de "dá para levantar?" ignora passarela de mão única (dá para atravessá-la de baixo); teto sólido (dutos) continua mantendo agachado | `scripts/player/eduardo.gd` (`_can_stand`, `_solid_over`) |
+

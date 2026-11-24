@@ -213,7 +213,32 @@ func _can_stand() -> bool:
 	params.transform = global_transform.translated(Vector2(0, -3)) * stand_shape.transform
 	params.collision_mask = collision_mask
 	params.exclude = [get_rid()]
-	return get_world_2d().direct_space_state.intersect_shape(params, 1).is_empty()
+	var head := stand_shape.shape.get_rect()
+	head = Rect2(params.transform * head.position, head.size)
+	# Passarela de mão única por cima não impede levantar (dá para atravessá-la
+	# de baixo para cima); antes, agachar sob as passarelas do átrio prendia.
+	for hit in get_world_2d().direct_space_state.intersect_shape(params, 8):
+		if _solid_over(hit["collider"], head):
+			return false
+	return true
+
+
+## O obstáculo é sólido (parede, teto) e não só grade de mão única?
+func _solid_over(collider: Object, rect: Rect2) -> bool:
+	var tl := collider as TileMapLayer
+	if tl == null:
+		return true
+	var c0 := tl.local_to_map(tl.to_local(rect.position))
+	var c1 := tl.local_to_map(tl.to_local(rect.end))
+	for x in range(c0.x, c1.x + 1):
+		for y in range(c0.y, c1.y + 1):
+			var td := tl.get_cell_tile_data(Vector2i(x, y))
+			if td == null:
+				continue
+			for i in td.get_collision_polygons_count(0):
+				if not td.is_collision_polygon_one_way(0, i):
+					return true
+	return false
 
 
 # --- Esconderijos e luz ------------------------------------------------
